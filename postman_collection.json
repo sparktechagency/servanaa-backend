@@ -1,0 +1,3585 @@
+{
+	"info": {
+		"_postman_id": "7792730e-4984-4cd9-b01e-59dfb22b5137",
+		"name": "Actor-Performance",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36680118",
+		"_collection_link": "https://tech-nexus.postman.co/workspace/tech-nexus-Workspace~fbebb58c-814a-4fc8-bbb0-9f551b52f8b6/collection/36680118-7792730e-4984-4cd9-b01e-59dfb22b5137?action=share&source=collection_link&creator=36680118"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Create-Actor",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"actor\": {\r\n        \"name\": {\r\n            \"firstName\": \"Actor\",\r\n            \"middleName\": \"A.\",\r\n            \"lastName\": \"Doe\"\r\n        },\r\n        \"email\": \"actor12@gmail.com\",\r\n        \"password\": \"actor12345\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/create-actor",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"create-actor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{SuperAdminToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"admin\": {\r\n        \"name\": {\r\n            \"firstName\": \"Admin by musa\",\r\n            \"middleName\": \"A.\",\r\n            \"lastName\": \"Doe\"\r\n        },\r\n        \"email\": \"admin3@gmail.com\",\r\n        \"password\": \"admin12345\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/create-admin",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"create-admin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Judge",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"judge\": {\r\n        \"name\": {\r\n            \"firstName\": \"Judge\",\r\n            \"middleName\": \"A.\",\r\n            \"lastName\": \"Doe\"\r\n        },\r\n        \"email\": \"judge3@gmail.com\",\r\n        \"password\": \"judge12345\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/create-judge",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"create-judge"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Judge-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/users/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/users/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/change-status/6725a26032ca3b18a1841b9e",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"change-status",
+								"6725a26032ca3b18a1841b9e"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Super Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"ahmadmusa9805@gmail.com\",\r\n    \"password\": \"superAdmin12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\":\"stagpt2024@gmail.com\",\r\n  \"password\":\"admin12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Judge Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\":\"nsujon872@gmail.com\",\r\n  \"password\":\"judge12345\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Actor Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\":\"actor3@gmail.com\",\r\n  \"password\":\"actor12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\": \"actor12345\",\r\n    \"newPassword\": \"actor123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/change-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh-Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/refresh-token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forget Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\":\"amaahmadmusa@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/forget-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"forget-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhbWFhaG1hZG11c2FAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNTIxODM1LCJleHAiOjE3MzA1MjI0MzV9.9OR5qMLf3Pje1hWNxrLSlTUFOVw64HFsW7Xw6BtDnho",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"amaahmadmusa@gmail.com\",\r\n    \"newPassword\":\"actor12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/reset-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get All Admins",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{SuperAdminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/admins",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Admin",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhaG1hZG11c2E5ODA1QGdtYWlsLmNvbSIsInJvbGUiOiJzdXBlckFkbWluIiwiaWF0IjoxNzMxMDQwNTU0LCJleHAiOjE3MzE5MDQ1NTR9.uiAqFDy55BKVp3EhEPLhedxnAmDzPsyXLS5Q7GjtHPU",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/admins/67174c1a6968d73925ee9e2b",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admins",
+								"67174c1a6968d73925ee9e2b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Admin",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{superAdminTokenA}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n    \"admin\": {\n        \"name\": {\n            \"firstName\": \"Admin Vai\",\n            \"middleName\": \"AAA.\",\n            \"lastName\": \"DddDoe\"\n        }\n       \n    }\n}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/Screenshot 2024-09-10 160138.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/admins/6725a29532ca3b18a1841ba6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admins",
+								"6725a29532ca3b18a1841ba6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Admin",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{SuperAdminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/admins/6725abd7014a15b3a03755cd",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admins",
+								"6725abd7014a15b3a03755cd"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Judge",
+			"item": [
+				{
+					"name": "Get All Judges",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/judges",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"judges"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Judge",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/judges/6725a3a532ca3b18a1841baf",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"judges",
+								"6725a3a532ca3b18a1841baf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Judge",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Judge-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n    \"judge\": {\n        \"name\": {\n            \"firstName\": \"Raf\",\n            \"middleName\": \"AA.\",\n            \"lastName\": \"DDoe\"\n        }\n    }\n}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/Screenshot 2024-09-10 160138.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/judges/6725a3a532ca3b18a1841baf",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"judges",
+								"6725a3a532ca3b18a1841baf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Judge",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/judges/6725ad19014a15b3a0375603",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"judges",
+								"6725ad19014a15b3a0375603"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Actor",
+			"item": [
+				{
+					"name": "Delete Single Actor",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/actors/6725a26132ca3b18a1841ba0",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"actors",
+								"6725a26132ca3b18a1841ba0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Actors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/actors",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"actors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Actor",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{url}}/actors/67174c1a6968d73925ee9e2b",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"actors",
+								"67174c1a6968d73925ee9e2b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Actor",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjJAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzI5NjgwOTg0LCJleHAiOjE3MzA1NDQ5ODR9.nBeBxK-KeqbvUbwHROKMrq6MHgYKHALpyUTbrrzKPkg",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n  \"actor\": {\n    \"name\": {\n      \"firstName\": \"MM\",\n      \"middleName\": \"AA.\",\n      \"lastName\": \"DDoe\"\n    },\n    \"LinkedIn\": \"https://linkedin.com/in/rafdoe\",\n    \"Spotlight\": \"https://spotlight.com/rafdoe\",\n    \"Facebook\": \"https://facebook.com/rafdoe\",\n    \"TikTok\": \"@rafdoe\",\n    \"X\": \"@raf_doe\",\n    \"skills\": [\"Acting\", \"Fighting\", \"Dancing\"]\n  }\n}\n\n",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": [
+										"/C:/Users/bdCalling/OneDrive/Desktop/kkk/459585811_1209939456948037_6288536165761449862_n.jpg",
+										"/C:/Users/bdCalling/OneDrive/Desktop/kkk/Screenshot 2024-09-10 160138.png"
+									]
+								},
+								{
+									"key": "video",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/big_buck_bunny_720p_1mb.mp4"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/actors/6725acf3014a15b3a03755ec",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"actors",
+								"6725acf3014a15b3a03755ec"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Competition Average Ratings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/actors/670a5d04d9f16ea67bd7b162/competition-ratings",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"actors",
+								"670a5d04d9f16ea67bd7b162",
+								"competition-ratings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Coments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/actors/67174d156968d73925ee9e57/comments",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"actors",
+								"67174d156968d73925ee9e57",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/upload/multiple",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://192.168.12.30:5000/upload/multiple",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"12",
+								"30"
+							],
+							"port": "5000",
+							"path": [
+								"upload",
+								"multiple"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Competetion",
+			"item": [
+				{
+					"name": "Create Single Competetion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNTI2Njc5LCJleHAiOjE3MzEzOTA2Nzl9.acQ_TdWcXsAmUmjzoUigyUtr2F_aaIPs-auSlhQmRN8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n\"competition\": \n{\n  \"title\": \"Story and history Competition\",\n  \"description\": \"A competition to discover the best talents in acting.\",\n  \"endDate\": \"2024-11-09T00:00:00Z\",\n\n  \"voter\": \"judge\",\n  \"rules\": \"Participants must submit a 5-minute video. No offensive content is allowed.\"\n}\n}",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/Screenshot 2024-09-10 160138.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/competitions/create-competition/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competitions",
+								"create-competition",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Competetions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{url}}/competitions/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competitions",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Competetion",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{SuperAdminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/competitions/6725b1c0eaada535ce8666cc",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competitions",
+								"6725b1c0eaada535ce8666cc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Competetion",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n\"competition\": \n{\n  \"description\": \"A competition to discover the best talents in acting.\",\n  \"startDate\": \"2024-11-15T09:00:00Z\",\n  \"endDate\": \"2024-11-02T18:00:00Z\",\n  \"firstPrize\": \"Cash Prize of $300\",\n  \"secondPrize\": \"Cash Prize of $200\",\n  \"thirdPrize\": \"Cash Prize of $100\",\n\"resultStatus\":\"in-progress\",\n  \"entryFee\": \"50\",\n  \"voter\": \"public\",\n  \"rules\": \"Participants must submit a 5-minute video. No offensive content is allowed.\"\n}\n}",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Pictures/Screenshots/Screenshot 2024-09-13 174914.png",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/competitions/6725bdfd67cabed6ea6f5d26",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competitions",
+								"6725bdfd67cabed6ea6f5d26"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Competetion",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/competitions/6725b2b6b5349775f1d839f6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competitions",
+								"6725b2b6b5349775f1d839f6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Competetion Winner Result",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/competitions/672df0c11cfef96853ec7af8/winner",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competitions",
+								"672df0c11cfef96853ec7af8",
+								"winner"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Competitions Of a User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/competitions/user/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competitions",
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Participation",
+			"item": [
+				{
+					"name": "Create Single Participation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n  \"participation\": {\n    \"competitionId\": \"672df0c11cfef96853ec7af8\",\n    \"actorId\": \"6725a26132ca3b18a1841ba0\",\n    \"title\": \"Monologue Performance\",\n    \"description\": \"A powerful monologue performed by the actor.\",\n    \"guideline\": \"The video should not exceed 5 minutes. Only original content is allowed.\"\n  }\n}",
+									"type": "text"
+								},
+								{
+									"key": "video",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/big_buck_bunny_720p_1mb.mp4"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/participations/create-participation",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"participations",
+								"create-participation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Participations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhbWFhaG1hZG11c2FAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzI4Nzk0MzAxLCJleHAiOjE3Mjk2NTgzMDF9.3CiwaY2i7PnBtasY8oIE_5MPqNYEKuNG1Hm7nz61FBQ",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/participations/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"participations",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Participaton",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/participations/672df0f41cfef96853ec7afe",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"participations",
+								"672df0f41cfef96853ec7afe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Participations",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjJAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNTI4MTk4LCJleHAiOjE3MzEzOTIxOTh9.Ceud5AWBwJ7AnDC8n-QOnrYHEpfsl_pMzuoLqjjhbJM",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n  \"participation\": {\n    \"title\": \"Self Performance\",\n    \"description\": \"A powerful monologue performed by the actor.\",\n    \"guideline\": \"The video should not exceed 5 minutes. Only original content is allowed.\",\n\"paymentStatus\":\"completed\",\n\"entryStatus\":\"approved\"\n  }\n}",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/Screenshot 2024-09-10 160138.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/participations/6725c5d2c1cbc30be7b4518b",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"participations",
+								"6725c5d2c1cbc30be7b4518b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Participations",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/participations/6725c5d2c1cbc30be7b4518b",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"participations",
+								"6725c5d2c1cbc30be7b4518b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Participation for a Competiton",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/participations/competition/672b00a4a3717ac4ba3022ee",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"participations",
+								"competition",
+								"672b00a4a3717ac4ba3022ee"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Winner Participation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/participations/winner/6725acee014a15b3a03755e7",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"participations",
+								"winner",
+								"6725acee014a15b3a03755e7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vote",
+			"item": [
+				{
+					"name": "Create Single Vote",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"vote\": {\r\n        \"competitionId\": \"672df0c11cfef96853ec7af8\",\r\n        \"participantId\": \"6725a26132ca3b18a1841ba0\",\r\n        \"voterId\": \"6725a26132ca3b18a1841ba0\",\r\n        \"comment\": \"Excellent performance!\",\r\n        \"ratings\":5,\r\n        \"voter\": \"judge\",\r\n        \"voterModel\": \"Actor\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/votes/create-vote",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"votes",
+								"create-vote"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Votes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/votes/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"votes",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Vote",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/votes/6725cce4a1157b231b39d2f8",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"votes",
+								"6725cce4a1157b231b39d2f8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Vote",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/votes/6725cce4a1157b231b39d2f8",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"votes",
+								"6725cce4a1157b231b39d2f8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Competition Result",
+			"item": [
+				{
+					"name": "Get Single Competition Result",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/competition-results/672865a177ccc11a8384b149",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competition-results",
+								"672865a177ccc11a8384b149"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Competition Results",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/competition-results/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competition-results",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Competition Result",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/competition-results/6725f232f60fb74b06e6c046",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competition-results",
+								"6725f232f60fb74b06e6c046"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Winner Of the Competition Result",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/competition-results/6725b1c0eaada535ce8666cc/winner",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competition-results",
+								"6725b1c0eaada535ce8666cc",
+								"winner"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Winner Results Of User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhbWFhaG1hZG11c2FAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwODAwODM1LCJleHAiOjE3MzE2NjQ4MzV9.dDMdkQk2UgiHW2LXwt6Hhxn01PhXCU6P4DDG8s10zz0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/competition-results/winner/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"competition-results",
+								"winner",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Learning Resources",
+			"item": [
+				{
+					"name": "Create Single Learning Resource",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n  \"learningResource\": {\n    \"title\": \"Musa\",\n    \"description\": \"A tutorial on perfecting your on-screen \n         performance.\",\n    \"resourceType\": \"article\",\n    \"author\": \"John Doe\",\n\"articleContent\":\"test\"\n    \n}\n}",
+									"type": "text"
+								},
+								{
+									"key": "video",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/big_buck_bunny_720p_1mb.mp4",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/learning-resources/create-learning-resource",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"learning-resources",
+								"create-learning-resource"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Learning Resources",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/learning-resources/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"learning-resources",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Learning Resource",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/learning-resources/6725f7e8a589a86ef1c277d1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"learning-resources",
+								"6725f7e8a589a86ef1c277d1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Learning Resources",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/learning-resources/6725f7e8a589a86ef1c277d1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"learning-resources",
+								"6725f7e8a589a86ef1c277d1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Learning Resources",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n  \"learningResource\": {\n    \"title\": \"Musa 2\",\n    \"description\": \"A tutorial on perfecting your on-screen performance.\",\n    \"resourceType\": \"video\",\n    \"author\": \"John Doe\"\n  }\n}\n",
+									"type": "text"
+								},
+								{
+									"key": "video",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/big_buck_bunny_720p_1mb.mp4"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/learning-resources/6725f782a589a86ef1c277c4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"learning-resources",
+								"6725f782a589a86ef1c277c4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Practice Room",
+			"item": [
+				{
+					"name": "Create Single Practice Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjJAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzI5NjczNTU1LCJleHAiOjE3MzA1Mzc1NTV9.xdzVFqIJPz3p-bllP-s0i-gttdwdDsMtDbZ3AREFU9M",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"practiceRoom\": {\r\n        \"title\": \"Voice Training mmm\",\r\n        \"description\": \"A practice session to enhance vocal techniques.\",\r\n        \"hostName\": \"John Doe\",\r\n        \"date\": \"2024-10-15T10:00:00Z\",\r\n        \"time\": \"14:30\",\r\n        \"zoomLink\": \"https://zoom.us/j/123456789\",\r\n        \"meetingId\": \"123-456-789\",\r\n        \"code\": \"PR1234\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/practice-rooms/create-practice-room",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-rooms",
+								"create-practice-room"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Practice-rooms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJzdGFncHQyMDI0QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMDk1OTk2NiwiZXhwIjoxNzMxODIzOTY2fQ.oURi6yYKF3qbqAZZ0ti5zPug9HS6La66OuBRGuKZhnM",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/practice-rooms/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-rooms",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Practice Room",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwOTYwMTU1LCJleHAiOjE3MzE4MjQxNTV9.NLi7eq4QX5EBhoHs5abh06UuOA8voHWpwOsdgX_76b4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/practice-rooms/672c5b2ee53ce6b88721c9f2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-rooms",
+								"672c5b2ee53ce6b88721c9f2"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Practice Room",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwOTYwMTU1LCJleHAiOjE3MzE4MjQxNTV9.NLi7eq4QX5EBhoHs5abh06UuOA8voHWpwOsdgX_76b4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/practice-rooms/672c5b2ee53ce6b88721c9f2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-rooms",
+								"672c5b2ee53ce6b88721c9f2"
+							],
+							"query": [
+								{
+									"key": null,
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Practice Room",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"practiceRoom\": {\r\n        \"title\": \"Musa \",\r\n        \"description\": \"An advanced vocal training session.\",\r\n        \"hostName\": \"Jane Doe\",\r\n        \"time\": \"15:30\",\r\n        \"zoomLink\": \"https://zoom.us/j/987654321\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/practice-rooms/672c5b2ee53ce6b88721c9f2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-rooms",
+								"672c5b2ee53ce6b88721c9f2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Practice Rooms Of a User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwOTYwMTU1LCJleHAiOjE3MzE4MjQxNTV9.NLi7eq4QX5EBhoHs5abh06UuOA8voHWpwOsdgX_76b4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/practice-rooms/user/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-rooms",
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Blog",
+			"item": [
+				{
+					"name": "Create Single Blog",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjNAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNTQ0NjAzLCJleHAiOjE3MzE0MDg2MDN9.9I9CE-UFyAb1TJ4AhUIIrIclQlGsupYJunitc11reNg",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"blog\": {\r\n    \"title\": \"Sample blog2\",\r\n    \"content\": \"<p><strong>fdsfsdf dsjfjsdfsd</strong></p><p>safddsafsdafsdfsdfsdfdsd</p><p>dsfds</p><p>fdsfds</p><p>fsdf</p><ol><li>dfdsafdsaf</li><li>sdfdsfsafa</li><li>sdfsdfas</li></ol><p><br></p><p>dsf;lsdkfposadk</p>\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/blogs/create-blog",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blogs",
+								"create-blog"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Blogs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/blogs/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blogs",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single blog",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/blogs/672603cf22aa53add15b75be",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blogs",
+								"672603cf22aa53add15b75be"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Blog",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/blogs/672603cf22aa53add15b75be",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blogs",
+								"672603cf22aa53add15b75be"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Blog",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"blog\": {\r\n    \"title\": \"Sample blog updated2\",\r\n    \"content\": \"Some content here there...\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/blogs/672603cf22aa53add15b75be",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blogs",
+								"672603cf22aa53add15b75be"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all My Blog",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjNAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNTQ0NjAzLCJleHAiOjE3MzE0MDg2MDN9.9I9CE-UFyAb1TJ4AhUIIrIclQlGsupYJunitc11reNg",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/blogs/my-blogs",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blogs",
+								"my-blogs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Blog Comment",
+			"item": [
+				{
+					"name": "Create Single Blog",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"blogComment\": {\r\n        \"blogId\": \"672603cb22aa53add15b75b9\",\r\n        \"comment\": \"comment4!\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/blog-comments/create-blog-comment",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blog-comments",
+								"create-blog-comment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Blogs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjJAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzI5NzUwNTc2LCJleHAiOjE3MzA2MTQ1NzZ9.crtsjmgggFHA11mYjW8fS5mk7aKHZKHH1Tkh60No0BI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/blog-comments/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blog-comments",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single blog",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjJAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzI5NzUwNTc2LCJleHAiOjE3MzA2MTQ1NzZ9.crtsjmgggFHA11mYjW8fS5mk7aKHZKHH1Tkh60No0BI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/blog-comments/672604be22aa53add15b7611",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blog-comments",
+								"672604be22aa53add15b7611"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Blog",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{SuperAdminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/blog-comments/672604be22aa53add15b7611",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blog-comments",
+								"672604be22aa53add15b7611"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Blog",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjJAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzI5NzUwNTc2LCJleHAiOjE3MzA2MTQ1NzZ9.crtsjmgggFHA11mYjW8fS5mk7aKHZKHH1Tkh60No0BI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"blogComment\": {\r\n        \"comment\": \"I am musa!\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/blog-comments/671e0aaee92aa8646863e11c",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blog-comments",
+								"671e0aaee92aa8646863e11c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Blog Comment By Blog ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/blog-comments/blog/672603c122aa53add15b75a8",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"blog-comments",
+								"blog",
+								"672603c122aa53add15b75a8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Workshop",
+			"item": [
+				{
+					"name": "Create Single Workshop",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n    \"workshop\": {\n        \"title\": \"Introduction to Web Development\",\n\"hostName\": \"admin sir\",\n        \"details\": \"A comprehensive workshop on modern web development techniques and technologies.\",\n        \"startTime\": \"10:00\",\n        \"endTime\": \"16:00\",\n        \"date\": \"2024-11-25T00:00:00Z\",\n        \"mode\": \"online\",\n \"location\": \"azimpur\"\n    }\n}",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/459585811_1209939456948037_6288536165761449862_n.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/workshops/create-workshop",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"workshops",
+								"create-workshop"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Workshops",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/workshops/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"workshops",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Workshop",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/workshops/672607cdbf19ca37dddfe618",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"workshops",
+								"672607cdbf19ca37dddfe618"
+							],
+							"query": [
+								{
+									"key": "Auth",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Workshop",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/workshops/672607cdbf19ca37dddfe618",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"workshops",
+								"672607cdbf19ca37dddfe618"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Workshop",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n    \"workshop\": {\n        \"title\": \"Introduction to AI\",\n        \"details\": \"A comprehensive workshop on modern web development techniques and technologies.\",\n        \"startTime\": \"10:00\",\n        \"endTime\": \"16:00\",\n        \"date\": \"2024-12-20T00:00:00Z\",\n        \"mode\": \"online\"\n    }\n}",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/Screenshot 2024-09-10 160138.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/workshops/672607cdbf19ca37dddfe618",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"workshops",
+								"672607cdbf19ca37dddfe618"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Analytics",
+			"item": [
+				{
+					"name": "Get All Monthly Participation",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/analytics/monthly-participation",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"analytics",
+								"monthly-participation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Monthly Revenue",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/analytics/monthly-revenue",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"analytics",
+								"monthly-revenue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Earning and Expenses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJzdGFncHQyMDI0QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMDcxNzQ0OCwiZXhwIjoxNzMxNTgxNDQ4fQ.XqWc4c9VcEJSZHXeX3-cmAUb5tdngsEF6Klzsr5H758",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/analytics/earnings-expenses",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"analytics",
+								"earnings-expenses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Email",
+			"item": [
+				{
+					"name": "Send Help Email To Client",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"help\": {\r\n        \"fullName\": \"Ahmad Musa Musa\",\r\n        \"email\": \"amaahmadmusa@gmail.com\",\r\n        \"contactNumber\": \"123-456-7890\",\r\n        \"message\": \"This is a test message to musa.\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/helps/send-email",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"helps",
+								"send-email"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Super Admin",
+			"item": [
+				{
+					"name": "Super Admin Credential",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{superAdminTokenA}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"ahmadmusa9805@gmail.com\",\r\n    \"password\":\"superAdmin12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/admins",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admins"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chat",
+			"item": [
+				{
+					"name": "Get All Chat Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJzdGFncHQyMDI0QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMDk3Mjc2MiwiZXhwIjoxNzMxODM2NzYyfQ.W_IIlp6VpH_buPDXqQJtT7z_YYBvbcBOeQy9EyrnvUw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/chats/messages?actor1=6726119b4f51a788239c058d&actor2=6725acf3014a15b3a03755ec",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"chats",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "actor1",
+									"value": "6726119b4f51a788239c058d"
+								},
+								{
+									"key": "actor2",
+									"value": "6725acf3014a15b3a03755ec"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwOTc3NDQyLCJleHAiOjE3MzE4NDE0NDJ9.sun2tBWK3jBLjr50CaXQSp-kg8-Yf4T7-7LKaXDI_CQ",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/chats/actor-actor-messages?actor1=6726119b4f51a788239c058d&actor2=6725acf3014a15b3a03755ec",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"chats",
+								"actor-actor-messages"
+							],
+							"query": [
+								{
+									"key": "actor1",
+									"value": "6726119b4f51a788239c058d"
+								},
+								{
+									"key": "actor2",
+									"value": "6725acf3014a15b3a03755ec"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Chat Partners",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwOTc3NDQyLCJleHAiOjE3MzE4NDE0NDJ9.sun2tBWK3jBLjr50CaXQSp-kg8-Yf4T7-7LKaXDI_CQ",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/chats/all-partners/?userId=6726119b4f51a788239c058d",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"chats",
+								"all-partners",
+								""
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "6726119b4f51a788239c058d"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Practice Room Participants",
+			"item": [
+				{
+					"name": "Get ALL Practice Room Participant",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/practice-room-participants/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-room-participants",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Practice Room Particpant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjNAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNTQ5MzY1LCJleHAiOjE3MzE0MTMzNjV9.-MRBQjXxpqofXCCvRIvtvVW0IzIKoOzE6SBTTZYFHec",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"practiceRoomParticipant\": {\r\n        \"roomId\": \"6725f689c94b14e8b6ea9c6d\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/practice-room-participants/create-practice-room-particiapant",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-room-participants",
+								"create-practice-room-particiapant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update single Practice Room Participant",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"practiceRoomParticipant\": {\r\n        \"ratings\": 5,\r\n        \"comment\": \"This is a good!\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/practice-room-participants/672616112a5ff16b0e97fb3d",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-room-participants",
+								"672616112a5ff16b0e97fb3d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Practice Room Participants By Room ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjNAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzI5NzUxNDk0LCJleHAiOjE3MzA2MTU0OTR9.18qm7eLzj7Vkjg_4jrST5yIDPE3iTJgsFxFPL4sgd9k",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/practice-room-participants/room/6725f688c94b14e8b6ea9c68",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"practice-room-participants",
+								"room",
+								"6725f688c94b14e8b6ea9c68"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Workshop Registration",
+			"item": [
+				{
+					"name": "Create Workshop Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhbWFhaG1hZG11c2FAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNDQyMzk3LCJleHAiOjE3MzEzMDYzOTd9.yi_ejJa26MwLBgGsz6onP1qiEnnRfyZC11eQng2MVn0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n    \"workshopRegistration\": {\r\n      \"workshopId\": \"672464a048e8d33c51520f98\"\r\n    }\r\n  }\r\n\r\n{\r\n    \"workshop\": {\r\n        \"title\": \"Introduction to Web Development\",\r\n         \"hostName\": \"admin sir\",\r\n        \"details\": \"A comprehensive workshop on modern web development techniques and technologies.\",\r\n        \"startTime\": \"10:00\",\r\n        \"endTime\": \"16:00\",\r\n        \"date\": \"2024-10-25T00:00:00Z\",\r\n        \"mode\": \"online\",\r\n        \"location\": \"azimpur\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/workshop-registrations/create-workshop-registration",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"workshop-registrations",
+								"create-workshop-registration"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get ALL Workshop Registration",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjNAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzI5NzYxOTM1LCJleHAiOjE3MzA2MjU5MzV9.L7lmkuMjS5mSmX2L7cK-2QaAHeCoUgj88lhftNdRLps",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/workshop-registrations/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"workshop-registrations",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Registrant By WorkshopId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{superAdminTokenA}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/workshop-registrations/workshopId/671a111fa4bce67d73d7bb29",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"workshop-registrations",
+								"workshopId",
+								"671a111fa4bce67d73d7bb29"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment",
+			"item": [
+				{
+					"name": "payments Entry fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhbWFhaG1hZG11c2FAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwMzQ4ODM5LCJleHAiOjE3MzEyMTI4Mzl9.DzZD8Mq7pDW5pyX2KpZ7dgzlZMpNrnFaceL9Q2BWYVg",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"competitionId\": \"671898eded96907fc67016e3\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/stripes/create-payment-intent",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"stripes",
+								"create-payment-intent"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Payment Completed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhbWFhaG1hZG11c2FAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwMzY2NzA1LCJleHAiOjE3MzEyMzA3MDV9.wyRGQrfMm_kBuJi_ECpXF2PW1HywkYoHmtfnvxAxE2g",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"payment\":{\r\n        \"competitionId\":\"671898eded96907fc67016e3\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/payments/check-payment-complete",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"payments",
+								"check-payment-complete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Account Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/payments/check-account-status?actorId=6725acee014a15b3a03755e7",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"payments",
+								"check-account-status"
+							],
+							"query": [
+								{
+									"key": "actorId",
+									"value": "6725acee014a15b3a03755e7"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Witdraw & Transaction",
+			"item": [
+				{
+					"name": "Send Withdraw Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJzdGFncHQyMDI0QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMDc4NzMyOCwiZXhwIjoxNzMxNjUxMzI4fQ.rglp4tA1uAGfXNg7WC5rIrSU7WVsImRrOr4LEyahD44",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"transaction\": {\r\n        \"amount\": \"15\",\r\n        \"competitionId\": \"6729ab22361eec39843c6878\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/transactions/send-withdrawal-request",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"send-withdrawal-request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send Withdraw Process",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhbWFhaG1hZG11c2FAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNzk4Nzg1LCJleHAiOjE3MzE2NjI3ODV9.201N-x-J24Pelt4qG4DHe2wu6Db8zHj5Yfy0JLvq5co",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"transaction\": {\r\n        \"competitionId\": \"6729ab22361eec39843c6878\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/transactions/withdrawal-process",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"withdrawal-process"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Single Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjRAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwNzg0NjgwLCJleHAiOjE3MzE2NDg2ODB9.fPFT3bu0XJQvU5uZZYJOY7hC4AiVcSgFQ8HW80wEY10",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"transaction\": {\r\n        \"competitionId\": \"6729ab22361eec39843c6878\",\r\n        \"paymentStatus\": \"completed\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/transactions/create-transaction",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"create-transaction"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get single transaction",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhbWFhaG1hZG11c2FAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwMzU3MjU5LCJleHAiOjE3MzEyMjEyNTl9.skN2yI1Rx_cpTS91tIU1clhkolDihl5dle8Cdbt-vsE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/transactions/67233fb5b029b226b8b7d18b",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"67233fb5b029b226b8b7d18b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Transaction",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"transaction\": {\r\n        \"adminPermission\": \"approved\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/transactions/672a0ad47a0403560176a12d",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"672a0ad47a0403560176a12d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Withdrawal Request",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhaG1hZG11c2E5ODA1QGdtYWlsLmNvbSIsInJvbGUiOiJzdXBlckFkbWluIiwiaWF0IjoxNzMwMzc2NTUyLCJleHAiOjE3MzEyNDA1NTJ9.jQNKaposIeZ1K4ywYrRvX3WTAQBKcPwf6FzPavANtnY",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/transactions/all-withdrawal-requests",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"all-withdrawal-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Transaction",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/transactions/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send Withdraw Request Revenue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwODA4NTAxLCJleHAiOjE3MzE2NzI1MDF9.AScybocs6TB_m3lhvuaGYU8_jQrQJ4quewOT6W-4_8g",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"transaction\": {\r\n        \"amount\": \"9\",\r\n        \"competitionId\": \"6729ab22361eec39843c6878\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/transactions/send-withdrawal-request-revenue",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"send-withdrawal-request-revenue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send Withdraw Process Revenue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwODA4NTAxLCJleHAiOjE3MzE2NzI1MDF9.AScybocs6TB_m3lhvuaGYU8_jQrQJ4quewOT6W-4_8g",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"transaction\": {\r\n        \"competitionId\": \"6729ab22361eec39843c6878\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/transactions/send-withdrawal-process-revenue",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"send-withdrawal-process-revenue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get single transaction",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/transactions/6729c27d6858a77157d7aa47",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"transactions",
+								"6729c27d6858a77157d7aa47"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Single Learning Resource",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin-Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n  \"learningResource\": {\n    \"title\": \"Musa\",\n    \"description\": \"A tutorial on perfecting your on-screen performance.\",\n    \"resourceType\": \"article\",\n    \"author\": \"John Doe\",\n    \"articleContent\": \"test\"\n  }\n}\n",
+									"type": "text"
+								},
+								{
+									"key": "video",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/big_buck_bunny_720p_1mb.mp4",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/learning-resources/create-learning-resource",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"learning-resources",
+								"create-learning-resource"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Admin",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{superAdminTokenA}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n    \"admin\": {\n        \"name\": {\n            \"firstName\": \"Admin Vai\",\n            \"middleName\": \"AAA.\",\n            \"lastName\": \"DddDoe\"\n        }\n       \n    }\n}",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/bdCalling/OneDrive/Desktop/kkk/Screenshot 2024-09-10 160138.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/admins/6725abd7014a15b3a03755cd",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admins",
+								"6725abd7014a15b3a03755cd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Actor Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\":\"actor1@gmail.com\",\r\n  \"password\":\"actor12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Actor-Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/users/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "File-S3",
+			"item": [
+				{
+					"name": "sinlge-image",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [
+										"/C:/Users/sarwa/Downloads/122356-725067757_small.mp4",
+										"/C:/Users/sarwa/WEB/Photo/Personal/Banner/chairB].jpg"
+									]
+								}
+							]
+						},
+						"url": {
+							"raw": "http://192.168.12.31:5000/upload/single",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"12",
+								"31"
+							],
+							"port": "5000",
+							"path": [
+								"upload",
+								"single"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RevenueSharingToActor",
+			"item": [
+				{
+					"name": "Create Revenue Sharing To Actor Data",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"revenueSharings\": {\r\n        \"competitionId\": \"64bfe8a7f2a3b2c7a4b5d8e1\", // Example ObjectId for Competition\r\n        \"profitRecipientId\": \"64bfe8a7f2a3b2c7a4b5d8e2\", // Example ObjectId for Actor or Admin\r\n        \"resultDate\": \"2024-11-05T00:00:00Z\", // Example date\r\n        \"percentage\": \"75\", // Percentage as a string\r\n        \"title\": \"Actor Share for November Competition\",\r\n        \"profitMoney\": \"1500\", // Profit amount as a string\r\n        \"isFinal\": true,\r\n        \"withdrawalStatus\": \"withdraw\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/revenue-sharings/create-revenue-sharing-actor",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"revenue-sharings",
+								"create-revenue-sharing-actor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Revenue Sharings Actor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJzdGFncHQyMDI0QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMDc4NzMyOCwiZXhwIjoxNzMxNjUxMzI4fQ.rglp4tA1uAGfXNg7WC5rIrSU7WVsImRrOr4LEyahD44",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/revenue-sharings",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"revenue-sharings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Revenue Sharing To Acotr Results Of User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjExQGdtYWlsLmNvbSIsInJvbGUiOiJhY3RvciIsImlhdCI6MTczMDg4MzExMiwiZXhwIjoxNzMxNzQ3MTEyfQ.LNRskjUhNmLJpOlRRzQOb1YdTtMLf8SlvSH6dqSwGOI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/revenue-sharings/revenue-share",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"revenue-sharings",
+								"revenue-share"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Revenue share analitics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhY3RvcjFAZ21haWwuY29tIiwicm9sZSI6ImFjdG9yIiwiaWF0IjoxNzMwODg0NTU2LCJleHAiOjE3MzE3NDg1NTZ9.uG6No15nraqiJqQjuekvtUmNx5VHwYBfyiLDC0MhpCk",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/revenue-sharings/revenue-share-analytics",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"revenue-sharings",
+								"revenue-share-analytics"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"payment\":{\r\n   \"amount\":5000,\r\n    \"competitionId\":\"12345\"\r\n    }\r\n \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/v1/stripe/create-payment-intent",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"stripe",
+						"create-payment-intent"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://192.168.12.31:5000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "adminTokenA",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhaG1hZG11c2E5ODA1QGdtYWlsLmNvbSIsInJvbGUiOiJzdXBlckFkbWluIiwiaWF0IjoxNzI5MzE2NDU4LCJleHAiOjE3MzAxODA0NTh9.Griku2kWacr1o9SAg1a7230dPTW6ENNdXViUfLrrKkk",
+			"type": "string"
+		},
+		{
+			"key": "musaURL",
+			"value": "http://192.168.12.30:5000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "superAdminTokenA",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhaG1hZG11c2E5ODA1QGdtYWlsLmNvbSIsInJvbGUiOiJzdXBlckFkbWluIiwiaWF0IjoxNzMwMDA0NDM4LCJleHAiOjE3MzA4Njg0Mzh9.CaPrbr9u4H6kZ4byLUx2Y8in04TWu9Yb1uUxXjE5dBs",
+			"type": "string"
+		}
+	]
+}

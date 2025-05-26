@@ -1,0 +1,9 @@
+config:
+  target: "http://127.0.0.1:5001" # Replace with your local backend URL
+  phases:
+    - duration: 60    # Run the test for 60 seconds
+      arrivalRate: 10 # Start with 10 requests per second
+scenarios:
+  - flow:
+      - get:
+          url: "/" # Replace with your API endpoint

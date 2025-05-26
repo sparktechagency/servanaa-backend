@@ -1,0 +1,1 @@
+export const CATEGORY_SEARCHABLE_FIELDS = ['name'];
