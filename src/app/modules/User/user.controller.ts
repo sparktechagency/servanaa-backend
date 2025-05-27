@@ -20,19 +20,8 @@ import config from '../../config';
 // });
 const createCustomer = catchAsync(async (req, res) => {
   const user = req.body;
-  console.log(user, "userData");
   const result = await UserServices.createCustomerIntoDB(user);
-
-  // sendResponse(res, {
-  //   statusCode: httpStatus.OK,
-  //   success: true,
-  //   message: 'Client is created succesfully and OTP sent',
-  //   data: result,
-  // });
-
-
-
-   const { refreshToken, accessToken, newUser } = result;
+   const { refreshToken, accessToken, customer } = result;
     // const { refreshToken, accessToken, needsPasswordChange } = result;
   
     res.cookie('refreshToken', refreshToken, {
@@ -46,10 +35,10 @@ const createCustomer = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'User is logged in succesfully!',   
+      message: 'Customer is created succesfully!',   
       data: {
         accessToken,
-        newUser,
+        customer,
       },
     });
 });
@@ -70,7 +59,7 @@ const   createContractor = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'User is logged in succesfully!',   
+      message: 'Contractor is created succesfully!',   
       data: {
         accessToken,
         contractor,

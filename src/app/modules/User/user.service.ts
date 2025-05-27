@@ -29,16 +29,30 @@ import { Contractor } from '../Contractor/Contractor.model';
 //     return result;
 // };
 
-export const createCustomerIntoDB = async (payload: TUser) => {
-   payload.role = payload.role || 'client'
+export const createCustomerIntoDB = async (payload: any) => {
 
-  // Handle file upload if present
-  // if (file) {
-  //   payload.profileImg = file?.location;
-  // }
+
+     const userData = await User.isUserExistsByCustomEmail(payload.email);
+    if (userData) throw new Error('Customer already exists with this email'); 
 
     const newUser = await User.create(payload);
     if (!newUser) throw new Error('Failed to create user'); 
+
+
+    const customerData = {
+      userId: newUser._id
+    }
+
+    const customer = await Contractor.create(customerData);
+    if (!customer) throw new Error('Failed to create user'); 
+
+
+  // Populate user field in contractor document
+  const populatedCustomer = await Contractor.findById(customer._id).populate({
+    path: 'userId',
+    // select: '-password -__v', // exclude sensitive fields
+  });
+
     
 
 
@@ -63,14 +77,14 @@ export const createCustomerIntoDB = async (payload: TUser) => {
   return {
     accessToken,
     refreshToken,
-    newUser
+    customer:populatedCustomer
   };
 };
 export const createContractorIntoDB = async (payload: any) => {
    
 
     const userData = await User.isUserExistsByCustomEmail(payload.email);
-    if (userData) throw new Error('User already exists with this email'); 
+    if (userData) throw new Error('Contractor already exists with this email'); 
 
     const newUser = await User.create(payload);
     if (!newUser) throw new Error('Failed to create user'); 
@@ -89,18 +103,6 @@ export const createContractorIntoDB = async (payload: any) => {
     path: 'userId',
     // select: '-password -__v', // exclude sensitive fields
   });
-
-
-  // console.log(newUser, 'newUser service');
-  // console.log(contractor, 'contractor service');
-  
-  //  payload.role = payload.role || 'client'
-
-  // Handle file upload if present
-  // if (file) {
-  //   payload.profileImg = file?.location;
-  // }
-
 
   //create token and sent to the  client
   const jwtPayload:any = {
