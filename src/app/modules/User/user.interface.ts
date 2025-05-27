@@ -5,42 +5,35 @@ import { USER_ROLE } from './user.constant';
  
 export type  TUser = {
   fullName: string;
-  bio?: string;
-  address?: string;
-  contactNo?: string; 
   email: string;
   password: string;
-  customerId?: string;
-  img?: string;
-  myBalance?: {          
-    deposit?: number;         
-    refund?: number;
-  };  
-  // preference?: Types.ObjectId;
+  contactNo: string; 
+  otpVerified: boolean;
   location?: string;
+  img?: string;
+  role: 'client' | 'superAdmin' | ' ';
+  status?: 'active' | 'blocked';
+  subscriptionStatus?: boolean;
+  customerId?: string;
+  paymentMethodId?: string;
   passwordChangedAt?: Date; 
-  approvalStatus: boolean;
+  approvalStatus?: boolean;
+
+  dob?: string;
+  gender?: string;
+  city?: string;
+  isDeleted: boolean;
   language?: string;
-  experience?: string;
   services?: {
     requiredTasks: string | string[]; // Array of strings for the requiredTasks
     specialistsIn: string | string[]; // Array of strings for the requiredTasks
   };
+  rateHourly?: number;
+  ratings?: number;
   skills?: string | string[];
-  otpVerified: boolean;
-  dob?: string;
-  role: 'client' | 'superAdmin' | ' ';
-  status?: 'active' | 'blocked';
-  isDeleted: boolean;
-   minimumBookingAmount?: number; 
-  workArea?: {
-    coordinates: {
-      type: 'Point'; 
-      latitude: number; // Latitude for the work area location
-      longitude: number; // Longitude for the work area location
-    };
-    mapLink: string; // Google Maps URL link to show the work area location
-  };
+  certificate?: string[];
+  materials?: string[];
+  skillsCategory?: string;
     mySchedule: {
     day?: string; // The day of the week (e.g., "Monday")
     startTime?: { type: string},
