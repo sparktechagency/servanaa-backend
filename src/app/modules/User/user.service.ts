@@ -15,19 +15,21 @@ import AppError from '../../errors/AppError';
 import config from '../../config';
 import { OtpServices } from '../Otp/otp.service';
 import { createToken } from '../Auth/auth.utils';
+import { Contractor } from '../Contractor/Contractor.model';
 
 
-export const addMobileNumberIntoDB = async (phoneNumber: any, user: any) => {
+// export const addMobileNumberIntoDB = async (phoneNumber: any, user: any) => {
 
-     if (!phoneNumber) {
-        return 'Phone number is required.'
-      }
+//      if (!phoneNumber) {
+//         return 'Phone number is required.'
+//       }
 
-    const result = await OtpServices.generateAndSendOTPToMobile(phoneNumber?.phone, user?.userEmail);
+//     const result = await OtpServices.generateAndSendOTPToMobile(phoneNumber?.phone, user?.userEmail);
 
-    return result;
-};
-export const createUserIntoDB = async (payload: TUser) => {
+//     return result;
+// };
+
+export const createCustomerIntoDB = async (payload: TUser) => {
    payload.role = payload.role || 'client'
 
   // Handle file upload if present
@@ -62,6 +64,66 @@ export const createUserIntoDB = async (payload: TUser) => {
     accessToken,
     refreshToken,
     newUser
+  };
+};
+export const createContractorIntoDB = async (payload: any) => {
+   
+
+    const userData = await User.isUserExistsByCustomEmail(payload.email);
+    if (userData) throw new Error('User already exists with this email'); 
+
+    const newUser = await User.create(payload);
+    if (!newUser) throw new Error('Failed to create user'); 
+
+
+    const contractorData = {
+      userId: newUser._id
+    }
+
+    const contractor = await Contractor.create(contractorData);
+    if (!contractor) throw new Error('Failed to create user'); 
+
+
+  // Populate user field in contractor document
+  const populatedContractor = await Contractor.findById(contractor._id).populate({
+    path: 'userId',
+    // select: '-password -__v', // exclude sensitive fields
+  });
+
+
+  // console.log(newUser, 'newUser service');
+  // console.log(contractor, 'contractor service');
+  
+  //  payload.role = payload.role || 'client'
+
+  // Handle file upload if present
+  // if (file) {
+  //   payload.profileImg = file?.location;
+  // }
+
+
+  //create token and sent to the  client
+  const jwtPayload:any = {
+    userEmail: newUser.email,
+    role: newUser.role,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    contractor: populatedContractor,
   };
 };
 const getMe = async (userEmail: string) => {
@@ -426,7 +488,8 @@ const getAllPreferedProvidersFromDB = async (query: Record<string, unknown>) => 
 
 
 export const UserServices = {
-  createUserIntoDB,
+  createContractorIntoDB,
+  createCustomerIntoDB,
   getSingleUserIntoDB,
   getUsersMonthlyFromDB, 
   deleteUserFromDB,
@@ -435,9 +498,9 @@ export const UserServices = {
   getAllUsersFromDB,
   updateUserIntoDB, 
   getAllProvidersFromDB, 
-  updateApprovalIntoDB,
-  getAllApprovalFalseUsersFromDB,
+  // updateApprovalIntoDB,
+  // getAllApprovalFalseUsersFromDB,
   getAllClientsFromDB,
-  addMobileNumberIntoDB,
-  getAllPreferedProvidersFromDB
+  // addMobileNumberIntoDB,
+  // getAllPreferedProvidersFromDB
 };

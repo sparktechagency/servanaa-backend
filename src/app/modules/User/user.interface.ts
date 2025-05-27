@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Model } from 'mongoose';
 import { USER_ROLE } from './user.constant';
-// import { Types } from 'mongoose';
  
 export type  TUser = {
   fullName: string;
@@ -9,15 +8,10 @@ export type  TUser = {
   password: string;
   contactNo: string; 
   otpVerified: boolean;
-  location?: string;
   img?: string;
-  role: 'client' | 'superAdmin' | ' ';
-  status?: 'active' | 'blocked';
-  subscriptionStatus?: boolean;
-  customerId?: string;
-  paymentMethodId?: string;
-  passwordChangedAt?: Date; 
-  approvalStatus?: boolean;
+  role: 'customer' | 'superAdmin' | 'contractor';
+  status: 'active' | 'blocked';
+  passwordChangedAt: Date; 
 }
 
 

@@ -9,91 +9,24 @@ import config from '../../config/index';
 const userSchema = new Schema<TUser, UserModel>(
   {
     fullName: { type: String, required: true },
-    contactNo: {
-      type: String,
-    },
-    approvalStatus: { type: Boolean, default: false },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    bio: { type: String },
-    // preferences: { type: Schema.Types.ObjectId, ref: 'Preference', required: false },
-    // preference: { type: Schema.Types.ObjectId, ref: 'Preference' },
-
-    experience: { type: String },
-    customerId: { type: String },
-    location: { type: String },
-    myBalance: {
-      deposit: {
-        type: Number,
-        // required: true,
-        default: 0,
-      },
-      refund: {
-        type: Number,
-        default: 0,
-      },
-    },
-    password: {
-      type: String,
-      required: true,
-      select: false,
-    },
-    passwordChangedAt: {
-      type: Date,
-    },
+    email: { type: String, required: true },
+    password: { type: String, required: true, select: false },
+    contactNo: { type: String, required: true },
+    otpVerified: { type: Boolean, default: false },
+    img: { type: String, default: '' },
     role: {
       type: String,
-      enum: ['client', 'superAdmin', 'provider'],
-      default: 'client',
-    },
-    dob: { type: String },
-    address: { type: String },
-    language: { type: String },
-    img: {
-      type: String,
-      default: '',
-    },
-    otpVerified: {
-      type: Boolean,
-      default: false,
+      enum: ['customer', 'superAdmin', 'contractor'],
+      required: true,
+      default: 'customer',
     },
     status: {
       type: String,
       enum: Object.values(UserStatus),
+      // enum: ['active', 'blocked'],
       default: 'active',
     },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
-    mySchedule: [
-      {
-        day: { type: String },
-        startTime: { type: String },
-        endTime: { type: String },
-      },
-    ],
-    minimumBookingAmount: { type: Number, default: 0 },
-    // workArea: {
-    //   coordinates: {
-    //     latitude: { type: Number, required: false },
-    //     longitude: { type: Number, required: false },
-    //   },
-    //   mapLink: { type: String },
-    // },
-    workArea: {
-      type: {
-        coordinates: {
-          latitude: { type: Number, required: false },
-          longitude: { type: Number, required: false },
-        },
-        mapLink: { type: String },
-      },
-      required: false,
-    },
+    passwordChangedAt: { type: Date, required: true, default: Date.now },
   },
   {
     timestamps: true,
@@ -102,6 +35,9 @@ const userSchema = new Schema<TUser, UserModel>(
 
 userSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
+  //   if (!this.isModified('password')) {
+  //   return next();
+  // }
   const user = this; // doc
   user.password = await bcrypt.hash(
     user.password,

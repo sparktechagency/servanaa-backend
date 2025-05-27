@@ -6,7 +6,7 @@ export const USER_ROLE = {
 
 
 export const usersSearchableFields = [
-  'email','fullName'
+  'email','fullName', 'contactNo'
 ];
 
 export const UserStatus = ['active', 'blocked'];
