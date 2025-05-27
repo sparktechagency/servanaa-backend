@@ -21,7 +21,7 @@ router.post(
 
 router.get(
   '/me',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.client,  USER_ROLE.provider),
+  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
   UserControllers.getMe,
 );
 
@@ -34,7 +34,7 @@ router.post(
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.client,  USER_ROLE.provider),
+  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
   uploadFileS3(true).single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     if (req.body.data) {
