@@ -1,12 +1,12 @@
 export const USER_ROLE = {
   superAdmin: 'superAdmin',
-  client: 'client',
-  provider: 'provider',
+  customer: 'customer',
+  contractor: 'contractor',
 } as const;
 
 
 export const usersSearchableFields = [
-  'email','fullName'
+  'email','fullName', 'contactNo'
 ];
 
 export const UserStatus = ['active', 'blocked'];

@@ -7,32 +7,21 @@ import sendResponse from '../../utils/sendResponse';
 import config from '../../config';
 
 
-const addMobileNumber = catchAsync(async (req, res) => {
-  const { user: userData } = req.body;
-  const result = await UserServices.addMobileNumberIntoDB(userData, req.user);
+// const addMobileNumber = catchAsync(async (req, res) => {
+//   const { user: userData } = req.body;
+//   const result = await UserServices.addMobileNumberIntoDB(userData, req.user);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Client is created succesfully and OTP sent',
-    data: result,
-  });
-});
-const createUser = catchAsync(async (req, res) => {
-  const { user: userData } = req.body;
-
-  const result = await UserServices.createUserIntoDB(userData);
-
-  // sendResponse(res, {
-  //   statusCode: httpStatus.OK,
-  //   success: true,
-  //   message: 'Client is created succesfully and OTP sent',
-  //   data: result,
-  // });
-
-
-
-   const { refreshToken, accessToken, newUser } = result;
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Client is created succesfully and OTP sent',
+//     data: result,
+//   });
+// });
+const createCustomer = catchAsync(async (req, res) => {
+  const user = req.body;
+  const result = await UserServices.createCustomerIntoDB(user);
+   const { refreshToken, accessToken, customer } = result;
     // const { refreshToken, accessToken, needsPasswordChange } = result;
   
     res.cookie('refreshToken', refreshToken, {
@@ -46,15 +35,36 @@ const createUser = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'User is logged in succesfully!',   
+      message: 'Customer is created succesfully!',   
       data: {
         accessToken,
-        newUser,
+        customer,
       },
     });
+});
 
-
-    
+const   createContractor = catchAsync(async (req, res) => {
+  const  user  = req.body;
+  const result = await UserServices.createContractorIntoDB(user);
+   const { refreshToken, accessToken, contractor } = result;
+  
+    res.cookie('refreshToken', refreshToken, {
+      secure: config.NODE_ENV === 'production',
+      // secure: true, 
+      httpOnly: true,
+      sameSite: 'none',
+      maxAge: 1000 * 60 * 60 * 24 * 365,
+    });
+  
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Contractor is created succesfully!',   
+      data: {
+        accessToken,
+        contractor,
+      },
+    });
 });
 
 const getMe = catchAsync(async (req, res) => {
@@ -104,17 +114,17 @@ const getAllUsers = catchAsync(async (req, res) => {
     data: result.result,
   });
 });
-const getAllApprovalFalseUsers = catchAsync(async (req, res) => {
-  const result = await UserServices.getAllApprovalFalseUsersFromDB(req.query);
+// const getAllApprovalFalseUsers = catchAsync(async (req, res) => {
+//   const result = await UserServices.getAllApprovalFalseUsersFromDB(req.query);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Users are retrieved succesfully',
-    meta: result.meta,
-    data: result.result,
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Users are retrieved succesfully',
+//     meta: result.meta,
+//     data: result.result,
+//   });
+// });
 
 const getUsersMonthly = catchAsync(async (req, res) => {
   const result = await UserServices.getUsersMonthlyFromDB();
@@ -139,18 +149,18 @@ const updateUser = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const updateApproval = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { User } = req.body;
-  const result = await UserServices.updateApprovalIntoDB(id, User);
+// const updateApproval = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+//   const { User } = req.body;
+//   const result = await UserServices.updateApprovalIntoDB(id, User);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: req.file ? 'User data and profile image updated successfully' : 'User data updated successfully',
-    data: result,
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: req.file ? 'User data and profile image updated successfully' : 'User data updated successfully',
+//     data: result,
+//   });
+// });
 const deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await UserServices.deleteUserFromDB(id);
@@ -175,18 +185,18 @@ const getAllProviders = catchAsync(async (req, res) => {
     data: result.result,
   });
 });
-const getAllPreferedProviders = catchAsync(async (req, res) => {
-  console.log(req.query, "test");
-    const result = await UserServices.getAllPreferedProvidersFromDB(req.query);
+// const getAllPreferedProviders = catchAsync(async (req, res) => {
+//   console.log(req.query, "test");
+//     const result = await UserServices.getAllPreferedProvidersFromDB(req.query);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Providers are retrieved succesfully',
-    meta: result.meta,
-    data: result.result,
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Providers are retrieved succesfully',
+//     meta: result.meta,
+//     data: result.result,
+//   });
+// });
 const getAllClients = catchAsync(async (req, res) => {
   const result = await UserServices.getAllClientsFromDB(req.query);
 
@@ -202,7 +212,8 @@ const getAllClients = catchAsync(async (req, res) => {
 
 
 export const UserControllers = {
-  createUser,
+createCustomer,
+createContractor,
   getSingleUser,
   getUsersMonthly,
   deleteUser,
@@ -212,9 +223,9 @@ export const UserControllers = {
   getAllUsers,
   getAllClients,
   getAllProviders,
-  updateApproval,
-  getAllApprovalFalseUsers,
-  addMobileNumber,
+  // updateApproval,
+  // getAllApprovalFalseUsers,
+  // addMobileNumber,
   // createProvider,
-  getAllPreferedProviders
+  // getAllPreferedProviders
 };
