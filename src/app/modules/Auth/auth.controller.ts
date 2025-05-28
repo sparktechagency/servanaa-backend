@@ -32,9 +32,7 @@ const loginUser = catchAsync(async (req, res) => {
 });
 
 const changePassword = catchAsync(async (req, res) => {
-
   const { ...passwordData } = req.body;
-
   const result = await AuthServices.changePassword(req.user, passwordData);
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -71,17 +69,10 @@ const forgetPassword = catchAsync(async (req, res) => {
 });
 
 const resetPassword = catchAsync(async (req, res) => {
-
-  
-  console.log(req.body, 'req.body controller');
-
-
   const token = req.headers.authorization;
-
   if (!token) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Something went wrong !');
   }
-
   const result = await AuthServices.resetPassword(req.body, token);
   sendResponse(res, {
     statusCode: httpStatus.OK,

@@ -17,7 +17,7 @@ router.post(
 
 router.post(
   '/change-password',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.client,  USER_ROLE.provider),
+  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
   validateRequest(AuthValidation.changePasswordValidationSchema),
   AuthControllers.changePassword,
 );
@@ -36,7 +36,7 @@ router.post(
 
 router.post(
   '/reset-password',
-  auth(USER_ROLE.superAdmin, USER_ROLE.client, USER_ROLE.provider),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   // validateRequest(AuthValidation.resetPasswordValidationSchema),
   AuthControllers.resetPassword,
 );

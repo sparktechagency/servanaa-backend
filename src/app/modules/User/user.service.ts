@@ -53,7 +53,9 @@ export const createCustomerIntoDB = async (payload: any) => {
     // select: '-password -__v', // exclude sensitive fields
   });
 
-    
+    if(newUser){
+      await OtpServices.generateAndSendOTP(newUser.email);
+    }
 
 
   //create token and sent to the  client

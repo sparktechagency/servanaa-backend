@@ -12,7 +12,7 @@ import config from "../../config";
 // import { UserServices } from "../User/user.service";
 
 
-const generateAndSendOTP = async (email: any ) => {
+export const generateAndSendOTP = async (email: any ) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
 
     // Save OTP to database
