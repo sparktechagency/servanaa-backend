@@ -12,7 +12,7 @@ import config from "../../config";
 // import { UserServices } from "../User/user.service";
 
 
-const generateAndSendOTP = async (email: any ) => {
+export const generateAndSendOTP = async (email: any ) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
 
     // Save OTP to database
@@ -264,7 +264,7 @@ const otpVerifyForMobileNumberIntoDB = async ( payload : any, user: any) => {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
   }
 
-  userData.contactNo = record.phone;
+  userData.contactNo = record.phone ?? '';
 
 
     // 4. Update user’s phone number using findOneAndUpdate

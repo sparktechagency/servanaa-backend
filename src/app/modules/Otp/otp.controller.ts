@@ -5,8 +5,8 @@ import sendResponse from '../../utils/sendResponse';
 
 
 const otpVeryfy = catchAsync(async (req, res) => {
-  const { Otp: otpData } = req.body;
-  const result = await OtpServices.verifyOTP(req.user, otpData);
+  const otp = req.body;
+  const result = await OtpServices.verifyOTP(req.user, otp);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

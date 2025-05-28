@@ -35,7 +35,7 @@ const createCustomer = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Customer is created succesfully!',   
+      message: 'Customer is created and otp is send succesfully!',   
       data: {
         accessToken,
         customer,
@@ -59,7 +59,7 @@ const   createContractor = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Contractor is created succesfully!',   
+      message: 'Contractor is created and otp is send succesfully!',   
       data: {
         accessToken,
         contractor,
@@ -139,8 +139,8 @@ const getUsersMonthly = catchAsync(async (req, res) => {
 
 const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const { user } = req.body;
-  const result = await UserServices.updateUserIntoDB(id, user, req.file as any);
+  const  userData  = req.body;
+  const result = await UserServices.updateUserIntoDB(id, userData, req.file as any, req.user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -212,8 +212,8 @@ const getAllClients = catchAsync(async (req, res) => {
 
 
 export const UserControllers = {
-createCustomer,
-createContractor,
+ createCustomer,
+ createContractor,
   getSingleUser,
   getUsersMonthly,
   deleteUser,

@@ -9,13 +9,15 @@ import httpStatus from 'http-status';
 import { TUser } from './user.interface';
 import { User } from './user.model';
 import QueryBuilder from '../../builder/QueryBuilder';
-import { usersSearchableFields } from './user.constant';
+import { contractorFields, customerFields, userFields, usersSearchableFields } from './user.constant';
 import AppError from '../../errors/AppError';
 
 import config from '../../config';
 import { OtpServices } from '../Otp/otp.service';
 import { createToken } from '../Auth/auth.utils';
 import { Contractor } from '../Contractor/Contractor.model';
+import { Customer } from '../Customer/Customer.model';
+import mongoose from 'mongoose';
 
 
 // export const addMobileNumberIntoDB = async (phoneNumber: any, user: any) => {
@@ -43,7 +45,7 @@ export const createCustomerIntoDB = async (payload: any) => {
       userId: newUser._id
     }
 
-    const customer = await Contractor.create(customerData);
+    const customer = await Customer.create(customerData);
     if (!customer) throw new Error('Failed to create user'); 
 
 
@@ -53,7 +55,9 @@ export const createCustomerIntoDB = async (payload: any) => {
     // select: '-password -__v', // exclude sensitive fields
   });
 
-    
+    if(newUser){
+      await OtpServices.generateAndSendOTP(newUser.email);
+    }
 
 
   //create token and sent to the  client
@@ -104,6 +108,11 @@ export const createContractorIntoDB = async (payload: any) => {
     // select: '-password -__v', // exclude sensitive fields
   });
 
+    if(newUser){
+      await OtpServices.generateAndSendOTP(newUser.email);
+    }
+
+
   //create token and sent to the  client
   const jwtPayload:any = {
     userEmail: newUser.email,
@@ -130,33 +139,17 @@ export const createContractorIntoDB = async (payload: any) => {
 };
 const getMe = async (userEmail: string) => {
   // const result = await User.findOne({ email: userEmail });
-  const result = await User.findOne({ email: userEmail }).populate('preference').select('-password');
+  const result = await User.findOne({ email: userEmail }).select('-password');
 
   return result;
 };
 const getSingleUserIntoDB = async (id: string) => {
-  const result = await User.findOne({ _id: id, isDeleted: false }).populate('preference').select('-password');
+  const result = await User.findOne({ _id: id, isDeleted: false }).select('-password');
   return result;
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const studentQuery = new QueryBuilder(User.find(), query)
-    .search(usersSearchableFields)
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
-
-  const meta = await studentQuery.countTotal();
-  const result = await studentQuery.modelQuery;
-
-  return {
-    meta,
-    result,
-  };
-};
-const getAllApprovalFalseUsersFromDB = async (query: Record<string, unknown>) => {
-  const studentQuery = new QueryBuilder(User.find({approvalStatus: false, isDeleted: false}), query)
     .search(usersSearchableFields)
     .filter()
     .sort()
@@ -180,110 +173,135 @@ const changeStatus = async (id: string, payload: { status: string }) => {
 
   return result;
 };
-const updateUserIntoDB = async (id: string, payload?: Partial<TUser>, file?: any) => {
 
 
- let modifiedUpdatedData: Record<string, unknown> = {};
- 
- if(payload) {
-  const {  ...userData } = payload;
-    modifiedUpdatedData = { ...userData };
- } 
-  // const { fullName, ...userData } = payload;
-  // if (name && Object.keys(name).length) {
-  //   for (const [key, value] of Object.entries(name)) {
-  //     modifiedUpdatedData[`name.${key}`] = value;
-  //   }
-  // }
 
-  // Handle file upload if present
-  if (file) {
-    modifiedUpdatedData.profileImg = file.location as string;
+// Helper function to pick only the fields you want to update
+function extractFields(payload: Record<string, any>, allowedFields: string[]) {
+  const extracted: Record<string, any> = {};
+  for (const key of allowedFields) {
+    if (payload[key] !== undefined) {
+      extracted[key] = payload[key];
+    }
+  }
+  return extracted;
+}
+const updateUserIntoDB = async (id: string, payload?: Partial<TUser>, file?: any, user?: any) => {
+  // 1. Extract common user fields for User collection update
+  const userDataToUpdate = extractFields(payload || {}, userFields);
+  
+  // 2. If file uploaded (image), add img field for user
+  if (file && file.location) {
+    userDataToUpdate.img = file.location;
   }
 
-  const result = await User.findByIdAndUpdate(
+
+  // 3. Update User collection document and get updated user data
+  const updatedUser = await User.findByIdAndUpdate(
     id,
-    modifiedUpdatedData,
-    {
-      new: true,
-      runValidators: true,
-    }
-  ).select('-password');
+    userDataToUpdate,
+    { new: true, runValidators: true }
+  ).select('-password'); // exclude password in result
 
-  return result;
-};
-const updateApprovalIntoDB = async (id: string, payload?: Partial<TUser>, file?: any) => {
- let modifiedUpdatedData: Record<string, unknown> = {};
-
- if(payload) {
-  const {  ...userData } = payload;
-    modifiedUpdatedData = { ...userData };
- } 
-  // const { fullName, ...userData } = payload;
-  // if (name && Object.keys(name).length) {
-  //   for (const [key, value] of Object.entries(name)) {
-  //     modifiedUpdatedData[`name.${key}`] = value;
-  //   }
-  // }
-
-  // Handle file upload if present
-  if (file) {
-    modifiedUpdatedData.profileImg = file.location as string;
+  if (!updatedUser) {
+    throw new Error('User not found');
   }
 
-  const result = await User.findByIdAndUpdate(
-    id,
-    modifiedUpdatedData,
-    {
-      new: true,
-      runValidators: true,
-    }
-  ).select('-password');
 
-  return result;
+  // 4. Extract role-specific fields depending on user's role
+  let roleDataToUpdate = null;
+  let updatedRoleData = null;
+
+  if (user?.role === 'customer') {
+    roleDataToUpdate = extractFields(payload || {}, customerFields);
+    updatedRoleData = await Customer.findOneAndUpdate(
+      { userId: id },
+      roleDataToUpdate,
+      { new: true, runValidators: true }
+    );
+  } else if (user?.role === 'contractor') {
+    roleDataToUpdate = extractFields(payload || {}, contractorFields);
+    updatedRoleData = await Contractor.findOneAndUpdate(
+      { userId: id },
+      roleDataToUpdate,
+      { new: true, runValidators: true }
+    );
+  }
+
+  // 5. Return combined updated data for frontend or caller
+  return {
+    user: updatedUser,
+    roleData: updatedRoleData,
+  };
+
 };
-const deleteUserFromDB = async (id: string) => {
-  // const session = await mongoose.startSession(); // Start a session
-  // session.startTransaction(); // Start transaction
+const deleteUserFromDB = async (userId: string) => {
+  const session = await mongoose.startSession();
 
   try {
-    // Step 1: Soft-delete the user
-    const deletedUser = await User.findByIdAndDelete(
-      id,
-      { new: true } // Pass the session
-      // { new: true, session } // Pass the session
-    );
+    session.startTransaction();
 
+    // 1. Delete user document
+    const deletedUser = await User.findByIdAndDelete(userId, { session });
     if (!deletedUser) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete User');
     }
 
-    // Step 2: Soft-delete the associated quote
-    // const deleted = await User.findOneAndUpdate(
-    //   { userId: id }, // Find the single quote associated with the user
-    //   { isDeleted: true }, // Set isDeleted to true
-    //   { new: true, session } // Pass the session
-    // );
+    // 2. Delete role-specific document
+    if (deletedUser.role === 'customer') {
+      await Customer.findOneAndDelete({ userId }, { session });
+    } else if (deletedUser.role === 'contractor') {
+      await Contractor.findOneAndDelete({ userId }, { session });
+    }
 
-    // // Optional: Validate that a quote was found and updated
-    // if (!deleted) {
-    //   console.warn(`No quote found for user with ID ${id}`);
-    // }
-
-    // Commit the transaction if all operations succeed
-    // await session.commitTransaction();
-    // session.endSession();
+    // 3. Commit transaction
+    await session.commitTransaction();
+    session.endSession();
 
     return deletedUser;
   } catch (error) {
-    // Rollback the transaction if any operation fails
-    // await session.abortTransaction();
-    // session.endSession();
-    // throw error; // Propagate the error to be handled by the caller
-
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete User');
+    // Abort transaction on error
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
 };
+
+
+// const deleteUserFromDB = async (id: string) => {
+
+//   try {
+//     // Step 1: Soft-delete the user
+//     const deletedUser = await User.findByIdAndDelete(
+//       id,
+//       { new: true } 
+//     );
+
+//     if (!deletedUser) {
+//       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete User');
+//     }
+
+
+
+//     // // Optional: Validate that a quote was found and updated
+//     // if (!deleted) {
+//     //   console.warn(`No quote found for user with ID ${id}`);
+//     // }
+
+//     // Commit the transaction if all operations succeed
+//     // await session.commitTransaction();
+//     // session.endSession();
+
+//     return deletedUser;
+//   } catch (error) {
+//     // Rollback the transaction if any operation fails
+//     // await session.abortTransaction();
+//     // session.endSession();
+//     // throw error; // Propagate the error to be handled by the caller
+
+//     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete User');
+//   }
+// };
 const getUsersMonthlyFromDB = async () => {
   const startOfYear = new Date(new Date().getFullYear(), 0, 1); // January 1st, current year
   const endOfYear = new Date(new Date().getFullYear() + 1, 0, 1); // January 1st, next year
@@ -348,145 +366,6 @@ const getAllClientsFromDB = async (query: Record<string, unknown>) => {
   };
 };
 
-// const getAllPreferedProvidersFromDB = async (query: Record<string, unknown>) => {
-//   const rawDays = query.days;
-//   const rawStartTime = query.startTime;
-//   const rawDuration = query.duration;
-
-//   // Parse days (support string "Mon,Tue" or array ["Mon", "Tue"])
-//   let days: string[] = [];
-//   if (typeof rawDays === 'string') {
-//     days = rawDays.split(',').map(d => d.trim());
-//   } else if (Array.isArray(rawDays)) {
-//     days = rawDays.filter(d => typeof d === 'string') as string[];
-//   }
-
-//   const startTime = typeof rawStartTime === 'string' ? rawStartTime : '';
-//   const duration = typeof rawDuration === 'string' ? Number(rawDuration) :
-//                    typeof rawDuration === 'number' ? rawDuration : NaN;
-
-//   if (days.length === 0 || !startTime || isNaN(duration) || duration <= 0) {
-//     throw new Error('Invalid search parameters: days, startTime, and duration are required.');
-//   }
-
-//   // Calculate endTime string "HH:mm"
-//   const calculateEndTime = (start: string, dur: number): string => {
-//     const [hourStr, minuteStr] = start.split(':');
-//     let hour = parseInt(hourStr, 10);
-//     const minute = parseInt(minuteStr, 10);
-
-//     hour += dur;
-//     if (hour >= 24) hour -= 24;
-
-//     return hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0');
-//   };
-
-//   const endTime = calculateEndTime(startTime, duration);
-
-//   // Build the query
-//   const filter = {
-//     role: 'provider',
-//     // approvalStatus: true,
-//     isDeleted: false,
-//     mySchedule: {
-//       $elemMatch: {
-//         day: { $in: days },
-//         startTime: { $lte: startTime },
-//         endTime: { $gte: endTime }
-//       }
-//     }
-//   };
-
-//   // Run query (add pagination or sorting if you want)
-//   const providers = await User.find(filter)
-//     .select('-password -__v') // exclude sensitive fields
-//     .limit(10);
-
-//   // Return as you want
-//   return {
-//     meta: {
-//       total: providers.length,
-//       limit: 10,
-//       page: 1,
-//       totalPage: 1
-//     },
-//     result: providers,
-//   };
-// };
-
-
-const getAllPreferedProvidersFromDB = async (query: Record<string, unknown>) => {
-  const rawDays = query.days;
-  const rawStartTime = query.startTime;
-  const rawDuration = query.duration;
-
-  // Parse days (support string "Mon,Tue" or array ["Mon", "Tue"])
-  let days: string[] = [];
-  if (typeof rawDays === 'string') {
-    days = rawDays.split(',').map(d => d.trim());
-  } else if (Array.isArray(rawDays)) {
-    days = rawDays.filter(d => typeof d === 'string') as string[];
-  }
-
-  const startTime = typeof rawStartTime === 'string' ? rawStartTime : '';
-  const duration = typeof rawDuration === 'string' ? Number(rawDuration) :
-                   typeof rawDuration === 'number' ? rawDuration : NaN;
-
-  // Base filter always includes role and isDeleted
-  const filter: any = {
-    role: 'provider',
-    isDeleted: false,
-  };
-
-  // If at least one of days, startTime, or duration is provided, add mySchedule filter
-  if (days.length > 0 || startTime || (!isNaN(duration) && duration > 0)) {
-    // Prepare schedule filter object
-    const scheduleFilter: any = {};
-
-    if (days.length > 0) {
-      scheduleFilter.day = { $in: days };
-    }
-
-    // If startTime provided, add startTime condition
-    if (startTime) {
-      scheduleFilter.startTime = { $lte: startTime };
-    }
-
-    // If duration provided, calculate endTime and add endTime condition
-    if (!isNaN(duration) && duration > 0 && startTime) {
-      const calculateEndTime = (start: string, dur: number): string => {
-        const [hourStr, minuteStr] = start.split(':');
-        let hour = parseInt(hourStr, 10);
-        const minute = parseInt(minuteStr, 10);
-
-        hour += dur;
-        if (hour >= 24) hour -= 24;
-
-        return hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0');
-      };
-      const endTime = calculateEndTime(startTime, duration);
-      scheduleFilter.endTime = { $gte: endTime };
-    }
-
-    filter.mySchedule = { $elemMatch: scheduleFilter };
-  }
-
-  // Query DB with constructed filter
-  const providers = await User.find(filter)
-    .select('-password -__v')
-    .limit(10);
-
-  return {
-    meta: {
-      total: providers.length,
-      limit: 10,
-      page: 1,
-      totalPage: 1
-    },
-    result: providers,
-  };
-};
-
 
 
 export const UserServices = {
@@ -500,9 +379,5 @@ export const UserServices = {
   getAllUsersFromDB,
   updateUserIntoDB, 
   getAllProvidersFromDB, 
-  // updateApprovalIntoDB,
-  // getAllApprovalFalseUsersFromDB,
   getAllClientsFromDB,
-  // addMobileNumberIntoDB,
-  // getAllPreferedProvidersFromDB
 };

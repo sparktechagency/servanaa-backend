@@ -12,9 +12,18 @@ import config from '../../config/index';
 const loginUser = async (payload: TLoginUser) => {
 
   const user = await User.isUserExistsByCustomEmail(payload.email);
+
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
   }
+
+
+   const otpVerified = user.otpVerified;
+
+  if (!otpVerified) {
+    throw new AppError(httpStatus.FORBIDDEN, 'required otp verify your account!');
+  }
+
 
   // checking if the user is already deleted
   const isDeleted = user.isDeleted;

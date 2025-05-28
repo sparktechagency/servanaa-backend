@@ -27,6 +27,7 @@ const userSchema = new Schema<TUser, UserModel>(
       default: 'active',
     },
     passwordChangedAt: { type: Date, required: true, default: Date.now },
+    isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,

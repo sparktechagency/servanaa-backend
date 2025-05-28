@@ -12,6 +12,7 @@ export type  TUser = {
   role: 'customer' | 'superAdmin' | 'contractor';
   status: 'active' | 'blocked';
   passwordChangedAt: Date; 
+  isDeleted: boolean;
 }
 
 

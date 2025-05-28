@@ -2,29 +2,29 @@
 import httpStatus from 'http-status';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
-import { CustomerSearchableFields } from './Customer.constant';
+import { CUSTOMER_SEARCHABLE_FIELDS } from './Customer.constant';
 import mongoose from 'mongoose';
-import { TCustomer } from './Customer.interface';
+// import { TCustomer } from './Customer.interface';
 import { Customer } from './Customer.model';
 
-const createCustomerIntoDB = async (
-  payload: TCustomer,
-) => {
-  const result = await Customer.create(payload);
+// const createCustomerIntoDB = async (
+//   payload: TCustomer,
+// ) => {
+//   const result = await Customer.create(payload);
   
-  if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Customer');
-  }
+//   if (!result) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Customer');
+//   }
 
-  return result;
-};
+//   return result;
+// };
 
 const getAllCustomersFromDB = async (query: Record<string, unknown>) => {
   const CustomerQuery = new QueryBuilder(
     Customer.find(),
     query,
   )
-    .search(CustomerSearchableFields)
+    .search(CUSTOMER_SEARCHABLE_FIELDS)
     .filter()
     .sort()
     .paginate()
@@ -88,7 +88,7 @@ const deleteCustomerFromDB = async (id: string) => {
 };
 
 export const CustomerServices = {
-  createCustomerIntoDB,
+  // createCustomerIntoDB,
   getAllCustomersFromDB,
   getSingleCustomerFromDB,
   updateCustomerIntoDB,
