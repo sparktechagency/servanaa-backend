@@ -5,10 +5,6 @@ import { USER_ROLE } from './user.constant';
 import auth from '../../middlewares/auth';
 import { uploadFileS3 } from '../../utils/UploaderS3';
 
-// import express from 'express';
-// import validateRequest from '../../middlewares/validateRequest';
-// import { upladFileS3 } from '..\..\utils\UploaderS3';
-
 const router = express.Router();
 router.post(
   '/create-customer', 
@@ -57,37 +53,7 @@ router.patch(
 // ); 
 
 
-// router.post(
-//   '/create-provider',
-//   // auth(USER_ROLE.superAdmin),
-//   validateRequest(UserValidation.createUserValidationSchema),
-//     UserControllers.createProvider,
-// );
 
-
-// router.patch(
-//   '/approval/:id',
-//   // auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.client, USER_ROLE.supervisor, USER_ROLE.technician),
-//   // uploadFileS3(true).single('file'),
-//   // (req: Request, res: Response, next: NextFunction) => {
-//   //   if (req.body.data) {
-//   //     try {
-//   //       req.body = JSON.parse(req.body.data);
-//   //     } catch (error) {
-//   //       next(error);
-//   //     }
-//   //   }
-//   //   next();
-//   // },
-//   // validateRequest(UserValidation.updateUserValidationSchema),
-//   UserControllers.updateApproval,
-// );
-
-router.get(
-  '/users-monthly',
-  auth(USER_ROLE.superAdmin),
-  UserControllers.getUsersMonthly,
-);
 
 router.delete(
   '/:id',
@@ -106,18 +72,6 @@ router.get(
 //   auth(USER_ROLE.superAdmin, USER_ROLE.client),
 //   UserControllers.getAllProviders,
 // );
-// router.get(
-//   '/prefered-providers',
-//   auth(USER_ROLE.superAdmin, USER_ROLE.client),
-//   UserControllers.getAllPreferedProviders,
-// );
-
-// router.get(
-//   '/approval-false',
-//   // auth(USER_ROLE.superAdmin),
-//   UserControllers.getAllApprovalFalseUsers,
-// );
-
 
 // router.get(
 //   '/clients',
@@ -127,7 +81,7 @@ router.get(
 
 router.get(
   '/:id',
-  auth(USER_ROLE.superAdmin, USER_ROLE.customer),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   UserControllers.getSingleUser,
 );
 

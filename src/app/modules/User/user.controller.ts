@@ -212,8 +212,8 @@ const getAllClients = catchAsync(async (req, res) => {
 
 
 export const UserControllers = {
-createCustomer,
-createContractor,
+ createCustomer,
+ createContractor,
   getSingleUser,
   getUsersMonthly,
   deleteUser,
