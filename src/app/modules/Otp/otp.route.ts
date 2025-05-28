@@ -15,7 +15,7 @@ router.post(
 );
 router.post(
   '/verify-mobile-number',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.client,  USER_ROLE.provider), 
+  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor), 
   OtpControllers.otpVerifyForMobileNumber,
 );
 router.post(

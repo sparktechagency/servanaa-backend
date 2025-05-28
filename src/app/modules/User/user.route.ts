@@ -83,23 +83,24 @@ router.patch(
 //   UserControllers.updateApproval,
 // );
 
-// router.get(
-//   '/users-monthly',
-//   auth(USER_ROLE.superAdmin),
-//   UserControllers.getUsersMonthly,
-// );
+router.get(
+  '/users-monthly',
+  auth(USER_ROLE.superAdmin),
+  UserControllers.getUsersMonthly,
+);
 
-// router.delete(
-//   '/:id',
-//   auth(USER_ROLE.superAdmin),
-//   UserControllers.deleteUser,
-// );
+router.delete(
+  '/:id',
+  auth(USER_ROLE.superAdmin),
+  UserControllers.deleteUser,
+);
 
-// router.get(
-//   '/',
-//   auth(USER_ROLE.superAdmin),
-//   UserControllers.getAllUsers,
-// );
+router.get(
+  '/',
+  auth(USER_ROLE.superAdmin),
+  UserControllers.getAllUsers,
+);
+
 // router.get(
 //   '/get-providers',
 //   auth(USER_ROLE.superAdmin, USER_ROLE.client),
@@ -124,11 +125,11 @@ router.patch(
 //   UserControllers.getAllClients,
 // );
 
-// router.get(
-//   '/:id',
-//   auth(USER_ROLE.superAdmin, USER_ROLE.client),
-//   UserControllers.getSingleUser,
-// );
+router.get(
+  '/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer),
+  UserControllers.getSingleUser,
+);
 
 
 export const UserRoutes = router;

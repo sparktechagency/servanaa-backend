@@ -264,7 +264,7 @@ const otpVerifyForMobileNumberIntoDB = async ( payload : any, user: any) => {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
   }
 
-  userData.contactNo = record.phone;
+  userData.contactNo = record.phone ?? '';
 
 
     // 4. Update user’s phone number using findOneAndUpdate

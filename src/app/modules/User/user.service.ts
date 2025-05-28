@@ -16,6 +16,7 @@ import config from '../../config';
 import { OtpServices } from '../Otp/otp.service';
 import { createToken } from '../Auth/auth.utils';
 import { Contractor } from '../Contractor/Contractor.model';
+import { Customer } from '../Customer/Customer.model';
 
 
 // export const addMobileNumberIntoDB = async (phoneNumber: any, user: any) => {
@@ -43,7 +44,7 @@ export const createCustomerIntoDB = async (payload: any) => {
       userId: newUser._id
     }
 
-    const customer = await Contractor.create(customerData);
+    const customer = await Customer.create(customerData);
     if (!customer) throw new Error('Failed to create user'); 
 
 
@@ -106,6 +107,11 @@ export const createContractorIntoDB = async (payload: any) => {
     // select: '-password -__v', // exclude sensitive fields
   });
 
+    if(newUser){
+      await OtpServices.generateAndSendOTP(newUser.email);
+    }
+
+
   //create token and sent to the  client
   const jwtPayload:any = {
     userEmail: newUser.email,
@@ -132,7 +138,7 @@ export const createContractorIntoDB = async (payload: any) => {
 };
 const getMe = async (userEmail: string) => {
   // const result = await User.findOne({ email: userEmail });
-  const result = await User.findOne({ email: userEmail }).populate('preference').select('-password');
+  const result = await User.findOne({ email: userEmail }).select('-password');
 
   return result;
 };
@@ -182,15 +188,122 @@ const changeStatus = async (id: string, payload: { status: string }) => {
 
   return result;
 };
-const updateUserIntoDB = async (id: string, payload?: Partial<TUser>, file?: any) => {
 
 
- let modifiedUpdatedData: Record<string, unknown> = {};
+// Fields that belong to the User collection (common fields)
+const userFields = [
+  'fullName',
+  'email',
+  'contactNo',
+  'img',
+  'otpVerified',
+  'status',
+  // add other common user fields you want to update
+];
+
+// Customer-specific fields
+const customerFields = [
+  'dob',
+  'gender',
+  'city',
+  'language',
+  'location',
+  // add other customer-specific fields here
+];
+
+// Contractor-specific fields
+const contractorFields = [
+  'dob',
+  'gender',
+  'city',
+  'language',
+  'location',
+  'rateHourly',
+  'skillsCategory',
+  'ratings',
+  'skills',
+  'subscriptionStatus',
+  'customerId',
+  'paymentMethodId',
+  'certificates',
+  'materials',
+  'mySchedule',
+  // add other contractor-specific fields here
+];
+
+// Helper function to pick only the fields you want to update
+function extractFields(payload: Record<string, any>, allowedFields: string[]) {
+  const extracted: Record<string, any> = {};
+  for (const key of allowedFields) {
+    if (payload[key] !== undefined) {
+      extracted[key] = payload[key];
+    }
+  }
+  return extracted;
+}
+
+
+const updateUserIntoDB = async (id: string, payload?: Partial<TUser>, file?: any, user?: any) => {
+
+ console.log(user, "user");
+ console.log(payload, "payload");
+
+  // 1. Extract common user fields for User collection update
+  const userDataToUpdate = extractFields(payload || {}, userFields);
+
+
+  
+  // 2. If file uploaded (image), add img field for user
+  if (file && file.location) {
+    userDataToUpdate.img = file.location;
+  }
+
+
+  // 3. Update User collection document and get updated user data
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    userDataToUpdate,
+    { new: true, runValidators: true }
+  ).select('-password'); // exclude password in result
+
+  if (!updatedUser) {
+    throw new Error('User not found');
+  }
+
+
+  // 4. Extract role-specific fields depending on user's role
+  let roleDataToUpdate = null;
+  let updatedRoleData = null;
+
+  if (user?.role === 'customer') {
+    roleDataToUpdate = extractFields(payload || {}, customerFields);
+    updatedRoleData = await Customer.findOneAndUpdate(
+      { userId: id },
+      roleDataToUpdate,
+      { new: true, runValidators: true }
+    );
+  } else if (user?.role === 'contractor') {
+    roleDataToUpdate = extractFields(payload || {}, contractorFields);
+    updatedRoleData = await Contractor.findOneAndUpdate(
+      { userId: id },
+      roleDataToUpdate,
+      { new: true, runValidators: true }
+    );
+  }
+
+  // 5. Return combined updated data for frontend or caller
+  return {
+    user: updatedUser,
+    roleData: updatedRoleData,
+  };
+
+
+
  
- if(payload) {
-  const {  ...userData } = payload;
-    modifiedUpdatedData = { ...userData };
- } 
+//  if(payload) {
+//   const {  ...userData } = payload;
+//     modifiedUpdatedData = { ...userData };
+//  } 
   // const { fullName, ...userData } = payload;
   // if (name && Object.keys(name).length) {
   //   for (const [key, value] of Object.entries(name)) {
@@ -199,20 +312,53 @@ const updateUserIntoDB = async (id: string, payload?: Partial<TUser>, file?: any
   // }
 
   // Handle file upload if present
-  if (file) {
-    modifiedUpdatedData.profileImg = file.location as string;
-  }
+  // if (file) {
+  //   modifiedUpdatedData.img = file.location as string;
+  // }
 
-  const result = await User.findByIdAndUpdate(
-    id,
-    modifiedUpdatedData,
-    {
-      new: true,
-      runValidators: true,
-    }
-  ).select('-password');
+  // const updatedUser = await User.findByIdAndUpdate(
+  //   id,
+  //   modifiedUpdatedData,
+  //   {
+  //     new: true,
+  //     runValidators: true,
+  //   }
+  // ).select('-password');
 
-  return result;
+  // if (!updatedUser) {
+  //   throw new Error('User not found');
+  // }
+
+  // let roleData = null;
+
+  // // 2. Update role-specific data and get updated document
+  // if (user?.role === 'customer') {
+  //   roleData = await Customer.findOneAndUpdate(
+  //     { userId: id },
+  //     payload,
+  //     { new: true, runValidators: true },
+  //   );
+  // } else if (user?.role === 'contractor') {
+  //   roleData = await Contractor.findOneAndUpdate(
+  //     { userId: id },
+  //     payload,
+  //     { new: true, runValidators: true },
+  //   );
+  // }
+
+
+  //   // Update role-specific collection based on role
+  // if (user.role === 'customer') {
+  //   await Customer.findOneAndUpdate({ userId:id }, modifiedUpdatedData);
+  // } else if (user.role === 'contractor') {
+  //   await Contractor.findOneAndUpdate({ userId:id }, modifiedUpdatedData);
+  // }
+
+  // 3. Return combined result
+  // return {
+  //   user: updatedUser,
+  //   roleData,
+  // };;
 };
 const updateApprovalIntoDB = async (id: string, payload?: Partial<TUser>, file?: any) => {
  let modifiedUpdatedData: Record<string, unknown> = {};
@@ -245,15 +391,12 @@ const updateApprovalIntoDB = async (id: string, payload?: Partial<TUser>, file?:
   return result;
 };
 const deleteUserFromDB = async (id: string) => {
-  // const session = await mongoose.startSession(); // Start a session
-  // session.startTransaction(); // Start transaction
 
   try {
     // Step 1: Soft-delete the user
     const deletedUser = await User.findByIdAndDelete(
       id,
-      { new: true } // Pass the session
-      // { new: true, session } // Pass the session
+      { new: true } 
     );
 
     if (!deletedUser) {
