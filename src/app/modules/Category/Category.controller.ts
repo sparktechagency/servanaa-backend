@@ -4,8 +4,8 @@ import sendResponse from '../../utils/sendResponse';
 import { CategoryServices } from './Category.service';
 
 const createCategory = catchAsync(async (req, res) => {
-  const { category: CategoryData } = req.body;
-  const result = await CategoryServices.createCategoryIntoDB(CategoryData, req.file);
+  const category = req.body;
+  const result = await CategoryServices.createCategoryIntoDB(category, req.file);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -41,7 +41,7 @@ const getAllCategorys = catchAsync(async (req, res) => {
 
 const updateCategory = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const { category } = req.body;
+  const  category = req.body;
   const result = await CategoryServices.updateCategoryIntoDB(id, category, req.file);
 
   sendResponse(res, {

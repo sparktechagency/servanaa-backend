@@ -86,10 +86,8 @@ const updateCategoryIntoDB = async (id: string, payload: any, file?: any) => {
 };
 
 const deleteCategoryFromDB = async (id: string) => {
-  const deletedService = await Category.findByIdAndUpdate(
+  const deletedService = await Category.findByIdAndDelete(
     id,
-    { isDeleted: true },
-    { new: true },
   );
 
   if (!deletedService) {

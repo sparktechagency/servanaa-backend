@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-      import { TFaq, FaqModel } from './Faq.interface';
+      import { TFaq, FaqModel } from './Question.interface';
       
       const FaqSchema = new Schema<TFaq, FaqModel>({
         question: { type: String, required: true },
@@ -11,5 +11,5 @@ import { Schema, model } from 'mongoose';
         return await this.findOne({ _id: id, isDeleted: false });
       };
       
-      export const Faq = model<TFaq, FaqModel>('Faq', FaqSchema);
+      export const Faq = model<TFaq, FaqModel>('Question', FaqSchema);
       
