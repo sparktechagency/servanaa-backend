@@ -1,7 +1,9 @@
 /* eslint-disable no-unused-vars */
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type TMaterial = {
+  categoryId: Types.ObjectId;
+  subCategoryId: Types.ObjectId;
   name: string;
   unit:  number;
   price: number;

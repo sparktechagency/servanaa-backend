@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type TSubCategory = {
+  categoryId: Types.ObjectId;
   name: string;
   img: string; 
   isDeleted: boolean;

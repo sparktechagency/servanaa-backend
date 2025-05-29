@@ -4,8 +4,10 @@ import sendResponse from '../../utils/sendResponse';
 import { BookingServices } from './Booking.service';
 
 const createBooking = catchAsync(async (req, res) => {
-  const { booking: BookingData } = req.body;
-  const result = await BookingServices.createBookingIntoDB(BookingData);
+  const booking = req.body;
+  console.log(booking, 'booking');
+  // return
+  const result = await BookingServices.createBookingIntoDB(booking);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -50,18 +52,18 @@ const getAllBookings = catchAsync(async (req, res) => {
 //   });
 // });
 
-const updateBooking = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { booking:data } = req.body;
-  const result = await BookingServices.updateBookingIntoDB(id, data);
+// const updateBooking = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+//   const { booking:data } = req.body;
+//   const result = await BookingServices.updateBookingIntoDB(id, data);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Booking is updated successfully',
-    data: result,
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Booking is updated successfully',
+//     data: result,
+//   });
+// });
 const updatePaymentStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { booking:data } = req.body;
@@ -91,7 +93,7 @@ export const BookingControllers = {
   createBooking,
   getSingleBooking,
   getAllBookings,
-  updateBooking,
+  // updateBooking,
   deleteBooking,
   updatePaymentStatus
   // getAllBookingsByUser
