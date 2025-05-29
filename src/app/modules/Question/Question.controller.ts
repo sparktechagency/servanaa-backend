@@ -1,11 +1,11 @@
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { FaqServices } from './Faq.service';
+import { FaqServices } from './Question.service';
 
 const createFaq = catchAsync(async (req, res) => {
-  const { faq: FaqData } = req.body;
-  const result = await FaqServices.createFaqIntoDB(FaqData);
+  const question = req.body;
+  const result = await FaqServices.createFaqIntoDB(question);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -41,8 +41,8 @@ const getAllFaqs = catchAsync(async (req, res) => {
 
 const updateFaq = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const { faq } = req.body;
-  const result = await FaqServices.updateFaqIntoDB(id, faq);
+  const question = req.body;
+  const result = await FaqServices.updateFaqIntoDB(id, question);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

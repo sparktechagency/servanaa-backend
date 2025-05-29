@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 
 export type TFaq = {
   question: string;
-  answer: string;
+  answer?: string;
   isDeleted: boolean;
 };
 

@@ -1,12 +1,12 @@
 import express from 'express';
-import { FaqControllers } from './Faq.controller';
+import { FaqControllers } from './Question.controller';
 import validateRequest from '../../middlewares/validateRequest';
-import { createFaqValidationSchema, updateFaqValidationSchema } from './Faq.validation';
+import { createFaqValidationSchema, updateFaqValidationSchema } from './Question.validation';
 
 const router = express.Router();
 
 router.post(
-  '/create-faq',
+  '/create-question',
   validateRequest(createFaqValidationSchema),
   FaqControllers.createFaq,
 );
@@ -32,4 +32,4 @@ router.get(
   FaqControllers.getAllFaqs,
 );
 
-export const FaqRoutes = router;
+export const QuestionRoutes = router;

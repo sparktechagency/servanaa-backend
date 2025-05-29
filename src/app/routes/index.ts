@@ -8,12 +8,14 @@ import { ServiceRoutes } from '../modules/Service/Service.route';
 import { AboutRoutes } from '../modules/About/About.route';
 import { TermRoutes } from '../modules/Term/Term.route';
 import { PrivacyRoutes } from '../modules/Privacy/Privacy.route';
-import { FaqRoutes } from '../modules/Faq/Faq.route';
+import {  QuestionRoutes } from '../modules/Question/Question.route';
 import { CardRoutes } from '../modules/Card/Card.route';
 import { ReviewRoutes } from '../modules/Review/Review.route';
 import { BookingRoutes } from '../modules/Booking/Booking.route';
 import { CategoryRoutes } from '../modules/Category/Category.route';
 import { PaymentRoutes } from '../modules/Payment/Payment.route';
+import { SubCategoryRoutes } from '../modules/SubCategory/SubCategory.route';
+import { MaterialRoutes } from '../modules/Material/Material.route';
 
 const router = Router();
 
@@ -55,8 +57,8 @@ const moduleRoutes = [
     route: PrivacyRoutes,
   },
   {
-    path: '/faqs',
-    route: FaqRoutes,
+    path: '/questions',
+    route: QuestionRoutes,
   },
   {
     path: '/cards',
@@ -73,6 +75,14 @@ const moduleRoutes = [
   {
     path: '/categories',
     route: CategoryRoutes,
+  },
+  {
+    path: '/sub-categories',
+    route: SubCategoryRoutes,
+  },
+  {
+    path: '/materials',
+    route: MaterialRoutes,
   },
   {
     path: '/payments',

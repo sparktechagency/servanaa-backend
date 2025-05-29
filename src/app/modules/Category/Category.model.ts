@@ -3,9 +3,9 @@ import { Schema, model } from 'mongoose';
       
       const CategorySchema = new Schema<TCategory, CategoryModel>({
         name: { type: String, required: true },
-        img: { type: String },
+        img: { type: String, required: true },
         isDeleted: { type: Boolean, default: false },
-      });
+      },  { timestamps: true });
       
       CategorySchema.statics.isCategoryExists = async function (id: string) {
         return await this.findOne({ _id: id, isDeleted: false });

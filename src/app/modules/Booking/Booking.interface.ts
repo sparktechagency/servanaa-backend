@@ -3,9 +3,12 @@
 import { Model, Types } from 'mongoose';
            
 export type TBooking = {
-  clientId:Types.ObjectId;
-  providerId:Types.ObjectId;
-  frequency: {
+  customerId:Types.ObjectId;
+  contractorId:Types.ObjectId;
+  categoryId: Types.ObjectId; // Duration in hours
+  subCategoryId:   Types.ObjectId; // Duration in hours
+  materialId:   Types.ObjectId; // Duration in hours
+  bookingType: {
     toObject: any;
     type: "Just Once" | "Weekly"; // Defines whether it's one-time or recurring
     days: string | string[]; // Date string for Just Once, array of days for Weekly
@@ -15,10 +18,6 @@ export type TBooking = {
   paymentIntent?: string; // Duration in hours
   status: 'pending' | 'ongoing' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'cancelled' | 'failed';
-  // startTime: {
-  //   type: "Flexible" | "Exact"; // Start time type
-  //   time: string; // "Morning" | "Evening" for flexible, "HH:mm" for exact  
-  // };
   date: string;
   startTime: string;    
   endTime: string;   

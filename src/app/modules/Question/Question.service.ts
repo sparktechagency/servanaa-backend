@@ -2,10 +2,10 @@
 import httpStatus from 'http-status';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
-import { FAQ_SEARCHABLE_FIELDS } from './Faq.constant';
+import { FAQ_SEARCHABLE_FIELDS } from './Question.constant';
 import mongoose from 'mongoose';
-import { TFaq } from './Faq.interface';
-import { Faq } from './Faq.model';
+import { TFaq } from './Question.interface';
+import { Faq } from './Question.model';
 
 const createFaqIntoDB = async (
   payload: TFaq,
@@ -47,7 +47,7 @@ const getSingleFaqFromDB = async (id: string) => {
 const updateFaqIntoDB = async (id: string, payload: any) => {
 
   const isDeletedService = await mongoose.connection
-    .collection('faqs')
+    .collection('questions')
     .findOne(
       { _id: new mongoose.Types.ObjectId(id) },
     );
