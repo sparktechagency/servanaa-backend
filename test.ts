@@ -5,11 +5,11 @@
 // subCategory
 // Materials
 // Question
-// notifcation
 // About
 // Term
 // Privacy
 // cancel policy
+// notifcation
 // booking
 // help and support
 
@@ -17,7 +17,7 @@
 // google map
 // audio
 // language
- 
+
 // subscription
 // payment
 // Transaction History

@@ -17,6 +17,7 @@ import { PaymentRoutes } from '../modules/Payment/Payment.route';
 import { SubCategoryRoutes } from '../modules/SubCategory/SubCategory.route';
 import { MaterialRoutes } from '../modules/Material/Material.route';
 import { CancelRoutes } from '../modules/Cancel/Cancel.route';
+import { NotificationRoutes } from '../modules/Notification/Notification.route';
 
 const router = Router();
 
@@ -92,6 +93,10 @@ const moduleRoutes = [
   {
     path: '/cancels',
     route: CancelRoutes,
+  },
+  {
+    path: '/notifications',
+    route: NotificationRoutes,
   },
 ];
 
