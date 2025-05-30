@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
@@ -65,75 +66,89 @@ const getSingleBookingFromDB = async (id: string) => {
   return result;
 };
 
-// const updateBookingIntoDB = async (id: string, payload: any) => {
-//   const booking = await Booking.findById(id);
-
-//   if (!booking) throw new Error("Booking not found");
-//   if (booking.isDeleted) throw new Error("Cannot update a deleted Booking");
+const updateBookingIntoDB = async (id: string, payload: any) => {
 
 
-//   // Store previous status to compare later
-//   const prevStatus = booking.status;
+  const booking = await Booking.findById(id);
 
-//   // Merge payload fields, including nested frequency if present
-//   for (const key in payload) {
-//     if (!payload.hasOwnProperty.call(payload,key)) continue;
-//     const value = payload[key];
-//     if (typeof value === 'object' && value !== null && !Array.isArray(value) && key === 'frequency') {
-//       // merge frequency fields instead of overwrite
-//       booking.frequency = {
-//         ...booking.frequency.toObject(),
-//         ...value,
-//       }; 
-//     } else {
-//       (booking as any)[key] = value;
-//     }
-//   }
+  if (!booking) throw new Error("Booking not found");
+  if (booking.isDeleted) throw new Error("Cannot update a deleted Booking");
+
+  const updatedData = await Booking.findByIdAndUpdate(
+    { _id: id },
+    payload,
+    { new: true, runValidators: true },
+  );
+
+
+  if (!updatedData) {
+    throw new Error('Booking cannot update');
+  }
+
+
+
+  // Store previous status to compare later
+  // const prevStatus = booking.status;
+
+  // Merge payload fields, including nested frequency if present
+  // for (const key in payload) {
+  //   if (!payload.hasOwnProperty.call(payload,key)) continue;
+  //   const value = payload[key];
+  //   if (typeof value === 'object' && value !== null && !Array.isArray(value) && key === 'frequency') {
+  //     // merge frequency fields instead of overwrite
+  //     booking.frequency = {
+  //       ...booking.frequency.toObject(),
+  //       ...value,
+  //     }; 
+  //   } else {
+  //     (booking as any)[key] = value;
+  //   }
+  // }
   
 
-//    // Check if status changed
-//   if (payload.status && payload.status !== prevStatus) {
-//     // Define notification message and type based on new status
-//     let notificationType = '';
-//     let notificationMessage = '';
+   // Check if status changed
+  // if (payload.status && payload.status !== prevStatus) {
+  //   // Define notification message and type based on new status
+  //   let notificationType = '';
+  //   let notificationMessage = '';
 
-//     switch (payload.status) {
-//       case 'completed':
-//         notificationType = 'booking_complete';
-//         notificationMessage = `Booking #${booking._id} has been completed.`;
-//         break;
-//       case 'cancelled':
-//         notificationType = 'booking_cancel';
-//         notificationMessage = `Booking #${booking._id} has been cancelled.`;
-//         break;
-//       case 'ongoing':
-//         notificationType = 'booking_confirm';
-//         notificationMessage = `Booking #${booking._id} is now ongoing.`;
-//         break;
-//       // Add other statuses if needed
-//       default:
-//         break;
-//     }
+  //   switch (payload.status) {
+  //     case 'completed':
+  //       notificationType = 'booking_complete';
+  //       notificationMessage = `Booking #${booking._id} has been completed.`;
+  //       break;
+  //     case 'cancelled':
+  //       notificationType = 'booking_cancel';
+  //       notificationMessage = `Booking #${booking._id} has been cancelled.`;
+  //       break;
+  //     case 'ongoing':
+  //       notificationType = 'booking_confirm';
+  //       notificationMessage = `Booking #${booking._id} is now ongoing.`;
+  //       break;
+  //     // Add other statuses if needed
+  //     default:
+  //       break;
+  //   }
 
-//     if (notificationType) {
-//       await Notification.create({
-//         clientId: booking.clientId,   // or booking.userId, depends on your schema
-//         title: notificationType,
-//         bookingId: booking._id,
-//         message: notificationMessage,
-//         isRead: false,
-//         isDeleted: false,
-//         createdAt: new Date(),
-//       });
-//     }
-//   }
+  //   if (notificationType) {
+  //     await Notification.create({
+  //       clientId: booking.clientId,   // or booking.userId, depends on your schema
+  //       title: notificationType,
+  //       bookingId: booking._id,
+  //       message: notificationMessage,
+  //       isRead: false,
+  //       isDeleted: false,
+  //       createdAt: new Date(),
+  //     });
+  //   }
+  // }
 
 
     
-//   await booking.save();
+  // await booking.save();
 
-//   return booking;
-// };
+  return updatedData;
+};
 const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
 const booking = await Booking.findOne({clientId:id, paymentStatus:"pending"});
 
@@ -174,7 +189,7 @@ export const BookingServices = {
   createBookingIntoDB,
   getAllBookingsFromDB,
   getSingleBookingFromDB,
-  // updateBookingIntoDB,
+  updateBookingIntoDB,
   deleteBookingFromDB,
   updatePaymentStatusIntoDB
   // getAllBookingsByUserFromDB

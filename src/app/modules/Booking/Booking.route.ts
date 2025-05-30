@@ -1,13 +1,13 @@
 import express from 'express';
 import { BookingControllers } from './Booking.controller';
 import validateRequest from '../../middlewares/validateRequest';
-import { createBookingValidationSchema } from './Booking.validation';
+import { bookingValidationSchema, updateBookingValidationSchema } from './Booking.validation';
 
 const router = express.Router();
 
 router.post(
   '/create-booking',
-  validateRequest(createBookingValidationSchema),
+  validateRequest(bookingValidationSchema),
   BookingControllers.createBooking,
 );
 
@@ -21,11 +21,11 @@ router.patch(
   // validateRequest(updateBookingValidationSchema),
   BookingControllers.updatePaymentStatus,
 );
-// router.patch(
-//   '/:id',
-//   validateRequest(updateBookingValidationSchema),
-//   BookingControllers.updateBooking,
-// );
+router.patch(
+  '/:id',
+  validateRequest(updateBookingValidationSchema),
+  BookingControllers.updateBooking,
+);
 
 router.delete(
   '/:id',

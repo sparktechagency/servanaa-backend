@@ -3,16 +3,16 @@ import { Schema, model } from 'mongoose';
 import { TBooking, BookingModel } from './Booking.interface';
 
 const BookingSchema = new Schema<TBooking, BookingModel>({
-  customerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  contractorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  categoryId: { type: Schema.Types.ObjectId, ref: "Category", required: true },
-  subCategoryId: { type: Schema.Types.ObjectId, ref: "SubCategory", required: true },
-  materialId: { type: Schema.Types.ObjectId, ref: "Material", required: true },
+  customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+  subCategoryId: { type: Schema.Types.ObjectId, ref: 'SubCategory', required: true },
+  materialId: { type: Schema.Types.ObjectId, ref: 'Material', required: true },
 
   bookingType: {
     type: {
       type: String,
-      enum: ["Just Once", "Weekly"],
+      enum: ['Just Once', 'Weekly'],
       required: true,
     },
     days: {
@@ -20,15 +20,16 @@ const BookingSchema = new Schema<TBooking, BookingModel>({
       required: true,
       validate: {
         validator: function (v: any) {
-          if (this.bookingType.type === "Just Once") {
-            return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v); // YYYY-MM-DD format
+          if (this.bookingType.type === 'Just Once') {
+            return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
           }
-          if (this.bookingType.type === "Weekly") {
-            return Array.isArray(v) && v.every(day => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(day));
+          if (this.bookingType.type === 'Weekly') {
+            const validDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            return Array.isArray(v) && v.every(day => validDays.includes(day));
           }
           return false;
         },
-        message: "Invalid bookingType.days format",
+        message: 'Invalid bookingType.days format',
       },
     },
   },
@@ -36,13 +37,13 @@ const BookingSchema = new Schema<TBooking, BookingModel>({
   duration: {
     type: Number,
     required: true,
-    min: [1, "Duration must be at least 1 hour"],
+    min: [1, 'Duration must be at least 1 hour'],
   },
 
   price: {
     type: Number,
     required: true,
-    default: 0,
+    min: [0, 'Price must be non-negative'],
   },
 
   paymentIntent: {
@@ -52,25 +53,27 @@ const BookingSchema = new Schema<TBooking, BookingModel>({
 
   status: {
     type: String,
-    enum: ["pending", "ongoing", "completed", "cancelled"],
-    default: "pending",
+    enum: ['pending', 'ongoing', 'completed', 'cancelled'],
+    default: 'pending',
   },
 
   paymentStatus: {
     type: String,
-    enum: ["pending", "paid", "cancelled", "failed"],
-    default: "pending",
+    enum: ['pending', 'paid', 'cancelled', 'failed'],
+    default: 'pending',
   },
+
   date: {
     type: String,
-    default: () => new Date().toISOString().split('T')[0],
+    default: () => new Date().toISOString().split('T')[0], // YYYY-MM-DD
   },
+
   startTime: {
     type: String,
     required: true,
     validate: {
       validator: (v: string) => /^\d{2}:\d{2}$/.test(v),
-      message: "Invalid startTime format (HH:mm)",
+      message: 'Invalid startTime format (HH:mm)',
     },
   },
 
@@ -79,7 +82,7 @@ const BookingSchema = new Schema<TBooking, BookingModel>({
     required: true,
     validate: {
       validator: (v: string) => /^\d{2}:\d{2}$/.test(v),
-      message: "Invalid endTime format (HH:mm)",
+      message: 'Invalid endTime format (HH:mm)',
     },
   },
 
@@ -87,7 +90,6 @@ const BookingSchema = new Schema<TBooking, BookingModel>({
     type: Boolean,
     default: false,
   },
-
 }, {
   timestamps: true,
 });

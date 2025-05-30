@@ -10,8 +10,8 @@
 // Privacy
 // cancel policy
 // notifcation
-// booking
 // help and support
+// booking
 
 // chat
 // google map
