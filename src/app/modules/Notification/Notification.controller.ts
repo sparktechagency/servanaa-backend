@@ -4,8 +4,8 @@ import sendResponse from '../../utils/sendResponse';
 import { NotificationServices } from './Notification.service';
 
 const createNotification = catchAsync(async (req, res) => {
-  const { Notification: NotificationData } = req.body;
-  const result = await NotificationServices.createNotificationIntoDB(NotificationData);
+  const notification = req.body;
+  const result = await NotificationServices.createNotificationIntoDB(notification);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -41,8 +41,8 @@ const getAllNotifications = catchAsync(async (req, res) => {
 
 const updateNotification = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const { Notification } = req.body;
-  const result = await NotificationServices.updateNotificationIntoDB(id, Notification);
+  const notification = req.body;
+  const result = await NotificationServices.updateNotificationIntoDB(id, notification);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

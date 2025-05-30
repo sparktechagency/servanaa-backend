@@ -6,7 +6,7 @@ import { createNotificationValidationSchema, updateNotificationValidationSchema 
 const router = express.Router();
 
 router.post(
-  '/create-Notification',
+  '/create-notification',
   validateRequest(createNotificationValidationSchema),
   NotificationControllers.createNotification,
 );

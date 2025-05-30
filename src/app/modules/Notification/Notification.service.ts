@@ -49,10 +49,9 @@ const updateNotificationIntoDB = async (id: string, payload: any) => {
     .collection('notifications')
     .findOne(
       { _id: new mongoose.Types.ObjectId(id) },
-      { projection: { isDeleted: 1, name: 1 } },
     );
 
-  if (!isDeletedService?.name) {
+  if (!isDeletedService) {
     throw new Error('Notification not found');
   }
 
@@ -74,10 +73,9 @@ const updateNotificationIntoDB = async (id: string, payload: any) => {
 };
 
 const deleteNotificationFromDB = async (id: string) => {
-  const deletedService = await Notification.findByIdAndUpdate(
+  const deletedService = await Notification.findByIdAndDelete(
     id,
     { isDeleted: true },
-    { new: true },
   );
 
   if (!deletedService) {

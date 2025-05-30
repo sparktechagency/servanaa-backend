@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 
 export type TCategory = {
   name: string;
-  img: string; 
+  img: string;
   isDeleted: boolean;
 };
 

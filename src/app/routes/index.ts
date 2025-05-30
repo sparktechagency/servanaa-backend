@@ -16,6 +16,9 @@ import { CategoryRoutes } from '../modules/Category/Category.route';
 import { PaymentRoutes } from '../modules/Payment/Payment.route';
 import { SubCategoryRoutes } from '../modules/SubCategory/SubCategory.route';
 import { MaterialRoutes } from '../modules/Material/Material.route';
+import { CancelRoutes } from '../modules/Cancel/Cancel.route';
+import { NotificationRoutes } from '../modules/Notification/Notification.route';
+import { HelpRoutes } from '../modules/Help/Help.route';
 
 const router = Router();
 
@@ -87,6 +90,18 @@ const moduleRoutes = [
   {
     path: '/payments',
     route: PaymentRoutes,
+  },
+  {
+    path: '/cancels',
+    route: CancelRoutes,
+  },
+  {
+    path: '/notifications',
+    route: NotificationRoutes,
+  },
+  {
+    path: '/helps',
+    route: HelpRoutes,
   },
 ];
 

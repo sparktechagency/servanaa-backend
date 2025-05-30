@@ -1,1 +1,1 @@
-export const NOTIFICATION_SEARCHABLE_FIELDS = ['message', 'type', 'bookingId'];
+export const NOTIFICATION_SEARCHABLE_FIELDS = ['message', 'title'];

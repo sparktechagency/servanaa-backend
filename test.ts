@@ -4,21 +4,23 @@
 // category
 // subCategory
 // Materials
-// booking
 // Question
-
-// notifcation
-// help and support
 // About
 // Term
 // Privacy
+// cancel policy
+// notifcation
+// help and support
+// booking
 
 // chat
+// google map
+// audio
+// language
+
 // subscription
 // payment
 // Transaction History
-// audio
-// language 
   
 // ====================================================================================================================
 //  user                User          
