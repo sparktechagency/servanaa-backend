@@ -11,6 +11,7 @@ const userSchema = new Schema<TUser, UserModel>(
     fullName: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true, select: false },
+    customerId: { type: String },
     contactNo: { type: String, required: true },
     otpVerified: { type: Boolean, default: false },
     img: { type: String, default: '' },
