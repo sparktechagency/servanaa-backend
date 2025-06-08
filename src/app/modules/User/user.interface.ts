@@ -6,6 +6,7 @@ export type  TUser = {
   fullName: string;
   email: string;
   password: string;
+  customerId?: string;
   contactNo: string; 
   otpVerified: boolean;
   img?: string;

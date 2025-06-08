@@ -27,6 +27,9 @@ const createPaymentIntoDB = async (
   };
 
 const user = await User.findById(userId);
+  // if (!user) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
+  // }
   if (!user || !user.customerId) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User or Stripe customer not found');
   }
