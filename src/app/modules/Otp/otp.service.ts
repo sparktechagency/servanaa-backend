@@ -14,24 +14,17 @@ import config from "../../config";
 
 export const generateAndSendOTP = async (email: any ) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
-
     // Save OTP to database
     await Otp.create({email, otp });
-
     // Simulate sending OTP (e.g., SMS or email)
     await SendEmail.sendOTPEmail(email, otp);
     return otp;
 };
 const generateAndSendOTPToMobile = async (phone: any, email: any) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
- console.log(otp, email, phone, "otp" ,"email", "phone");
     // Save OTP to database
 
     await Otp.create({phone, otp, email });
-
-
- console.log(otp, "musa next");
-
     // Create a Twilio client
     const client = new Twilio(config.account_sid, config.auth_token);
 

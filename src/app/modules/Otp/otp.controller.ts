@@ -41,8 +41,9 @@ const otpVerifyForMobileNumber = catchAsync(async (req, res) => {
 });
 
 const generateOtp = catchAsync(async (req, res) => {
-  const { Otp	: otpData} = req.body;
-  const result = await OtpServices.generateAndSendOTP( otpData);
+  const otpData = req.body;
+
+  const result = await OtpServices.generateAndSendOTP( otpData?.email);
   // const result = await OtpServices.generateAndSendOTP(req.user, otpData);
 
   sendResponse(res, {

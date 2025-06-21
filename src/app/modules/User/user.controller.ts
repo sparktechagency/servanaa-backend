@@ -139,7 +139,8 @@ const getUsersMonthly = catchAsync(async (req, res) => {
 
 const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const  userData  = req.body;
+  const  userData  = req.body; 
+
   const result = await UserServices.updateUserIntoDB(id, userData, req.file as any, req.user);
 
   sendResponse(res, {

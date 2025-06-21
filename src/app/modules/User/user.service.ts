@@ -18,21 +18,19 @@ import { createToken } from '../Auth/auth.utils';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
 import mongoose from 'mongoose';
+import { TCustomer } from '../Customer/Customer.interface';
+import { TContractor } from '../Contractor/Contractor.interface';
 
 
 // export const addMobileNumberIntoDB = async (phoneNumber: any, user: any) => {
-
 //      if (!phoneNumber) {
 //         return 'Phone number is required.'
 //       }
-
 //     const result = await OtpServices.generateAndSendOTPToMobile(phoneNumber?.phone, user?.userEmail);
-
 //     return result;
 // };
 
 export const createCustomerIntoDB = async (payload: any) => {
-
 
      const userData = await User.isUserExistsByCustomEmail(payload.email);
     if (userData) throw new Error('Customer already exists with this email'); 
@@ -174,7 +172,82 @@ const changeStatus = async (id: string, payload: { status: string }) => {
   return result;
 };
 
+// // Helper to merge arrays without duplicates
+// function mergeArrayField<T = any>(existing: T[] = [], incoming: T[] = []): T[] {
+//   return [...new Set([...existing, ...incoming])];
+// }
 
+// const updateUserIntoDB = async (id: string, payload?: any, file?: any,user?: any) => {
+//   // 1. Extract common user fields for User collection update
+//   const userDataToUpdate = extractFields(payload || {}, userFields);
+
+//   // 2. If file uploaded (image), add img field for user
+//   if (file && file.location) {
+//     userDataToUpdate.img = file.location;
+//   }
+
+//   // 3. Update User collection document and get updated user data
+//   const updatedUser = await User.findByIdAndUpdate(
+//     id,
+//     userDataToUpdate,
+//     { new: true, runValidators: true }
+//   ).select('-password'); // exclude password in result
+
+//   if (!updatedUser) {
+//     throw new Error('User not found');
+//   }
+
+//   // 4. Extract role-specific fields depending on user's role
+//   let roleDataToUpdate = null;
+//   let updatedRoleData = null;
+
+//   if (user?.role === 'customer') {
+//     roleDataToUpdate = extractFields(payload || {}, customerFields);
+//     updatedRoleData = await Customer.findOneAndUpdate(
+//       { userId: id },
+//       roleDataToUpdate,
+//       { new: true, runValidators: true }
+//     );
+//   } else if (user?.role === 'contractor') {
+//     roleDataToUpdate = extractFields(payload || {}, contractorFields);
+
+//     const existingContractor = await Contractor.findOne({ userId: id });
+//     if (!existingContractor) {
+//       throw new Error('Contractor not found');
+//     }
+
+//     // Merge/append array fields instead of replacing
+//     if (payload?.skills) {
+// if (payload?.skills) {
+//   const existingSkills = Array.isArray(existingContractor?.skills) ? existingContractor?.skills : [existingContractor?.skills];
+//   roleDataToUpdate.skills = mergeArrayField(existingSkills, payload?.skills);
+// }    }
+
+//     if (payload?.certificates) {
+//       roleDataToUpdate.certificates = mergeArrayField(existingContractor.certificates, payload.certificates);
+//     }
+
+//     if (payload?.mySchedule) {
+//       roleDataToUpdate.mySchedule = [
+//         ...(existingContractor.mySchedule || []),
+//         ...payload.mySchedule,
+//       ];
+//     }
+
+//     updatedRoleData = await Contractor.findOneAndUpdate(
+//       { userId: id },
+//       roleDataToUpdate,
+//       { new: true, runValidators: true }
+//     );
+//   }
+
+//   // 5. Return combined updated data for frontend or caller
+//   return {
+//     user: updatedUser,
+//     roleData: updatedRoleData,
+//   };
+// };
+///////////////////////
 
 // Helper function to pick only the fields you want to update
 function extractFields(payload: Record<string, any>, allowedFields: string[]) {
@@ -184,43 +257,108 @@ function extractFields(payload: Record<string, any>, allowedFields: string[]) {
       extracted[key] = payload[key];
     }
   }
+  console.log("extracted",extracted)
   return extracted;
 }
-const updateUserIntoDB = async (id: string, payload?: Partial<TUser>, file?: any, user?: any) => {
-  // 1. Extract common user fields for User collection update
+
+function mergeArrayField<T = any>(existing: T[] = [], incoming: T[] = []): T[] {
+  return [...new Set([...existing, ...incoming])];
+}
+
+function removeArrayItems<T>(existing: T[] = [], toRemove: T[] = [], key?: keyof T): T[] {
+  if (key) {
+    return existing.filter(
+      existingItem => !toRemove.some(removeItem => existingItem[key] === removeItem[key])
+    );
+  } else {
+    return existing.filter(item => !toRemove.includes(item));
+  }
+}
+
+const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: any) => {
+
+// console.log("payload",payload)
+// console.log("id",id)
+// console.log("file",file)
+// console.log("user",user)
+
+  console.log("userFields",userFields)
+  console.log("payload",payload)
   const userDataToUpdate = extractFields(payload || {}, userFields);
-  
-  // 2. If file uploaded (image), add img field for user
+  console.log("userDataToUpdate",userDataToUpdate)
+
   if (file && file.location) {
     userDataToUpdate.img = file.location;
   }
 
+  const updatedUser = await User.findByIdAndUpdate(id, userDataToUpdate, {
+    new: true,
+    runValidators: true,
+  }).select('-password');
 
-  // 3. Update User collection document and get updated user data
-  const updatedUser = await User.findByIdAndUpdate(
-    id,
-    userDataToUpdate,
-    { new: true, runValidators: true }
-  ).select('-password'); // exclude password in result
+  if (!updatedUser) throw new Error('User not found');
+  console.log("updatedUser",updatedUser)
 
-  if (!updatedUser) {
-    throw new Error('User not found');
-  }
-
-
-  // 4. Extract role-specific fields depending on user's role
-  let roleDataToUpdate = null;
+  const roleDataToUpdate:any = {};
   let updatedRoleData = null;
 
-  if (user?.role === 'customer') {
-    roleDataToUpdate = extractFields(payload || {}, customerFields);
-    updatedRoleData = await Customer.findOneAndUpdate(
-      { userId: id },
-      roleDataToUpdate,
-      { new: true, runValidators: true }
-    );
-  } else if (user?.role === 'contractor') {
-    roleDataToUpdate = extractFields(payload || {}, contractorFields);
+  console.log("roleDataToUpdate",roleDataToUpdate)
+  console.log("updatedRoleData",updatedRoleData)
+
+
+
+  const add = payload?.add || {};
+  const remove = payload?.remove || {};
+
+  console.log("add",add)
+  console.log("remove",remove)
+
+  if (user?.role === 'contractor') {
+    const existingContractor = await Contractor.findOne({ userId: id });
+    if (!existingContractor) throw new Error('Contractor not found');
+  console.log("existingContractor",existingContractor)
+
+    // Skills
+    const existingSkills = Array.isArray(existingContractor.skills) ? existingContractor.skills : [];
+      console.log("existingSkills",existingSkills)
+
+    const addedSkills = add.skills || [];
+    const removedSkills = remove.skills || [];
+          console.log("addedSkills",addedSkills)
+      console.log("removedSkills",removedSkills)
+
+
+    const afterAddSkills = mergeArrayField(existingSkills, addedSkills);
+    const finalSkills = removeArrayItems(afterAddSkills, removedSkills);
+
+    if (addedSkills.length || removedSkills.length) {
+      roleDataToUpdate.skills = finalSkills;
+    }
+
+    // Certificates
+    const existingCertificates = existingContractor.certificates || [];
+    const addedCerts = add.certificates || [];
+    const removedCerts = remove.certificates || [];
+
+    const afterAddCerts = mergeArrayField(existingCertificates, addedCerts);
+    const finalCerts = removeArrayItems(afterAddCerts, removedCerts);
+
+    if (addedCerts.length || removedCerts.length) {
+      roleDataToUpdate.certificates = finalCerts;
+    }
+
+    // mySchedule
+    const existingSchedule = existingContractor.mySchedule || [];
+    const addedSchedule = add.mySchedule || [];
+    const removedSchedule = remove.mySchedule || [];
+
+    const afterAddSchedule = [...existingSchedule, ...addedSchedule];
+    const finalSchedule = removeArrayItems(afterAddSchedule, removedSchedule, 'day'); // assuming 'day' is unique
+
+    if (addedSchedule.length || removedSchedule.length) {
+      roleDataToUpdate.mySchedule = finalSchedule;
+    }
+
     updatedRoleData = await Contractor.findOneAndUpdate(
       { userId: id },
       roleDataToUpdate,
@@ -228,43 +366,43 @@ const updateUserIntoDB = async (id: string, payload?: Partial<TUser>, file?: any
     );
   }
 
-  // 5. Return combined updated data for frontend or caller
   return {
     user: updatedUser,
     roleData: updatedRoleData,
   };
-
 };
+
 const deleteUserFromDB = async (userId: string) => {
   const session = await mongoose.startSession();
-
-  try {
-    session.startTransaction();
-
+  // try {
+    // session.startTransaction();
     // 1. Delete user document
-    const deletedUser = await User.findByIdAndDelete(userId, { session });
+    const deletedUser = await User.findByIdAndDelete(userId);
+    // const deletedUser = await User.findByIdAndDelete(userId, { session });
     if (!deletedUser) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete User');
     }
 
     // 2. Delete role-specific document
     if (deletedUser.role === 'customer') {
-      await Customer.findOneAndDelete({ userId }, { session });
+      await Customer.findOneAndDelete({ userId });
+      // await Customer.findOneAndDelete({ userId }, { session });
     } else if (deletedUser.role === 'contractor') {
-      await Contractor.findOneAndDelete({ userId }, { session });
+      await Contractor.findOneAndDelete({ userId });
+      // await Contractor.findOneAndDelete({ userId }, { session });
     }
 
     // 3. Commit transaction
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
 
     return deletedUser;
-  } catch (error) {
-    // Abort transaction on error
-    await session.abortTransaction();
-    session.endSession();
-    throw error;
-  }
+  // } catch (error) {
+  //   // Abort transaction on error
+  //   await session.abortTransaction();
+  //   session.endSession();
+  //   throw error;
+  // }
 };
 
 

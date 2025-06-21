@@ -10,6 +10,9 @@ export class SendEmail {
       pass: config.email_app_password, // Your email password
       user: config.admin_email_user, // Your email
     },
+    tls: {
+    rejectUnauthorized: false, // <-- allows self-signed certs
+  },
   });
 
   static async sendOTPEmail(email: string, otp: string): Promise<void> {
