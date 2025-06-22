@@ -288,17 +288,7 @@ function removeArrayItems<T>(existing: T[] = [], toRemove: T[] = [], key?: keyof
 }
 
 const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: any) => {
-
-// console.log("payload",payload)
-// console.log("id",id)
-// console.log("file",file)
-// console.log("user",user)
-
-  console.log("userFields",userFields)
-  console.log("payload",payload)
   const userDataToUpdate = extractFields(payload || {}, userFields);
-  console.log("userDataToUpdate",userDataToUpdate)
-
   if (file && file.location) {
     userDataToUpdate.img = file.location;
   }
@@ -309,35 +299,23 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
   }).select('-password');
 
   if (!updatedUser) throw new Error('User not found');
-  console.log("updatedUser",updatedUser)
 
   const roleDataToUpdate:any = {};
   let updatedRoleData = null;
-
-  console.log("roleDataToUpdate",roleDataToUpdate)
-  console.log("updatedRoleData",updatedRoleData)
-
 
 
   const add = payload?.add || {};
   const remove = payload?.remove || {};
 
-  console.log("add",add)
-  console.log("remove",remove)
-
   if (user?.role === 'contractor') {
     const existingContractor = await Contractor.findOne({ userId: id });
     if (!existingContractor) throw new Error('Contractor not found');
-  console.log("existingContractor",existingContractor)
 
     // Skills
     const existingSkills = Array.isArray(existingContractor.skills) ? existingContractor.skills : [];
-      console.log("existingSkills",existingSkills)
-
     const addedSkills = add.skills || [];
     const removedSkills = remove.skills || [];
-          console.log("addedSkills",addedSkills)
-      console.log("removedSkills",removedSkills)
+
 
 
     const afterAddSkills = mergeArrayField(existingSkills, addedSkills);
