@@ -5,23 +5,25 @@
 // subCategory
 // Materials
 // Question
-
 // About
 // Term
 // Privacy
 // cancel policy
-// notifcation
+// notifcation 
 // help and support
-// booking
+// booking 
+// availability 
 
 // chat
-// google map
-// audio
-// language
-
-// subscription
 // payment
 // Transaction History
+// ratings 
+
+// subscription
+// google map 
+// audio-video
+// language
+
   
 // ====================================================================================================================
 //  user                User          

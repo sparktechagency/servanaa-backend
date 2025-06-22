@@ -28,12 +28,23 @@ const userSchema = new Schema<TUser, UserModel>(
       default: 'active',
     },
     passwordChangedAt: { type: Date, required: true, default: Date.now },
+   contractor: { type: Schema.Types.ObjectId, ref: 'Contractor' },
+   customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
     isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
   },
 );
+
+
+  userSchema.virtual('archieves', {
+  ref: 'Archieve',
+  localField: '_id',
+  foreignField: 'archieveCategoryId', // exact field name in ThingToKnow schema
+  justOne: false,
+});
+
 
 userSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
