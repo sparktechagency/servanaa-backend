@@ -1,9 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { USER_ROLE } from './user.constant';
  
 export type  TUser = {
   fullName: string;
+  customer?: Types.ObjectId;
+  contractor?: Types.ObjectId;
   email: string;
   password: string;
   customerId?: string;

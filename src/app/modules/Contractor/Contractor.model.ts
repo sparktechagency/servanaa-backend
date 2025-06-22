@@ -4,7 +4,7 @@ import { Schema, model } from 'mongoose';
 
 const contractorSchema = new Schema<TContractor, ContractorModel>(
   {
-    userId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
     dob: { type: String },
     gender: { type: String },
     city: { type: String },

@@ -32,24 +32,27 @@ import { TContractor } from '../Contractor/Contractor.interface';
 
 export const createCustomerIntoDB = async (payload: any) => {
 
-     const userData = await User.isUserExistsByCustomEmail(payload.email);
-    if (userData) throw new Error('Customer already exists with this email'); 
+     const user = await User.isUserExistsByCustomEmail(payload.email);
+    if (user) throw new Error('Customer already exists with this email'); 
+
+    // const customerData = {
+    //   userId: newUser._id
+    // }
+
+    const customer = await Customer.create(payload);
+    if (!customer) throw new Error('Failed to create user'); 
+
+   
+     payload.customer =customer._id
+
 
     const newUser = await User.create(payload);
     if (!newUser) throw new Error('Failed to create user'); 
 
 
-    const customerData = {
-      userId: newUser._id
-    }
-
-    const customer = await Customer.create(customerData);
-    if (!customer) throw new Error('Failed to create user'); 
-
-
   // Populate user field in contractor document
-  const populatedCustomer = await Contractor.findById(customer._id).populate({
-    path: 'userId',
+  const populatedCustomer = await User.findById(newUser._id).populate({
+    path: 'customer',
     // select: '-password -__v', // exclude sensitive fields
   });
 
@@ -83,26 +86,21 @@ export const createCustomerIntoDB = async (payload: any) => {
   };
 };
 export const createContractorIntoDB = async (payload: any) => {
-   
 
     const userData = await User.isUserExistsByCustomEmail(payload.email);
     if (userData) throw new Error('Contractor already exists with this email'); 
 
+    const contractor = await Contractor.create(payload);
+    if (!contractor) throw new Error('Failed to create contractor'); 
+    
+      payload.contractor = contractor._id
+
     const newUser = await User.create(payload);
     if (!newUser) throw new Error('Failed to create user'); 
 
-
-    const contractorData = {
-      userId: newUser._id
-    }
-
-    const contractor = await Contractor.create(contractorData);
-    if (!contractor) throw new Error('Failed to create user'); 
-
-
   // Populate user field in contractor document
-  const populatedContractor = await Contractor.findById(contractor._id).populate({
-    path: 'userId',
+  const populatedContractor = await User.findById(newUser?._id).populate({
+    path: 'contractor',
     // select: '-password -__v', // exclude sensitive fields
   });
 
@@ -142,8 +140,22 @@ const getMe = async (userEmail: string) => {
   return result;
 };
 const getSingleUserIntoDB = async (id: string) => {
-  const result = await User.findOne({ _id: id, isDeleted: false }).select('-password');
-  return result;
+// Fetch the user from the database first
+  const user = await User.findById(id);
+
+  // Check the role and populate the respective field
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Populate the correct field based on user role
+  if (user.role === 'contractor') {
+    await user.populate('contractorId');  // Populating contractor data
+  } else if (user.role === 'customer') {
+    await user.populate('customerId');  // Populating customer data
+  }
+
+  return user;
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {

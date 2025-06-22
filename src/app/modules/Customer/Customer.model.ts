@@ -1,11 +1,8 @@
 import { Schema, model } from 'mongoose';
-      import { TCustomer, CustomerModel } from './Customer.interface';
-
-
-
+import { TCustomer, CustomerModel } from './Customer.interface';
 
       const CustomerSchema = new Schema<TCustomer, CustomerModel>({
-        userId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+        userId: { type: Schema.Types.ObjectId, ref: 'User' },
         dob: { type: String, default: '' },
         gender: { type: String, default: '' },
         city: { type: String, default: '' },
