@@ -9,8 +9,9 @@ import { initializeChatSocket } from "./app/modules/Chat/chat.socket";
 const server = http.createServer(app);
 async function main() {
   try {
+    // await mongoose.connect('mongodb://127.0.0.1:27017/servana');
+    // await mongoose.connect('mongodb://localhost:27017/servana');
     await mongoose.connect(config.database_url as string);
-    // await mongoose.connect('mongodb://localhost:27017/mydatabase');
     const port = config.port || 3000;  // Default to 3000 if undefined
 
     await seedSuperAdmin();

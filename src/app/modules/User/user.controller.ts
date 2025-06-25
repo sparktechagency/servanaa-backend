@@ -19,9 +19,10 @@ import config from '../../config';
 //   });
 // });
 const createCustomer = catchAsync(async (req, res) => {
-  const user = req.body;
-  const result = await UserServices.createCustomerIntoDB(user);
-   const { refreshToken, accessToken, customer } = result;
+  const userData = req.body;
+  const result = await UserServices.createCustomerIntoDB(userData);
+   const { refreshToken, accessToken, userCustomer:user} = result;
+
     // const { refreshToken, accessToken, needsPasswordChange } = result;
   
     res.cookie('refreshToken', refreshToken, {
@@ -36,17 +37,14 @@ const createCustomer = catchAsync(async (req, res) => {
       statusCode: httpStatus.OK,
       success: true,
       message: 'Customer is created and otp is send succesfully!',   
-      data: {
-        accessToken,
-        customer,
-      },
+      data: {accessToken, user},
     });
 });
 
 const   createContractor = catchAsync(async (req, res) => {
-  const  user  = req.body;
-  const result = await UserServices.createContractorIntoDB(user);
-   const { refreshToken, accessToken, contractor } = result;
+  const  userData  = req.body;
+  const result = await UserServices.createContractorIntoDB(userData);
+   const { refreshToken, accessToken, populatedContractor:user } = result;
   
     res.cookie('refreshToken', refreshToken, {
       secure: config.NODE_ENV === 'production',
@@ -62,7 +60,7 @@ const   createContractor = catchAsync(async (req, res) => {
       message: 'Contractor is created and otp is send succesfully!',   
       data: {
         accessToken,
-        contractor,
+        user,
       },
     });
 });

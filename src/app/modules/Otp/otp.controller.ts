@@ -17,7 +17,7 @@ const otpVeryfy = catchAsync(async (req, res) => {
 });
 
 const otpVeryfyForgetPassword = catchAsync(async (req, res) => {
-  const { Otp: otpData } = req.body;
+  const otpData = req.body;
   const result = await OtpServices.otpVeryfyForgetPasswordIntoDB(otpData);
 
   sendResponse(res, {

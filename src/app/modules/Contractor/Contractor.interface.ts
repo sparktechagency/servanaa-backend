@@ -10,7 +10,6 @@ export type TContractor = {
    city?: string;
    language?: string;
    location: string;
-
    ratings: number;
    skills: string | string[];  
    subscriptionStatus:  "pending" | "active" | "failed" | "cancelled"  | "paused";
