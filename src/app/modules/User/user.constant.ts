@@ -34,18 +34,16 @@ export const customerFields = [
 
 // Contractor-specific fields
 export const contractorFields = [
+  'rateHourly',
+  'skillsCategory',
   'dob',
   'gender',
   'city',
   'language',
   'location',
-  'rateHourly',
-  'skillsCategory',
   'ratings',
-  'skills',
   'subscriptionStatus',
-  'customerId',
-  'paymentMethodId',
+  'skills',
   'certificates',
   'materials',
   'mySchedule',

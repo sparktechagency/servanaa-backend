@@ -33,7 +33,7 @@ import { TContractor } from '../Contractor/Contractor.interface';
 export const createCustomerIntoDB = async (payload: any) => {
 
      const user = await User.isUserExistsByCustomEmail(payload.email);
-    if (user) throw new Error('Customer already exists with this email'); 
+    if (user) throw new Error('This Email already Used'); 
 
     // const customerData = {
     //   userId: newUser._id
@@ -51,7 +51,7 @@ export const createCustomerIntoDB = async (payload: any) => {
 
 
   // Populate user field in contractor document
-  const populatedCustomer = await User.findById(newUser._id).populate({
+  const userCustomer = await User.findById(newUser._id).populate({
     path: 'customer',
     // select: '-password -__v', // exclude sensitive fields
   });
@@ -82,7 +82,7 @@ export const createCustomerIntoDB = async (payload: any) => {
   return {
     accessToken,
     refreshToken,
-    customer:populatedCustomer
+    userCustomer
   };
 };
 export const createContractorIntoDB = async (payload: any) => {
@@ -118,7 +118,7 @@ export const createContractorIntoDB = async (payload: any) => {
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    config.jwt_access_expires_in as string,
+    config.jwt_access_expires_in as string,  
   );
 
   const refreshToken = createToken(
@@ -130,19 +130,28 @@ export const createContractorIntoDB = async (payload: any) => {
   return {
     accessToken,
     refreshToken,
-    contractor: populatedContractor,
+    populatedContractor,
   };
 };
 const getMe = async (userEmail: string) => {
   // const result = await User.findOne({ email: userEmail });
-  const result = await User.findOne({ email: userEmail }).select('-password');
+  const user = await User.findOne({ email: userEmail }).select('-password');
 
-  return result;
+  if(user?.status === 'blocked'){
+     throw new Error('User is Blocked'); 
+  }else{
+  if (user?.role === 'contractor') {
+    await user.populate('contractor');  // Populating contractor data
+  } else if (user?.role === 'customer') {
+    await user.populate('customer');  // Populating customer data
+  }
+  return user;
+  }
+
 };
 const getSingleUserIntoDB = async (id: string) => {
 // Fetch the user from the database first
   const user = await User.findById(id);
-
   // Check the role and populate the respective field
   if (!user) {
     throw new Error('User not found');
@@ -150,16 +159,19 @@ const getSingleUserIntoDB = async (id: string) => {
 
   // Populate the correct field based on user role
   if (user.role === 'contractor') {
-    await user.populate('contractorId');  // Populating contractor data
+    await user.populate('contractor');  // Populating contractor data
   } else if (user.role === 'customer') {
-    await user.populate('customerId');  // Populating customer data
+    await user.populate('customer');  // Populating customer data
   }
 
   return user;
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  const studentQuery = new QueryBuilder(User.find(), query)
+  const studentQuery = new QueryBuilder(User.find({ role: { $ne: 'superAdmin' } })
+    .populate('contractor', 'location')   // Populating location from contractor
+    .populate('customer', 'location'),    // Populating location from customer
+    query)
     .search(usersSearchableFields)
     .filter()
     .sort()
@@ -289,6 +301,8 @@ function removeArrayItems<T>(existing: T[] = [], toRemove: T[] = [], key?: keyof
 
 const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: any) => {
   const userDataToUpdate = extractFields(payload || {}, userFields);
+ 
+
   if (file && file.location) {
     userDataToUpdate.img = file.location;
   }
@@ -300,29 +314,42 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
 
   if (!updatedUser) throw new Error('User not found');
 
-  const roleDataToUpdate:any = {};
-  let updatedRoleData = null;
+  let roleDataToUpdate:any = {};
+  let updatedRoleData:any = {};
 
 
   const add = payload?.add || {};
   const remove = payload?.remove || {};
 
   if (user?.role === 'contractor') {
-    const existingContractor = await Contractor.findOne({ userId: id });
-    if (!existingContractor) throw new Error('Contractor not found');
+       roleDataToUpdate = extractFields(payload || {}, contractorFields);
+      
+    //   console.log('contractor')
+    //   console.log('roleDataToUpdate', roleDataToUpdate)
+    // console.log('payload',payload)
 
+    const existingContractor = await Contractor.findOne({ _id: updatedUser.contractor });
+    if (!existingContractor) throw new Error('Contractor not found');
+    // console.log('existingContractor',existingContractor)
+
+      // const roleDataToUpdate = extractFields(payload || {}, customerFields);
     // Skills
     const existingSkills = Array.isArray(existingContractor.skills) ? existingContractor.skills : [];
     const addedSkills = add.skills || [];
     const removedSkills = remove.skills || [];
-
-
-
     const afterAddSkills = mergeArrayField(existingSkills, addedSkills);
     const finalSkills = removeArrayItems(afterAddSkills, removedSkills);
 
+           // console.log('roleDataToUpdate',roleDataToUpdate)
+        // console.log('existingSkills',existingSkills)
+        // console.log('addedSkills',addedSkills)
+        // console.log('removedSkills',removedSkills)
+        // console.log('afterAddSkills',afterAddSkills)
+        // console.log('finalSkills',finalSkills)
+        
     if (addedSkills.length || removedSkills.length) {
-      roleDataToUpdate.skills = finalSkills;
+         roleDataToUpdate.skills = finalSkills;
+        //  console.log('roleDataToUpdate', roleDataToUpdate)
     }
 
     // Certificates
@@ -349,12 +376,37 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
       roleDataToUpdate.mySchedule = finalSchedule;
     }
 
+
+     // Materials (add/remove)
+    const existingMaterials = existingContractor.materials || [];
+    const addedMaterials = add.materials || [];
+    const removedMaterials = remove.materials || [];
+    const afterAddMaterials = mergeArrayField(existingMaterials, addedMaterials);
+    const finalMaterials = removeArrayItems(afterAddMaterials, removedMaterials);
+
+    if (addedMaterials.length || removedMaterials.length) {
+      roleDataToUpdate.materials = finalMaterials;
+    }
+
+   
+   
+
     updatedRoleData = await Contractor.findOneAndUpdate(
-      { userId: id },
+      {  _id: updatedUser.contractor},
       roleDataToUpdate,
       { new: true, runValidators: true }
     );
   }
+
+  if(user?.role === 'customer'){
+     roleDataToUpdate = extractFields(payload || {}, customerFields);
+     updatedRoleData = await Contractor.findOneAndUpdate(
+      {  _id: updatedUser.contractor},
+      roleDataToUpdate,
+      { new: true, runValidators: true }
+    );
+  }
+
 
   return {
     user: updatedUser,

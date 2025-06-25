@@ -26,6 +26,9 @@
 
   
 // ====================================================================================================================
+// user create and delete option should be transaction and roleback
+
+
 //  user                User          
 //  full name           fullname
 //  email               email

@@ -4,6 +4,8 @@ import { UserControllers } from './user.controller';
 import { USER_ROLE } from './user.constant';
 import auth from '../../middlewares/auth';
 import { uploadFileS3 } from '../../utils/UploaderS3';
+import validateRequest from '../../middlewares/validateRequest';
+import { statusSchema } from './user.validation';
 
 const router = express.Router();
 router.post(
@@ -24,7 +26,7 @@ router.get(
 router.post(
   '/change-status/:id',
   auth(USER_ROLE.superAdmin),
-  // validateRequest(UserValidation.changeStatusValidationSchema),
+  validateRequest(statusSchema),
   UserControllers.changeStatus,
 );
 
@@ -81,7 +83,7 @@ router.get(
 
 router.get(
   '/:id',
-  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin),
   UserControllers.getSingleUser,
 );
 

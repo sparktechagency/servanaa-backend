@@ -1,19 +1,97 @@
-// User
-// Auth 
-// Service
-// Role  
-// Booking 
-// Favourite
-// chat 
-// notification
-// map 
-// audio 
-// video 
-// profile-Img 
-// mobile-otp 
-// push-notification
+// const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: any) => {
+//   console.log('id', id)
+//   console.log('payload', payload)
+//   console.log('file', file)
+//   console.log('user', user)
+//   const {userEmail} = user;
+//   const exUser = await User.isUserExistsByCustomEmail(userEmail)
+// if(exUser?.role === 'customer'){
+//   console.log('customer')
+// }else if(exUser?.role === 'contractor'){
+//   console.log('contractor')
+//     console.log('payload', payload)
 
-// mobile 6-9
-// backend 9-12
-// frontent 12-3
-// web 3-10 SEO
+//    const userDataToUpdate = extractFields(payload || {}, userFields);
+//     console.log('userDataToUpdate', userDataToUpdate)
+
+//   if (file && file.location) {
+//     userDataToUpdate.img = file.location;
+//         console.log('file.location', file.location)
+//   }
+
+//   const updatedUser = await User.findByIdAndUpdate(id, userDataToUpdate, {
+//     new: true,
+//     runValidators: true,
+//   }).select('-password');
+
+//   if (!updatedUser) throw new Error('User not found');
+//   console.log('updatedUser', updatedUser)
+
+//   const roleDataToUpdate:any = {};
+//   let updatedRoleData = null;
+
+
+//   const add = payload?.add || {};
+//   const remove = payload?.remove || {};
+
+//   if (user?.role === 'contractor') {
+//     const existingContractor = await Contractor.findById({ _id:  updatedUser.contractor});
+//     if (!existingContractor) throw new Error('Contractor not found');
+
+//     // Skills
+//     const existingSkills = Array.isArray(existingContractor.skills) ? existingContractor.skills : [];
+//     const addedSkills = add.skills || [];
+//     const removedSkills = remove.skills || [];
+
+
+
+//     const afterAddSkills = mergeArrayField(existingSkills, addedSkills);
+//     const finalSkills = removeArrayItems(afterAddSkills, removedSkills);
+
+//     if (addedSkills.length || removedSkills.length) {
+//       roleDataToUpdate.skills = finalSkills;
+//     }
+
+//     // Certificates
+//     const existingCertificates = existingContractor.certificates || [];
+//     const addedCerts = add.certificates || [];
+//     const removedCerts = remove.certificates || [];
+
+//     const afterAddCerts = mergeArrayField(existingCertificates, addedCerts);
+//     const finalCerts = removeArrayItems(afterAddCerts, removedCerts);
+
+//     if (addedCerts.length || removedCerts.length) {
+//       roleDataToUpdate.certificates = finalCerts;
+//     }
+
+//     // mySchedule
+//     const existingSchedule = existingContractor.mySchedule || [];
+//     const addedSchedule = add.mySchedule || [];
+//     const removedSchedule = remove.mySchedule || [];
+
+//     const afterAddSchedule = [...existingSchedule, ...addedSchedule];
+//     const finalSchedule = removeArrayItems(afterAddSchedule, removedSchedule, 'day'); // assuming 'day' is unique
+
+//     if (addedSchedule.length || removedSchedule.length) {
+//       roleDataToUpdate.mySchedule = finalSchedule;
+//     }
+
+//     updatedRoleData = await Contractor.findOneAndUpdate(
+//       { userId: id },
+//       roleDataToUpdate,
+//       { new: true, runValidators: true }
+//     );
+//   }
+
+//   return {
+//     user: updatedUser,
+//     roleData: updatedRoleData,
+//   };
+
+// }else{
+//   console.log('superAdmin')
+
+// }
+//   return
+ 
+// };
