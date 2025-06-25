@@ -300,8 +300,9 @@ function removeArrayItems<T>(existing: T[] = [], toRemove: T[] = [], key?: keyof
 }
 
 const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: any) => {
-
   const userDataToUpdate = extractFields(payload || {}, userFields);
+ 
+
   if (file && file.location) {
     userDataToUpdate.img = file.location;
   }
@@ -313,7 +314,7 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
 
   if (!updatedUser) throw new Error('User not found');
 
-  const roleDataToUpdate:any = {};
+  let roleDataToUpdate:any = {};
   let updatedRoleData:any = {};
 
 
@@ -321,19 +322,34 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
   const remove = payload?.remove || {};
 
   if (user?.role === 'contractor') {
+       roleDataToUpdate = extractFields(payload || {}, contractorFields);
+      
+    //   console.log('contractor')
+    //   console.log('roleDataToUpdate', roleDataToUpdate)
+    // console.log('payload',payload)
+
     const existingContractor = await Contractor.findOne({ _id: updatedUser.contractor });
     if (!existingContractor) throw new Error('Contractor not found');
+    // console.log('existingContractor',existingContractor)
 
+      // const roleDataToUpdate = extractFields(payload || {}, customerFields);
     // Skills
     const existingSkills = Array.isArray(existingContractor.skills) ? existingContractor.skills : [];
     const addedSkills = add.skills || [];
     const removedSkills = remove.skills || [];
-
     const afterAddSkills = mergeArrayField(existingSkills, addedSkills);
     const finalSkills = removeArrayItems(afterAddSkills, removedSkills);
 
+           // console.log('roleDataToUpdate',roleDataToUpdate)
+        // console.log('existingSkills',existingSkills)
+        // console.log('addedSkills',addedSkills)
+        // console.log('removedSkills',removedSkills)
+        // console.log('afterAddSkills',afterAddSkills)
+        // console.log('finalSkills',finalSkills)
+        
     if (addedSkills.length || removedSkills.length) {
-      roleDataToUpdate.skills = finalSkills;
+         roleDataToUpdate.skills = finalSkills;
+        //  console.log('roleDataToUpdate', roleDataToUpdate)
     }
 
     // Certificates
@@ -372,6 +388,9 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
       roleDataToUpdate.materials = finalMaterials;
     }
 
+   
+   
+
     updatedRoleData = await Contractor.findOneAndUpdate(
       {  _id: updatedUser.contractor},
       roleDataToUpdate,
@@ -380,10 +399,7 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
   }
 
   if(user?.role === 'customer'){
-      const roleDataToUpdate = extractFields(payload || {}, customerFields);
-      
-      console.log('block customer')
-
+     roleDataToUpdate = extractFields(payload || {}, customerFields);
      updatedRoleData = await Contractor.findOneAndUpdate(
       {  _id: updatedUser.contractor},
       roleDataToUpdate,
