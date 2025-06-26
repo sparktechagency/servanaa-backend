@@ -10,3 +10,4 @@ export type TFaq = {
 export interface FaqModel extends Model<TFaq> {
   isFaqExists(id: string): Promise<TFaq | null>;
 }
+  

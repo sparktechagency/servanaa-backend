@@ -2,7 +2,7 @@
 import { Model, Types } from 'mongoose';
 
 export type TMaterial = {
-  categoryId: Types.ObjectId;
+  // categoryId: Types.ObjectId;
   subCategoryId: Types.ObjectId;
   name: string;
   unit:  number;

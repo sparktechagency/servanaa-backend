@@ -381,15 +381,15 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
     const existingMaterials = existingContractor.materials || [];
     const addedMaterials = add.materials || [];
     const removedMaterials = remove.materials || [];
-    const afterAddMaterials = mergeArrayField(existingMaterials, addedMaterials);
-    const finalMaterials = removeArrayItems(afterAddMaterials, removedMaterials);
+
+    // const afterAddMaterials = mergeArrayField(existingMaterials, addedMaterials);
+        const afterAddMaterials = [...existingMaterials, ...addedMaterials];
+    // const finalMaterials = removeArrayItems(afterAddMaterials, removedMaterials);
+    const finalMaterials = removeArrayItems(afterAddMaterials, removedMaterials, 'name');
 
     if (addedMaterials.length || removedMaterials.length) {
       roleDataToUpdate.materials = finalMaterials;
     }
-
-   
-   
 
     updatedRoleData = await Contractor.findOneAndUpdate(
       {  _id: updatedUser.contractor},

@@ -16,7 +16,12 @@ export type TContractor = {
    customerId: string;
    paymentMethodId: string;
    certificates: string[]; 
-   materials: string[]; 
+  //  materials: string[]; 
+   materials?: {
+   name: string; // The day of the week (e.g., "Monday")
+   unit?: { type: string},
+   price: { type: number},
+    }[];
    mySchedule?: {
    day: string; // The day of the week (e.g., "Monday")
    startTime: { type: string},
