@@ -17,7 +17,9 @@ const getSingleContractor = catchAsync(async (req, res) => {
 });
 
 const getAllContractors = catchAsync(async (req, res) => {
+    // const subCategory = req.body;
   const result = await ContractorServices.getAllContractorsFromDB(req.query);
+  // const result = await ContractorServices.getAllContractorsFromDB(subCategory, req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

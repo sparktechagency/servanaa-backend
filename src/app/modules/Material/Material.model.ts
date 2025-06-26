@@ -2,9 +2,9 @@ import { Schema, model } from 'mongoose';
       import { TMaterial, MaterialModel } from './Material.interface';
       
       const MaterialSchema = new Schema<TMaterial, MaterialModel>({
-        categoryId: { type: Schema.Types.ObjectId, ref: "Category", required: true },
+        // categoryId: { type: Schema.Types.ObjectId, ref: "Category", required: true },
         subCategoryId: { type: Schema.Types.ObjectId, ref: "SubCategory", required: true },
-        name: { type: String, required: true },
+        name: { type: String, required: true, unique:true },
         unit: { type: Number, required: true },
         price: { type: Number, required: true },
         isDeleted: { type: Boolean, default: false },

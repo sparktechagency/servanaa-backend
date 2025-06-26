@@ -10,8 +10,17 @@ import { Faq } from './Question.model';
 const createFaqIntoDB = async (
   payload: TFaq,
 ) => {
+
+  // Ensure the 'question' array has only unique questions
+  const exist =  await Faq.findOne({subCategoryId:payload.subCategoryId})
+  if(exist){
+      payload.question = [...new Set(payload.question)];
+    const updatedFaq = await Faq.findByIdAndUpdate(exist._id, payload, { new: true });
+    return updatedFaq;  // Return the updated term
+  }
+
+  payload.question = [...new Set(payload.question)];
   const result = await Faq.create(payload);
-  
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create FAQ');
   }

@@ -25,7 +25,14 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     customerId: { type: String,  default: '' },
     paymentMethodId: { type: String, default: '' },
     certificates: { type: [String], required: true, default: [] },
-    materials: { type: [String], required: true, default: [] },
+    // materials: { type: [String], required: true, default: [] },
+    materials: [
+      {
+        name: { type: String },
+        unit: { type: String},
+        price: { type: Number },
+      },
+    ],
     mySchedule: [
       {
         day: { type: String },

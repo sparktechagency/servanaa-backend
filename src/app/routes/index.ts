@@ -19,6 +19,7 @@ import { MaterialRoutes } from '../modules/Material/Material.route';
 import { CancelRoutes } from '../modules/Cancel/Cancel.route';
 import { NotificationRoutes } from '../modules/Notification/Notification.route';
 import { HelpRoutes } from '../modules/Help/Help.route';
+import { ContractorRoutes } from '../modules/Contractor/Contractor.route';
 
 const router = Router();
 
@@ -102,6 +103,10 @@ const moduleRoutes = [
   {
     path: '/helps',
     route: HelpRoutes,
+  },
+  {
+    path: '/contractors',
+    route: ContractorRoutes,
   },
 ];
 
