@@ -31,7 +31,7 @@ const createSubCategoryIntoDB = async (
 
 const getAllSubCategorysFromDB = async (query: Record<string, unknown>) => {
   const SubCategoryQuery = new QueryBuilder(
-    SubCategory.find(),
+    SubCategory.find().populate('categoryId', 'name'),
     query,
   )
     .search(SUBCATEGORY_SEARCHABLE_FIELDS)

@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
       import { TCategory, CategoryModel } from './Category.interface';
       
       const CategorySchema = new Schema<TCategory, CategoryModel>({
-        name: { type: String, required: true },
+        name: { type: String, required: true, unique:true },
         img: { type: String, required: true },
         isDeleted: { type: Boolean, default: false },
       },  { timestamps: true });

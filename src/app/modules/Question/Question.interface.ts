@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type TFaq = {
-  question: string;
-  answer?: string;
+  subCategoryId: Types.ObjectId;
+  question: string[];
   isDeleted: boolean;
 };
 
