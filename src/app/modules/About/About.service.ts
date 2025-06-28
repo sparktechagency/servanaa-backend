@@ -8,6 +8,7 @@ const createAboutIntoDB = async (
   payload: TAbout,
 ) => {
 
+  console.log(payload, "payload")
 
     // Check if a About already exists based on a unique field (e.g., About name or code)
     const existingAbout = await About.find({ }); // or use another unique field like 'code'

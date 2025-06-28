@@ -4,7 +4,8 @@ import sendResponse from '../../utils/sendResponse';
 import { TermServices } from './Term.service';
 
 const createTerm = catchAsync(async (req, res) => {
-  const { term: TermData } = req.body;
+  const TermData = req.body;
+  console.log( TermData)
   const result = await TermServices.createTermIntoDB(TermData);
 
   sendResponse(res, {

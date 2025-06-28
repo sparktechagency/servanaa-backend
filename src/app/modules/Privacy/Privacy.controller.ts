@@ -4,7 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import { PrivacyServices } from './Privacy.service';
 
 const createPrivacy = catchAsync(async (req, res) => {
-  const { privacy: PrivacyData } = req.body;
+  const PrivacyData = req.body;
   const result = await PrivacyServices.createPrivacyIntoDB(PrivacyData);
 
   sendResponse(res, {
