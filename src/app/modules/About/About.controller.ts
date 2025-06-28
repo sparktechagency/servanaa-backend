@@ -6,7 +6,9 @@ import { AboutServices } from './About.service';
 
 
 const createAbout = catchAsync(async (req, res) => {
-  const { about: AboutData } = req.body;
+  const AboutData = req.body;
+    console.log(AboutData)
+
   const result = await AboutServices.createAboutIntoDB(AboutData);
 
   sendResponse(res, {

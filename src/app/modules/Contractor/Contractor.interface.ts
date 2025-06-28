@@ -22,12 +22,13 @@ export type TContractor = {
    unit?: { type: string},
    price: { type: number},
     }[];
-   mySchedule?: {
-   day: string; // The day of the week (e.g., "Monday")
-   startTime: { type: string},
-   endTime: { type: string},
-    }[];
-    isDeleted: boolean;
+  //  mySchedule?: {
+  //  day: string; // The day of the week (e.g., "Monday")
+  //  startTime: { type: string},
+  //  endTime: { type: string},
+  //   }[];
+  myScheduleId: Types.ObjectId;
+  isDeleted: boolean;
 };
 
 export interface ContractorModel extends Model<TContractor> {

@@ -10,7 +10,7 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     city: { type: String },
     language: { type: String },
     location: { type: String, default: '' },
-
+    
     
     rateHourly: { type: Number, default: 0, required: true },
     skillsCategory: { type: String, default: '' },
@@ -33,13 +33,14 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
         price: { type: Number },
       },
     ],
-    mySchedule: [
-      {
-        day: { type: String },
-        startTime: { type: String},
-        endTime: { type: String },
-      },
-    ],
+    myScheduleId: { type: Schema.Types.ObjectId, ref: 'MySchedule' },
+    // mySchedule: [
+    //   {
+    //     day: { type: String },
+    //     startTime: { type: String},
+    //     endTime: { type: String },
+    //   },
+    // ],
     isDeleted: { type: Boolean, default: false },
   },
   {

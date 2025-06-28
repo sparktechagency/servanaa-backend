@@ -1,6 +1,5 @@
 // auth
 // user
-
 // category
 // subCategory
 // Materials
@@ -9,10 +8,11 @@
 // Term
 // Privacy
 // cancel policy
+
+// availability
 // notifcation 
 // help and support
-// booking 
-// availability 
+// booking
 
 // chat
 // payment

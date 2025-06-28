@@ -20,6 +20,7 @@ import { CancelRoutes } from '../modules/Cancel/Cancel.route';
 import { NotificationRoutes } from '../modules/Notification/Notification.route';
 import { HelpRoutes } from '../modules/Help/Help.route';
 import { ContractorRoutes } from '../modules/Contractor/Contractor.route';
+import { MyScheduleRoutes } from '../modules/MySchedule/MySchedule.route';
 
 const router = Router();
 
@@ -107,6 +108,10 @@ const moduleRoutes = [
   {
     path: '/contractors',
     route: ContractorRoutes,
+  },
+  {
+    path: '/availabilities',
+    route: MyScheduleRoutes,
   },
 ];
 
