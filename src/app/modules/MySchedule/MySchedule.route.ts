@@ -1,7 +1,7 @@
 import express from 'express';
 import { MyScheduleControllers } from './MySchedule.controller';
 import validateRequest from '../../middlewares/validateRequest';
-import { createMyScheduleValidationSchema, updateMyScheduleValidationSchema } from './MySchedule.validation';
+import { createMyScheduleValidationSchema } from './MySchedule.validation';
 import auth from '../../middlewares/auth';
 import { USER_ROLE } from '../User/user.constant';
 
@@ -16,17 +16,20 @@ router.post(
 
 router.get(
   '/:id',
+  auth(USER_ROLE.contractor),
   MyScheduleControllers.getSingleMySchedule,
 );
 
 router.patch(
-  '/:id',
-  validateRequest(updateMyScheduleValidationSchema),
+  '/udate-schedule',
+  auth(USER_ROLE.contractor),
+  // validateRequest(updateMyScheduleValidationSchema),
   MyScheduleControllers.updateMySchedule,
 );
 
 router.delete(
-  '/:id',
+  '/delete-schedule',
+  auth(USER_ROLE.contractor),
   MyScheduleControllers.deleteMySchedule,
 );
 

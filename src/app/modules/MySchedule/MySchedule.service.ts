@@ -3,7 +3,6 @@ import httpStatus from 'http-status';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { MYSCHEDULE_SEARCHABLE_FIELDS } from './MySchedule.constant';
-import mongoose from 'mongoose';
 import { TMySchedule } from './MySchedule.interface';
 import { MySchedule } from './MySchedule.model';
 import { User } from '../User/user.model';
@@ -16,6 +15,7 @@ const createMyScheduleIntoDB = async (
 
 const usr =  await User.findOne({email:user.userEmail}).populate('contractor')
 const id = usr?.contractor?._id
+ if(id) payload.contractorId = id
 
 const mySchedule = await MySchedule.create(payload);
   if (!mySchedule) {
@@ -59,24 +59,25 @@ const getSingleMyScheduleFromDB = async (id: string) => {
   return result;
 };
 
-const updateMyScheduleIntoDB = async (id: string, payload: any) => {
-  const isDeletedService = await mongoose.connection
-    .collection('myschedules')
-    .findOne(
-      { _id: new mongoose.Types.ObjectId(id) },
-      { projection: { isDeleted: 1, name: 1 } },
-    );
-
-  if (!isDeletedService?.name) {
-    throw new Error('MySchedule not found');
+const updateMyScheduleIntoDB = async ( payload: any, user:any) => {
+const usr =  await User.findOne({email:user.userEmail}).select('contractor').populate({
+  path: 'contractor',
+  populate: {
+    path: 'myScheduleId'
   }
+})
 
-  if (isDeletedService.isDeleted) {
-    throw new Error('Cannot update a deleted MySchedule');
-  }
+const conId = usr?.contractor?._id
+const contractor =  await Contractor.findOne({_id:conId}).populate('myScheduleId')
+const scheduleId = contractor?.myScheduleId?._id
+
+
+  // if (isDeletedService.isDeleted) {
+  //   throw new Error('Cannot update a deleted MySchedule');
+  // }
 
   const updatedData = await MySchedule.findByIdAndUpdate(
-    { _id: id },
+    { _id: scheduleId },
     payload,
     { new: true, runValidators: true },
   );
@@ -88,10 +89,22 @@ const updateMyScheduleIntoDB = async (id: string, payload: any) => {
   return updatedData;
 };
 
-const deleteMyScheduleFromDB = async (id: string) => {
-  const deletedService = await MySchedule.findByIdAndUpdate(
-    id,
-    { isDeleted: true },
+const deleteMyScheduleFromDB = async (user: any) => {
+
+  const usr =  await User.findOne({email:user.userEmail}).select('contractor').populate({
+  path: 'contractor',
+  populate: {
+    path: 'myScheduleId'
+  }
+})
+
+const conId = usr?.contractor?._id
+const contractor =  await Contractor.findOne({_id:conId}).populate('myScheduleId')
+const scheduleId = contractor?.myScheduleId?._id
+
+  const deletedService = await MySchedule.findByIdAndDelete(
+    scheduleId,
+    // { isDeleted: true },
     { new: true },
   );
 

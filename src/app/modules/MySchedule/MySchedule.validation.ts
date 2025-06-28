@@ -1,23 +1,37 @@
 import { z } from 'zod';
 
-const objectIdRegex = /^[a-f\d]{24}$/i;
-const timeSlotRegex = /^([01]\d|2[0-3]):00-([01]\d|2[0-3]):00$/;
-
 export const createMyScheduleValidationSchema = z.object({
   body: z.object({
-    contractorId: z.string().regex(objectIdRegex, 'Invalid ObjectId'),
-    day: z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']),
-    timeSlots: z.array(z.string().regex(timeSlotRegex, 'Invalid time slot format. Use HH:00-HH:00 (24-hour)')).min(1),
+  schedules: z.array(
+    z.object({
+      day: z.enum([
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+      ]),
+      timeSlots: z.array(
+        z.string().regex(/^([01]\d|2[0-3]):00-([01]\d|2[0-3]):00$/, {
+          message: 'Time slot must be in HH:00-HH:00 24-hour format',
+        })
+      ).min(1, { message: 'At least one time slot is required' })
+    })
+  ).min(1, { message: 'At least one schedule is required' }),
   }),
+
 });
 
 
-export const updateMyScheduleValidationSchema = z.object({
-  body: z.object({
-    contractorId: z.string().regex(objectIdRegex, 'Invalid ObjectId').optional(),
-    day: z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']).optional(),
-    timeSlots: z.array(z.string().regex(timeSlotRegex, 'Invalid time slot format. Use HH:00-HH:00 (24-hour)')).min(1).optional(),
-    isDeleted: z.boolean().optional(),
-  }),
-});
+
+// export const updateMyScheduleValidationSchema = z.object({
+//   body: z.object({
+//   schedules: z.array(ScheduleDaySchema).min(1, {
+//     message: 'At least one day is required',
+//   }).optional(),
+//   isDeleted: z.boolean().optional().default(false),
+//   }),
+// });
 

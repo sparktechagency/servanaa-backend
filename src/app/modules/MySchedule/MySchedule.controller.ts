@@ -5,6 +5,7 @@ import { MyScheduleServices } from './MySchedule.service';
 
 const createMySchedule = catchAsync(async (req, res) => {
   const MyScheduleData = req.body;
+  console.log(MyScheduleData, 'MyScheduleData')
   const result = await MyScheduleServices.createMyScheduleIntoDB(MyScheduleData, req.user);
 
   sendResponse(res, {
@@ -40,9 +41,9 @@ const getAllMySchedules = catchAsync(async (req, res) => {
 });
 
 const updateMySchedule = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
   const MySchedule = req.body;
-  const result = await MyScheduleServices.updateMyScheduleIntoDB(id, MySchedule);
+  const result = await MyScheduleServices.updateMyScheduleIntoDB(MySchedule, req.user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -53,8 +54,8 @@ const updateMySchedule = catchAsync(async (req, res) => {
 });
 
 const deleteMySchedule = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await MyScheduleServices.deleteMyScheduleFromDB(id);
+  // const { id } = req.params;
+  const result = await MyScheduleServices.deleteMyScheduleFromDB( req.user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
