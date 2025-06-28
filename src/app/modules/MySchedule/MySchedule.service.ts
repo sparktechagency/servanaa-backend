@@ -7,31 +7,55 @@ import { TMySchedule } from './MySchedule.interface';
 import { MySchedule } from './MySchedule.model';
 import { User } from '../User/user.model';
 import { Contractor } from '../Contractor/Contractor.model';
+import mongoose from 'mongoose';
 
 const createMyScheduleIntoDB = async (
   payload: TMySchedule,
   user:any
 ) => {
+const session = await mongoose.startSession();
+  session.startTransaction();
 
-const usr =  await User.findOne({email:user.userEmail}).populate('contractor')
-const id = usr?.contractor?._id
- if(id) payload.contractorId = id
+  try {
+    // 1. Get contractor ID from authenticated user
+    const usr = await User.findOne({ email: user.userEmail })
+      .populate('contractor')
+      .session(session);
 
-const mySchedule = await MySchedule.create(payload);
-  if (!mySchedule) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create MySchedule');
+    const contractorId = usr?.contractor?._id;
+    if (!contractorId) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found for user');
+    }
+
+    payload.contractorId = contractorId;
+
+    // 2. Create schedule
+    const mySchedule = await MySchedule.create([payload], { session });
+    if (!mySchedule || !mySchedule[0]) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create MySchedule');
+    }
+
+    // 3. Update contractor
+    const updatedContractor = await Contractor.findByIdAndUpdate(
+      contractorId,
+      { myScheduleId: mySchedule[0]._id },
+      { new: true, runValidators: true, session }
+    ).populate('myScheduleId');
+
+    if (!updatedContractor) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update Contractor with schedule');
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return updatedContractor;
+
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-
-  const updatedData = await Contractor.findByIdAndUpdate(
-    { _id: id },
-    {
-    myScheduleId: mySchedule._id
-   },
-    { new: true, runValidators: true },
-  ).populate('myScheduleId');
-
-
-  return  updatedData ;
 };
 
 const getAllMySchedulesFromDB = async (query: Record<string, unknown>) => {
@@ -89,30 +113,84 @@ const scheduleId = contractor?.myScheduleId?._id
   return updatedData;
 };
 
-const deleteMyScheduleFromDB = async (user: any) => {
 
+
+const deleteMyScheduleFromDB = async (user: any) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+   try {
+    // 1. Get user with nested contractor → myScheduleId
   const usr =  await User.findOne({email:user.userEmail}).select('contractor').populate({
   path: 'contractor',
   populate: {
     path: 'myScheduleId'
   }
-})
+}).session(session);
 
 const conId = usr?.contractor?._id
-const contractor =  await Contractor.findOne({_id:conId}).populate('myScheduleId')
+const contractor =  await Contractor.findOne({_id:conId}).populate('myScheduleId').session(session);
 const scheduleId = contractor?.myScheduleId?._id
 
-  const deletedService = await MySchedule.findByIdAndDelete(
-    scheduleId,
-    // { isDeleted: true },
-    { new: true },
-  );
+    // const conId = usr?.contractor?._id;
+    // const scheduleId = usr?.contractor?.myScheduleId?._id;
 
-  if (!deletedService) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete MySchedule');
+   if (!scheduleId || !conId) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Contractor or Schedule not found');
+    }
+
+        // 2. Delete schedule
+    const deletedSchedule = await MySchedule.findByIdAndDelete(scheduleId, { session });
+    if (!deletedSchedule) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete MySchedule');
+    }
+
+  // const deletedService = await MySchedule.findByIdAndDelete(
+  //   scheduleId,
+  //   // { isDeleted: true },
+  //   { new: true },
+  // );
+
+  // if (!deletedService) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete MySchedule');
+  // }
+
+
+    // 3. Update contractor's myScheduleId to null
+    const updatedContractor = await Contractor.findByIdAndUpdate(
+      conId,
+      { myScheduleId: null },
+      { new: true, session } // ✅ attach session
+    );
+
+    if (!updatedContractor) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update Contractor');
+    }
+
+
+    await session.commitTransaction(); // ✅ commit
+    session.endSession();
+
+    return deletedSchedule;
+
+  //   const updatedContractor = await Contractor.findByIdAndUpdate(
+  //   conId,
+  //   { myScheduleId: null },
+  //   { new: true },
+  // );
+
+  
+  // if (!updatedContractor) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Update Contractor');
+  // }
+
+  // return deletedService;
+
+   } catch (error) {
+    await session.abortTransaction(); // ❌ rollback
+    session.endSession();
+    throw error;
   }
-
-  return deletedService;
 };
 
 export const MyScheduleServices = {

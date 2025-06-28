@@ -9,10 +9,10 @@
 // Privacy
 // cancel policy
 
+// availability
 // notifcation 
 // help and support
-// booking 
-// availability 
+// booking
 
 // chat
 // payment
