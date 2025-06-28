@@ -27,7 +27,7 @@ const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleContractorFromDB = async (id: string) => {
-  const result = await Contractor.findById(id);
+  const result = await Contractor.findById(id).populate('myScheduleId');
 
   return result;
 };

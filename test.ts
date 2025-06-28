@@ -1,11 +1,9 @@
 // auth
 // user
-
 // category
 // subCategory
 // Materials
 // Question
-
 // About
 // Term
 // Privacy
