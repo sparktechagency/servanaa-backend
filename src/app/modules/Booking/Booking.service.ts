@@ -12,13 +12,42 @@ import { Booking } from './Booking.model';
 const createBookingIntoDB = async (
   payload: TBooking,
 ) => {
-    // console.log(booking, 'booking');
+ const { startTime, duration } = payload;
+
+ // Convert startTime to a Date object
+  const [startHour, startMinute] = startTime.split(':').map(Number);
+  const startDate = new Date();
+  startDate.setHours(startHour, startMinute, 0, 0); // Set the start time to the specified hour and minute
+
+// Calculate endTime by adding duration (in hours) to startTime
+  const endDate = new Date(startDate.getTime() + duration * 60 * 60 * 1000); // Multiply duration (in hours) by milliseconds
+  // Format endTime as HH:mm (ensuring it is returned in the same format as startTime)
+  const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+
+// Step 2: Calculate the price
+  const materialTotalPrice = payload.material.reduce((total, material) => total + material.price, 0); // Sum up all material prices
+  const price = materialTotalPrice + (payload.rateHourly * duration); // Add hourly rate multiplied by the duration to the total material price
+
+  // Step 3: Add endTime and price to payload
+  payload.endTime = endTime;
+  payload.price = price;
+
+
+  if(payload.bookingType === 'Just Once'){
+    console.log(payload, 'booking');
+    console.log( endTime,"endDate" )
+    console.log( price,"price" )
+
+  }
 
   const result = await Booking.create(payload);
   
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Booking');
   }
+
+    return result;
+};
   // if (result) {
 
   //   const notificationPayload = {
@@ -38,8 +67,8 @@ const createBookingIntoDB = async (
 
   // }
   
-  return result;
-};
+//   return result;
+// };
 
 const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
   const BookingQuery = new QueryBuilder(
