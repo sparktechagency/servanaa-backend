@@ -5,7 +5,6 @@ import { MyScheduleServices } from './MySchedule.service';
 
 const createMySchedule = catchAsync(async (req, res) => {
   const MyScheduleData = req.body;
-  console.log(MyScheduleData, 'MyScheduleData')
   const result = await MyScheduleServices.createMyScheduleIntoDB(MyScheduleData, req.user);
 
   sendResponse(res, {

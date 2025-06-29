@@ -6,17 +6,16 @@ export type TBooking = {
   contractorId: Types.ObjectId;
   categoryId: Types.ObjectId;
   subCategoryId: Types.ObjectId;
-  materialId: Types.ObjectId;
-  bookingType: {
-    type: "Just Once" | "Weekly";
-    days: string | string[]; // string YYYY-MM-DD or array of weekdays
-  };
+  rateHourly: number;
+  questions: { question: string; answer: string }[]; // Array of question-answer objects
+  material: { name: string; unit: string; price: number }[]; // Array of material objects with name, unit, and price
+  bookingType: "Just Once" | "Weekly";
   duration: number;
   price: number;
   paymentIntent?: string;
   status: 'pending' | 'ongoing' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'cancelled' | 'failed';
-  date: string;
+  days: string; // string YYYY-MM-DD/Day like sunday for each week
   startTime: string;
   endTime: string;
   isDeleted: boolean;

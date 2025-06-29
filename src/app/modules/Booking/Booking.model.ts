@@ -2,97 +2,124 @@
 import { Schema, model } from 'mongoose';
 import { TBooking, BookingModel } from './Booking.interface';
 
-const BookingSchema = new Schema<TBooking, BookingModel>({
-  customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
-  subCategoryId: { type: Schema.Types.ObjectId, ref: 'SubCategory', required: true },
-  materialId: { type: Schema.Types.ObjectId, ref: 'Material', required: true },
+const BookingSchema = new Schema<TBooking, BookingModel>(
+  {
+    customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    categoryId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
+    },
+    subCategoryId: {
+      type: Schema.Types.ObjectId,
+      ref: 'SubCategory',
+      required: true,
+    },
+    rateHourly: {
+      type: Number,
+      required: true,
+      min: [0, 'Price must be non-negative'],
+    },
 
-  bookingType: {
-    type: {
+    // questions: Array of question-answer objects
+    questions: [
+      {
+        question: { type: String, required: true },
+        answer: { type: String, required: true },
+      },
+    ],
+
+    // material: Array of material objects with name, unit, and price
+    material: [
+      {
+        name: { type: String, required: true },
+        unit: { type: String },
+        price: {
+          type: Number,
+          required: true,
+          min: [0, 'Price must be non-negative'],
+        },
+      },
+    ],
+
+    bookingType: {
       type: String,
       enum: ['Just Once', 'Weekly'],
       required: true,
     },
+    duration: { type: Number, required: true }, // duration as string
+
+    price: {
+      type: Number,
+      required: true,
+      min: [0, 'Price must be non-negative'],
+    },
+    paymentIntent: { type: String, default: '' },
+
+    status: {
+      type: String,
+      enum: ['pending', 'ongoing', 'completed', 'cancelled'],
+      default: 'pending',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'cancelled', 'failed'],
+      default: 'pending',
+    },
+
+    // `days` can be either a string (YYYY-MM-DD) or an array of weekdays
     days: {
-      type: Schema.Types.Mixed, // string or string[]
+      type: Schema.Types.Mixed,
       required: true,
       validate: {
         validator: function (v: any) {
-          if (this.bookingType.type === 'Just Once') {
-            return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+          if (this.bookingType === 'Just Once') {
+            // For 'Just Once', expect a single date string in 'YYYY-MM-DD' format
+            return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v); // Date format validation
           }
-          if (this.bookingType.type === 'Weekly') {
-            const validDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            return Array.isArray(v) && v.every(day => validDays.includes(day));
+          if (this.bookingType === 'Weekly') {
+            // For 'Weekly', expect a single weekday name (e.g., 'Monday')
+            const validDays = [
+              'Monday',
+              'Tuesday',
+              'Wednesday',
+              'Thursday',
+              'Friday',
+              'Saturday',
+              'Sunday',
+            ];
+            return typeof v === 'string' && validDays.includes(v); // Day name validation
           }
           return false;
         },
         message: 'Invalid bookingType.days format',
       },
     },
-  },
 
-  duration: {
-    type: Number,
-    required: true,
-    min: [1, 'Duration must be at least 1 hour'],
-  },
-
-  price: {
-    type: Number,
-    required: true,
-    min: [0, 'Price must be non-negative'],
-  },
-
-  paymentIntent: {
-    type: String,
-    default: '',
-  },
-
-  status: {
-    type: String,
-    enum: ['pending', 'ongoing', 'completed', 'cancelled'],
-    default: 'pending',
-  },
-
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'paid', 'cancelled', 'failed'],
-    default: 'pending',
-  },
-
-  date: {
-    type: String,
-    default: () => new Date().toISOString().split('T')[0], // YYYY-MM-DD
-  },
-
-  startTime: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (v: string) => /^\d{2}:\d{2}$/.test(v),
-      message: 'Invalid startTime format (HH:mm)',
+    startTime: {
+      type: String,
+      required: true,
+      validate: {
+        validator: (v: string) => /^\d{2}:\d{2}$/.test(v), // Validate time slot format (HH:mm)
+        message: 'Invalid timeSlot format (HH:mm)',
+      },
     },
-  },
-
-  endTime: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (v: string) => /^\d{2}:\d{2}$/.test(v),
-      message: 'Invalid endTime format (HH:mm)',
+    endTime: {
+      type: String,
+      required: true,
+      validate: {
+        validator: (v: string) => /^\d{2}:\d{2}$/.test(v), // Validate time slot format (HH:mm)
+        message: 'Invalid timeSlot format (HH:mm)',
+      },
     },
-  },
 
-  isDeleted: {
-    type: Boolean,
-    default: false,
+    isDeleted: { type: Boolean, default: false },
   },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  },
+);
 
 // Static method to check if booking exists and not deleted
 BookingSchema.statics.isBookingExists = async function (id: string) {

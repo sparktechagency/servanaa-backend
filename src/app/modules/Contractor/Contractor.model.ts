@@ -5,10 +5,10 @@ import { Schema, model } from 'mongoose';
 const contractorSchema = new Schema<TContractor, ContractorModel>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
-    dob: { type: String },
-    gender: { type: String },
-    city: { type: String },
-    language: { type: String },
+    dob: { type: String, default:'' },
+    gender: { type: String , default:''},
+    city: { type: String, default:'' },
+    language: { type: String, default:'' },
     location: { type: String, default: '' },
     
     
@@ -28,12 +28,12 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     // materials: { type: [String], required: true, default: [] },
     materials: [
       {
-        name: { type: String },
-        unit: { type: String},
-        price: { type: Number },
+        name: { type: String, default:'' },
+        unit: { type: String, default:''},
+        price: { type: Number, default:'' },
       },
     ],
-    myScheduleId: { type: Schema.Types.ObjectId, ref: 'MySchedule' },
+    myScheduleId: { type: Schema.Types.ObjectId, ref: 'MySchedule', default:null },
     // mySchedule: [
     //   {
     //     day: { type: String },

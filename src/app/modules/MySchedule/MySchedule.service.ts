@@ -19,26 +19,52 @@ const session = await mongoose.startSession();
   try {
     // 1. Get contractor ID from authenticated user
     const usr = await User.findOne({ email: user.userEmail })
-      .populate('contractor')
-      .session(session);
+      .populate({
+    path: 'contractor',
+    populate: {
+      path: 'myScheduleId', // this is a reference inside Contractor
+    },
+  }).session(session);
 
+    const myScheduleId = (usr?.contractor as any)?.myScheduleId?._id;
     const contractorId = usr?.contractor?._id;
+
     if (!contractorId) {
       throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found for user');
     }
 
     payload.contractorId = contractorId;
 
-    // 2. Create schedule
-    const mySchedule = await MySchedule.create([payload], { session });
-    if (!mySchedule || !mySchedule[0]) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create MySchedule');
-    }
+// const schedule = await MySchedule.findOne({ contractorId }).session(session)
+    // 2. Update schedule or create a new one
+    let updatedData;
+ if(myScheduleId){
+     // If a schedule exists, update it
+      updatedData = await MySchedule.findByIdAndUpdate(
+        myScheduleId, 
+        payload, 
+        { new: true, runValidators: true, session }
+      );
+
+      if (!updatedData) {
+        throw new AppError(httpStatus.NOT_FOUND, 'MySchedule not found after update');
+      }
+
+      console.log(updatedData, 'updatedData');
+ }else {
+     // 2. Create schedule
+      // If no schedule exists, create a new one
+      const mySchedule = await MySchedule.create([payload], { session });
+      if (!mySchedule || !mySchedule[0]) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create MySchedule');
+      }
+
+      updatedData = mySchedule[0];    }
 
     // 3. Update contractor
     const updatedContractor = await Contractor.findByIdAndUpdate(
       contractorId,
-      { myScheduleId: mySchedule[0]._id },
+      { myScheduleId: updatedData._id },
       { new: true, runValidators: true, session }
     ).populate('myScheduleId');
 
