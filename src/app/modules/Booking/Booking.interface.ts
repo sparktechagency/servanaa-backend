@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 export type TBooking = {
   customerId: Types.ObjectId;
   contractorId: Types.ObjectId;
-  categoryId: Types.ObjectId;
+  // categoryId: Types.ObjectId;
   subCategoryId: Types.ObjectId;
   rateHourly: number;
   questions: { question: string; answer: string }[]; // Array of question-answer objects
@@ -15,7 +15,8 @@ export type TBooking = {
   paymentIntent?: string;
   status: 'pending' | 'ongoing' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'cancelled' | 'failed';
-  days: string; // string YYYY-MM-DD/Day like sunday for each week
+  day: string; // string YYYY-MM-DD/Day like sunday for each week
+  timeSlots?: string[]; // string YYYY-MM-DD/Day like sunday for each week
   startTime: string;
   endTime: string;
   isDeleted: boolean;

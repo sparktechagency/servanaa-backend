@@ -4,9 +4,9 @@ export const bookingValidationSchema = z.object({
   body: z.object({
   customerId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId format"), // Customer ObjectId
   contractorId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId format"), // Contractor ObjectId
-  categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId format"), // Category ObjectId
+  // categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId format"), // Category ObjectId
   subCategoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId format"), // SubCategory ObjectId
-  rateHourly: z.number().min(0, "Price must be non-negative"), // rateHourly
+  // rateHourly: z.number().min(0, "Price must be non-negative"), // rateHourly
   questions: z.array(
     z.object({
       question: z.string(),
@@ -24,7 +24,7 @@ export const bookingValidationSchema = z.object({
   duration: z.number(),
   // price: z.number().min(0, "Price must be non-negative"),
   // Updated days validation: supports both a date string or a single weekday name
-  days: z.union([
+  day: z.union([
     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format YYYY-MM-DD"), // For 'Just Once' bookings
     z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]), // For 'Weekly' bookings
   ]),  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid timeSlot format (HH:mm)"),
@@ -37,7 +37,7 @@ export const updateBookingValidationSchema = z.object({
   body: z.object({
   customerId: z.string().optional(),
   contractorId: z.string().optional(),
-  categoryId: z.string().optional(),
+  // categoryId: z.string().optional(),
   subCategoryId: z.string().optional(),
   materialId: z.string().optional(),
   bookingType: z.object({
