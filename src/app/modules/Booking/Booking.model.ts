@@ -6,11 +6,11 @@ const BookingSchema = new Schema<TBooking, BookingModel>(
   {
     customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    categoryId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
-      required: true,
-    },
+    // categoryId: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: 'Category',
+    //   required: true,
+    // },
     subCategoryId: {
       type: Schema.Types.ObjectId,
       ref: 'SubCategory',
@@ -42,6 +42,7 @@ const BookingSchema = new Schema<TBooking, BookingModel>(
         },
       },
     ],
+    timeSlots: [String],
 
     bookingType: {
       type: String,
@@ -69,7 +70,7 @@ const BookingSchema = new Schema<TBooking, BookingModel>(
     },
 
     // `days` can be either a string (YYYY-MM-DD) or an array of weekdays
-    days: {
+    day: {
       type: Schema.Types.Mixed,
       required: true,
       validate: {
