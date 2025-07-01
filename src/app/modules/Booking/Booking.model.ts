@@ -70,7 +70,7 @@ const BookingSchema = new Schema<TBooking, BookingModel>(
     },
 
     // `days` can be either a string (YYYY-MM-DD) or an array of weekdays
-    day: {
+    days: {
       type: Schema.Types.Mixed,
       required: true,
       validate: {

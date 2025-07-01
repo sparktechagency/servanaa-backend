@@ -25,3 +25,19 @@ export const getDayName = (dateStr: string):string => {
   const options: Intl.DateTimeFormatOptions = { weekday: 'long' };  // We want the full name of the weekday
   return new Intl.DateTimeFormat('en-US', options).format(date);  // Format the date to get the weekday name
 };
+
+export const getNextWeekDayDate = (dayName: string, startDate: Date): Date => {
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const dayIndex = daysOfWeek.indexOf(dayName);
+  
+  const currentDayIndex = startDate.getDay();
+  let daysUntilNext = dayIndex - currentDayIndex;
+  
+  if (daysUntilNext <= 0) {
+    daysUntilNext += 7; // Move to the next week if the day already passed
+  }
+
+  const nextDay = new Date(startDate);
+  nextDay.setDate(startDate.getDate() + daysUntilNext);
+  return nextDay;
+};
