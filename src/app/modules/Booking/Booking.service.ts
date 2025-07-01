@@ -9,14 +9,87 @@ import { TBooking } from './Booking.interface';
 import { Booking } from './Booking.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import { Contractor } from '../Contractor/Contractor.model';
-import { generateTimeSlots, getDayName } from './Booking.utils';
+import { generateTimeSlots, getNextWeekDayDate } from './Booking.utils';
 // import { Notification } from '../Notification/Notification.model';
 
+
+// const createBookingIntoDB = async (
+//   payload: TBooking,
+// ) => {
+//   const { startTime, duration, bookingType, day } = payload;
+//  // Convert startTime to a Date object
+//   const [startHour, startMinute] = startTime.split(':').map(Number);
+//   const startDate = new Date();
+//   startDate.setHours(startHour, startMinute, 0, 0); // Set the start time to the specified hour and minute
+
+// // Calculate endTime by adding duration (in hours) to startTime
+//   const endDate = new Date(startDate.getTime() + duration * 60 * 60 * 1000); // Multiply duration (in hours) by milliseconds 
+//   // Format endTime as HH:mm (ensuring it is returned in the same format as startTime)
+//   const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+//   payload.endTime = endTime;
+
+// // Step Add rateHourly to payload
+//   const myScheduleId = await Contractor.findOne({ _id: payload.contractorId });
+//   if (!myScheduleId) {
+//     throw new Error('Contractor availability not found');
+//   }
+//   payload.rateHourly = myScheduleId.rateHourly;
+
+// // Step 2: Calculate the price add to payload
+//   const materialTotalPrice = payload.material.reduce((total, material) => total + material.price, 0); // Sum up all material prices
+//   const price = materialTotalPrice + (payload.rateHourly * duration); // Add hourly rate multiplied by the duration to the total material price
+//   payload.price = price;
+
+//   if(bookingType === 'Just Once'){
+//  // Retrieve contractor's availability for the given day
+//   const schedule = await MySchedule.findOne({ contractorId: payload.contractorId });
+//     // Find the specific day's availability
+//     const dayName = getDayName(day);  // This will return "Monday"
+//   const daySchedule = schedule?.schedules?.find((s:any) => s.day === dayName);
+//   if (!daySchedule) {
+//     throw new Error('Contractor is not available on this day');
+//   }
+
+//   // Generate requested time slots based on the startTime and endTime
+//   const requestedTimeSlots = generateTimeSlots(startTime, endTime);
+
+//   // 1. Check if any of the requested slots are not available
+//   const unavailableSlots = requestedTimeSlots.filter((slot:any) => !daySchedule.timeSlots.includes(slot));
+//   // If we find any slots that are not in contractor's available time slots, then it's unavailable
+//   if (unavailableSlots.length > 0) {
+//     return { available: false, unavailableSlots };
+//   }
+//   // 2. Check for overlapping bookings with existing bookings
+//   const existingBooking = await Booking.findOne({
+//     contractorId: payload.contractorId,
+//     day: day,
+//     // startTime: { $gte: startTime, $lte: endTime },
+//     // timeSlots: requestedTimeSlots,
+//     timeSlots: { $in: requestedTimeSlots },
+//     status: { $ne: 'cancelled' },
+//   });
+
+//   if (existingBooking) {
+//     // If there is an existing booking that overlaps with the requested time range
+//       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Booking - Slot is already booked');
+//   }
+//    payload.timeSlots = requestedTimeSlots;
+//   }
+
+  
+
+//   const result = await Booking.create(payload);
+//   if (!result) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Booking');
+//   }
+
+//     return result;
+// };
 
 const createBookingIntoDB = async (
   payload: TBooking,
 ) => {
- const { startTime, duration } = payload;
+  const { startTime, duration, bookingType, days,contractorId } = payload;
  // Convert startTime to a Date object
   const [startHour, startMinute] = startTime.split(':').map(Number);
   const startDate = new Date();
@@ -29,7 +102,7 @@ const createBookingIntoDB = async (
   payload.endTime = endTime;
 
 // Step Add rateHourly to payload
-  const myScheduleId = await Contractor.findOne({ _id: payload.contractorId });
+  const myScheduleId = await Contractor.findOne({ _id: contractorId });
   if (!myScheduleId) {
     throw new Error('Contractor availability not found');
   }
@@ -40,53 +113,72 @@ const createBookingIntoDB = async (
   const price = materialTotalPrice + (payload.rateHourly * duration); // Add hourly rate multiplied by the duration to the total material price
   payload.price = price;
 
-
-
-
-  if(payload.bookingType === 'Just Once'){
+  if(bookingType === 'Weekly'){
  // Retrieve contractor's availability for the given day
-  const schedule = await MySchedule.findOne({ contractorId: payload.contractorId });
-    // Find the specific day's availability
-    const day = getDayName(payload.day);  // This will return "Monday"
-  const daySchedule = schedule?.schedules?.find((s:any) => s.day === day);
-  if (!daySchedule) {
-    throw new Error('Contractor is not available on this day');
+  const schedule = await MySchedule.findOne({ contractorId });
+  if (!schedule) {
+      throw new Error('Contractor schedule not found');
+    }
+
+  // Check availability for each selected day
+    const unavailableSlots: string[] = [];
+    for (const day of days) {
+      //  const dayName = getDayName(days); 
+      const daySchedule = schedule?.schedules?.find((s:any) => s.day === day);
+      if (!daySchedule) {
+        throw new Error(`Contractor is not available on ${day}`);
+      }
+
+      // Generate requested time slots based on the startTime and endTime
+      const requestedTimeSlots = generateTimeSlots(startTime, endTime);
+
+      // Check if any of the requested time slots are unavailable
+      const unavailableForDay = requestedTimeSlots.filter((slot: any) => !daySchedule.timeSlots.includes(slot));
+      if (unavailableForDay.length > 0) {
+        unavailableSlots.push(...unavailableForDay);
+      }
+    }
+
+       if (unavailableSlots.length > 0) {
+      return { available: false, unavailableSlots };
+    }
+
+    // Step 2: Check for overlapping bookings with existing bookings (for each day)
+    for (const day of days) {
+      const existingBooking = await Booking.findOne({
+        contractorId: contractorId,
+        day,
+        startTime: { $gte: startTime, $lte: endTime },
+        status: { $ne: 'cancelled' },
+      });
+
+      if (existingBooking) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Booking - Slot is already booked');
+      }
+    }
+
+
+   // Create recurring bookings for each selected day indefinitely
+    const bookings = [];
+    for (const day of days) {
+      // Calculate the next week's date for the selected day
+      const bookingDate = getNextWeekDayDate(day, startDate);
+      const requestedTimeSlots = generateTimeSlots(startTime, endTime);
+      // Add day-specific details to the payload
+      const bookingPayload = {
+        ...payload,
+        day,
+        bookingDate,
+        timeSlots: requestedTimeSlots,
+        recurring: true, // Mark as recurring
+      };
+
+      const newBooking = await Booking.create(bookingPayload);
+      bookings.push(newBooking);
+    }
+
+    return bookings
   }
-
-  // Generate requested time slots based on the startTime and endTime
-  const requestedTimeSlots = generateTimeSlots(startTime, endTime);
-
-  // 1. Check if any of the requested slots are not available
-  const unavailableSlots = requestedTimeSlots.filter((slot:any) => !daySchedule.timeSlots.includes(slot));
-  // If we find any slots that are not in contractor's available time slots, then it's unavailable
-  if (unavailableSlots.length > 0) {
-    return { available: false, unavailableSlots };
-  }
-  // 2. Check for overlapping bookings with existing bookings
-  const existingBooking = await Booking.findOne({
-    contractorId: payload.contractorId,
-    day: payload.day,
-    // startTime: { $gte: startTime, $lte: endTime },
-    // timeSlots: requestedTimeSlots,
-    timeSlots: { $in: requestedTimeSlots },
-    status: { $ne: 'cancelled' },
-  });
-
-  if (existingBooking) {
-    // If there is an existing booking that overlaps with the requested time range
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Booking - Slot is already booked');
-  }
-   payload.timeSlots = requestedTimeSlots;
-  }
-
-  
-
-  const result = await Booking.create(payload);
-  if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Booking');
-  }
-
-    return result;
 };
   // if (result) {
 

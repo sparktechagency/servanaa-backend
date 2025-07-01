@@ -15,7 +15,7 @@ export type TBooking = {
   paymentIntent?: string;
   status: 'pending' | 'ongoing' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'cancelled' | 'failed';
-  day: string; // string YYYY-MM-DD/Day like sunday for each week
+  days: string; // string YYYY-MM-DD/Day like sunday for each week
   timeSlots?: string[]; // string YYYY-MM-DD/Day like sunday for each week
   startTime: string;
   endTime: string;

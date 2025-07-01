@@ -24,7 +24,7 @@ export const bookingValidationSchema = z.object({
   duration: z.number(),
   // price: z.number().min(0, "Price must be non-negative"),
   // Updated days validation: supports both a date string or a single weekday name
-  day: z.union([
+  days: z.union([
     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format YYYY-MM-DD"), // For 'Just Once' bookings
     z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]), // For 'Weekly' bookings
   ]),  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid timeSlot format (HH:mm)"),
