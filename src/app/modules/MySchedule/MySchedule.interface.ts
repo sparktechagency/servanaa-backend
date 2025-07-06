@@ -3,7 +3,7 @@ import { Model, Types} from 'mongoose';
 
 // One day's schedule
 export type TScheduleDay = {
-  day: string; // e.g., "Monday"
+  days: string; // e.g., "Monday"
   timeSlots: string[]; // e.g., ["09:00-10:00", "10:00-11:00"]
 };
 

@@ -3,7 +3,7 @@ import { TMySchedule, MyScheduleModel } from './MySchedule.interface';
 import { daysOfWeek } from './MySchedule.constant';
 // Schema for each day's schedule
 const ScheduleDaySchema = new Schema({
-  day: {
+  days: {
     type: String,
     required: true,
     enum: daysOfWeek,

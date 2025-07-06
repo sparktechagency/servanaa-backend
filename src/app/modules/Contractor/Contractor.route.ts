@@ -7,6 +7,11 @@ const router = express.Router();
 
 
 router.get(
+  '/available',
+  ContractorControllers.getAllAvailableContractors,
+);
+
+router.get(
   '/:id',
   ContractorControllers.getSingleContractor,
 );
@@ -26,5 +31,6 @@ router.get(
   '/',
   ContractorControllers.getAllContractors,
 );
+
 
 export const ContractorRoutes = router;

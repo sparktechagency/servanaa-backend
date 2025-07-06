@@ -4,7 +4,7 @@ export const createMyScheduleValidationSchema = z.object({
   body: z.object({
   schedules: z.array(
     z.object({
-      day: z.enum([
+      days: z.enum([
         'Monday',
         'Tuesday',
         'Wednesday',
