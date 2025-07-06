@@ -105,7 +105,51 @@ const checkAvailability = async (contractorId: any, startTime: any, duration: an
     let daySchedule;
     
     // Convert specific date to day name if one-time booking
-    if (bookingType === 'One-time') {
+    if (bookingType === 'Just Once') {
+      const requestedDay = getDayName(day); // Convert to day name
+      daySchedule = schedule.schedules.find((s) => s.days === requestedDay);
+    } 
+    else if (bookingType === 'Weekly') {
+      daySchedule = schedule.schedules.find((s) => s.days === day); 
+    }
+
+    if (!daySchedule) throw new Error(`Contractor is not available on ${day}`);
+
+    const unavailableSlots = requestedTimeSlots.filter(
+      (slot) => !daySchedule.timeSlots.includes(slot)
+    );
+    
+    if (unavailableSlots.length > 0) {
+      return { available: false, message: 'Requested slots are unavailable.' };
+    }
+  }
+
+
+  // Check for overlapping bookings for future recurring or one-time slots
+  const existingBooking = await Booking.findOne({
+    contractorId,
+    days: { $in: days }, // This checks if the requested day matches any day in the booking collection
+    startTime: { $gte: startTime, $lte: addOneHour(startTime) },  // Compare time range
+    status: { $ne: 'cancelled' },
+  });
+
+  if (existingBooking) {
+    return { available: false, message: 'Time slot is already booked.' };
+  }
+
+  return { available: true };
+};
+const checkAvailabilityIntoDB = async (contractorId: any, startTime: any, duration: any, days: any, bookingType: any) => {
+  const requestedTimeSlots = generateTimeSlots(startTime, addOneHour(startTime));
+
+  const schedule = await MySchedule.findOne({ contractorId });
+  if (!schedule) throw new Error('Contractor schedule not found');
+
+  for (const day of days) {
+    let daySchedule;
+    
+    // Convert specific date to day name if one-time booking
+    if (bookingType === 'Just Once') {
       const requestedDay = getDayName(day); // Convert to day name
       daySchedule = schedule.schedules.find((s) => s.days === requestedDay);
     } 
@@ -166,7 +210,7 @@ const createRecurringBookingIntoDB = async (updatedPayload: TBooking) => {
 
     for (const day of days) {
       const daySchedule = await MySchedule.findOne({ contractorId });
-      // console.log('daySchedule', daySchedule)
+      console.log('daySchedule', daySchedule)
       const requestedTimeSlots = generateTimeSlots(startTime, updatedBooking.endTime);
       const bookingPayload = {
         ...updatedBooking,
@@ -227,9 +271,6 @@ const renewRecurringBookingForNextMonth = async (customerId:any, contractorId:an
   // Create new recurring bookings for the next month
   await createRecurringBookingIntoDB({ ...existingBookings[0], startDate: newStartDate });
 };
-
-
-
 
 
 
@@ -308,6 +349,7 @@ export const BookingServices = {
   getSingleBookingFromDB,
   updateBookingIntoDB,
   deleteBookingFromDB,
-  updatePaymentStatusIntoDB
+  updatePaymentStatusIntoDB,
+  checkAvailabilityIntoDB
   // getAllBookingsByUserFromDB
 };

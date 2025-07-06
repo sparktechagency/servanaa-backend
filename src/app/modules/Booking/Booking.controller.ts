@@ -95,6 +95,7 @@ export const BookingControllers = {
   getAllBookings,
   updateBooking,
   deleteBooking,
-  updatePaymentStatus
+  updatePaymentStatus,
+
   // getAllBookingsByUser
 };

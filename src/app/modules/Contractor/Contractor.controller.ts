@@ -29,6 +29,20 @@ const getAllContractors = catchAsync(async (req, res) => {
     data: result.result,
   });
 });
+const getAllAvailableContractors = catchAsync(async (req, res) => {
+    // const subCategory = req.body;
+    console.log('controller')
+  const result = await ContractorServices.getAllAvailableContractorsFromDB(req.query);
+  // const result = await ContractorServices.getAllContractorsFromDB(subCategory, req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Contractors are retrieved successfully',
+    meta: result.meta,
+    data: result.result,
+  });
+});
 
 const updateContractor = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -60,4 +74,5 @@ export const ContractorControllers = {
   getAllContractors,
   updateContractor,
   deleteContractor,
+  getAllAvailableContractors
 };

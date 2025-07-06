@@ -7,8 +7,8 @@ export type TBooking = {
   // categoryId: Types.ObjectId;
   subCategoryId: Types.ObjectId;
   rateHourly: number;
-startDate: Date;
-bookingDate: Date;
+  startDate: Date;
+  bookingDate: Date;
   periodInDays: number;
   questions: { question: string; answer: string }[]; // Array of question-answer objects
   material: { name: string; unit: string; price: number }[]; // Array of material objects with name, unit, and price
