@@ -139,50 +139,6 @@ const checkAvailability = async (contractorId: any, startTime: any, duration: an
 
   return { available: true };
 };
-const checkAvailabilityIntoDB = async (contractorId: any, startTime: any, duration: any, days: any, bookingType: any) => {
-  const requestedTimeSlots = generateTimeSlots(startTime, addOneHour(startTime));
-
-  const schedule = await MySchedule.findOne({ contractorId });
-  if (!schedule) throw new Error('Contractor schedule not found');
-
-  for (const day of days) {
-    let daySchedule;
-    
-    // Convert specific date to day name if one-time booking
-    if (bookingType === 'Just Once') {
-      const requestedDay = getDayName(day); // Convert to day name
-      daySchedule = schedule.schedules.find((s) => s.days === requestedDay);
-    } 
-    else if (bookingType === 'Weekly') {
-      daySchedule = schedule.schedules.find((s) => s.days === day); 
-    }
-
-    if (!daySchedule) throw new Error(`Contractor is not available on ${day}`);
-
-    const unavailableSlots = requestedTimeSlots.filter(
-      (slot) => !daySchedule.timeSlots.includes(slot)
-    );
-    
-    if (unavailableSlots.length > 0) {
-      return { available: false, message: 'Requested slots are unavailable.' };
-    }
-  }
-
-  // Check for overlapping bookings for future recurring or one-time slots
-  const existingBooking = await Booking.findOne({
-    contractorId,
-    days: { $in: days }, // This checks if the requested day matches any day in the booking collection
-    startTime: { $gte: startTime, $lte: addOneHour(startTime) },  // Compare time range
-    status: { $ne: 'cancelled' },
-  });
-
-  if (existingBooking) {
-    return { available: false, message: 'Time slot is already booked.' };
-  }
-
-  return { available: true };
-};
-
 
 // Function to create a one-time booking
 const createOneTimeBooking = async (updatedPayload: TBooking) => {
@@ -272,7 +228,49 @@ const renewRecurringBookingForNextMonth = async (customerId:any, contractorId:an
   await createRecurringBookingIntoDB({ ...existingBookings[0], startDate: newStartDate });
 };
 
+const checkAvailabilityIntoDB = async (contractorId: any, startTime: any, duration: any, days: any, bookingType: any) => {
+  const requestedTimeSlots = generateTimeSlots(startTime, addOneHour(startTime));
 
+  const schedule = await MySchedule.findOne({ contractorId });
+  if (!schedule) throw new Error('Contractor schedule not found');
+
+  for (const day of days) {
+    let daySchedule;
+    
+    // Convert specific date to day name if one-time booking
+    if (bookingType === 'Just Once') {
+      const requestedDay = getDayName(day); // Convert to day name
+      daySchedule = schedule.schedules.find((s) => s.days === requestedDay);
+    } 
+    else if (bookingType === 'Weekly') {
+      daySchedule = schedule.schedules.find((s) => s.days === day); 
+    }
+
+    if (!daySchedule) throw new Error(`Contractor is not available on ${day}`);
+
+    const unavailableSlots = requestedTimeSlots.filter(
+      (slot) => !daySchedule.timeSlots.includes(slot)
+    );
+    
+    if (unavailableSlots.length > 0) {
+      return { available: false, message: 'Requested slots are unavailable.' };
+    }
+  }
+
+  // Check for overlapping bookings for future recurring or one-time slots
+  const existingBooking = await Booking.findOne({
+    contractorId,
+    days: { $in: days }, // This checks if the requested day matches any day in the booking collection
+    startTime: { $gte: startTime, $lte: addOneHour(startTime) },  // Compare time range
+    status: { $ne: 'cancelled' },
+  });
+
+  if (existingBooking) {
+    return { available: false, message: 'Time slot is already booked.' };
+  }
+
+  return { available: true };
+};
 
 const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
   const BookingQuery = new QueryBuilder(
