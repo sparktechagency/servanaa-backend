@@ -43,7 +43,7 @@
 // //   const price = materialTotalPrice + (payload.rateHourly * duration); // Add hourly rate multiplied by the duration to the total material price
 // //   payload.price = price;
 
-// //   if(bookingType === 'Just Once'){
+// //   if(bookingType === 'OneTime'){
 // //  // Retrieve contractor's availability for the given day
 // //   const schedule = await MySchedule.findOne({ contractorId: payload.contractorId });
 // //     // Find the specific day's availability
@@ -155,7 +155,7 @@
 //   }
 
 //   // Step 3: Create the booking (either one-time or recurring)
-//   if (bookingType === 'Just Once') {
+//   if (bookingType === 'OneTime') {
 //     const booking = await createOneTimeBooking(updatedPayload); // Create one-time booking
 //     return booking;
 //   } else if (bookingType === 'Weekly') {
@@ -638,7 +638,7 @@
 //   }
 
 //   // Step 3: Create the booking (either one-time or recurring)
-//   if (bookingType === 'Just Once') {
+//   if (bookingType === 'OneTime') {
 //     const booking = await createOneTimeBooking(updatedPayload); // Create one-time booking
 //     return booking;
 //   } else if (bookingType === 'Weekly') {
@@ -658,7 +658,7 @@
 //     let daySchedule;
     
 //     // Convert specific date to day name if one-time booking
-//     if (bookingType === 'Just Once') {
+//     if (bookingType === 'OneTime') {
 //       const requestedDay = getDayName(day); // Convert to day name
 //       daySchedule = schedule.schedules.find((s) => s.days === requestedDay);
 //     } 

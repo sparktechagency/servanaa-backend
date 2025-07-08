@@ -46,12 +46,11 @@ const BookingSchema = new Schema<TBooking, BookingModel>(
 
     bookingType: {
       type: String,
-      enum: ['Just Once', 'Weekly'],
+      enum: ['OneTime', 'Weekly'],
       required: true,
     },
     duration: { type: Number, required: true }, // duration as string
     periodInDays: { type: Number}, // duration as string
-   startDate: { type: Date },
    bookingDate: { type: Date },
     price: {
       type: Number,
@@ -72,33 +71,37 @@ const BookingSchema = new Schema<TBooking, BookingModel>(
     },
 
     // `days` can be either a string (YYYY-MM-DD) or an array of weekdays
-    days: {
-      type: Schema.Types.Mixed,
+    day: {
+      type: String,
       required: true,
-      validate: {
-        validator: function (v: any) {
-          if (this.bookingType === 'Just Once') {
-            // For 'Just Once', expect a single date string in 'YYYY-MM-DD' format
-            return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v); // Date format validation
-          }
-          if (this.bookingType === 'Weekly') {
-            // For 'Weekly', expect a single weekday name (e.g., 'Monday')
-            const validDays = [
-              'Monday',
-              'Tuesday',
-              'Wednesday',
-              'Thursday',
-              'Friday',
-              'Saturday',
-              'Sunday',
-            ];
-            return typeof v === 'string' && validDays.includes(v); // Day name validation
-          }
-          return false;
-        },
-        message: 'Invalid bookingType.days format',
-      },
     },
+    // days: {
+    //   type: Schema.Types.Mixed,
+    //   required: true,
+    //   validate: {
+    //     validator: function (v: any) {
+    //       if (this.bookingType === 'OneTime') {
+    //         // For 'OneTime', expect a single date string in 'YYYY-MM-DD' format
+    //         return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v); // Date format validation
+    //       }
+    //       if (this.bookingType === 'Weekly') {
+    //         // For 'Weekly', expect a single weekday name (e.g., 'Monday')
+    //         const validDays = [
+    //           'Monday',
+    //           'Tuesday',
+    //           'Wednesday',
+    //           'Thursday',
+    //           'Friday',
+    //           'Saturday',
+    //           'Sunday',
+    //         ];
+    //         return typeof v === 'string' && validDays.includes(v); // Day name validation
+    //       }
+    //       return false;
+    //     },
+    //     message: 'Invalid bookingType.days format',
+    //   },
+    // },
 
     startTime: {
       type: String,
