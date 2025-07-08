@@ -18,8 +18,6 @@ import { createToken } from '../Auth/auth.utils';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
 import mongoose from 'mongoose';
-import { TCustomer } from '../Customer/Customer.interface';
-import { TContractor } from '../Contractor/Contractor.interface';
 
 
 // export const addMobileNumberIntoDB = async (phoneNumber: any, user: any) => {
@@ -323,29 +321,16 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
 
   if (user?.role === 'contractor') {
        roleDataToUpdate = extractFields(payload || {}, contractorFields);
-      
-    //   console.log('contractor')
-    //   console.log('roleDataToUpdate', roleDataToUpdate)
-    // console.log('payload',payload)
 
     const existingContractor = await Contractor.findOne({ _id: updatedUser.contractor });
     if (!existingContractor) throw new Error('Contractor not found');
-    // console.log('existingContractor',existingContractor)
 
-      // const roleDataToUpdate = extractFields(payload || {}, customerFields);
     // Skills
     const existingSkills = Array.isArray(existingContractor.skills) ? existingContractor.skills : [];
     const addedSkills = add.skills || [];
     const removedSkills = remove.skills || [];
     const afterAddSkills = mergeArrayField(existingSkills, addedSkills);
     const finalSkills = removeArrayItems(afterAddSkills, removedSkills);
-
-           // console.log('roleDataToUpdate',roleDataToUpdate)
-        // console.log('existingSkills',existingSkills)
-        // console.log('addedSkills',addedSkills)
-        // console.log('removedSkills',removedSkills)
-        // console.log('afterAddSkills',afterAddSkills)
-        // console.log('finalSkills',finalSkills)
         
     if (addedSkills.length || removedSkills.length) {
          roleDataToUpdate.skills = finalSkills;
@@ -365,7 +350,7 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
     }
 
     // mySchedule
-    const existingSchedule = existingContractor.mySchedule || [];
+    const existingSchedule = existingContractor?.mySchedule || [];
     const addedSchedule = add.mySchedule || [];
     const removedSchedule = remove.mySchedule || [];
 
