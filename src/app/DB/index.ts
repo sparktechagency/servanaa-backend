@@ -7,7 +7,7 @@ import { User } from "../modules/User/user.model";
 const superUser = {
   fullName: 'Super Admin',
   userName: 'superadmin',
-  email:  config.super_admin_email || 'ahmadmusa9805@gmail.com',
+  email:  config.super_admin_email || 'support@servana.com.au',
   password: config.super_admin_password || 'superAdmin12345',
   location: 'sdgsdg',
   contactNo: "+4407823878152",
