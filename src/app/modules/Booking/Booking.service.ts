@@ -48,7 +48,6 @@ const getAllCustomersWithRecurringBookings = async () => {
 // Common function to calculate endTime, price, and rateHourly for both booking types
 const getBookingDetails = async (payload: TBooking) => {
   const { startTime, duration, contractorId } = payload;
-
   // Calculate end time
   const [startHour, startMinute] = startTime.split(':').map(Number);
   const startDate = new Date();
@@ -58,34 +57,56 @@ const getBookingDetails = async (payload: TBooking) => {
   const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
   payload.endTime = endTime; // Attach endTime to payload
 
+
   // Get contractor rate and calculate price
-  const contractor = await Contractor.findOne({ _id: contractorId });
+  const contractor = await Contractor.findById(contractorId);
   if (!contractor) throw new Error('Contractor not found');
   payload.rateHourly = contractor.rateHourly;
-
   // Calculate material total price
   const materialTotalPrice = payload.material.reduce((total, material) => total + material.price, 0);
   const price = materialTotalPrice + (payload.rateHourly * duration); // Final price
   payload.price = price;
 
+
   return payload; // Return updated payload with all the details
 };
 
 // Main booking service function to handle both one-time and recurring bookings
+// const createBookingIntoDB = async (payload: TBooking) => {
+//   const { bookingType, contractorId, days, periodInDays } = payload;
+//   console.log(periodInDays, 'periodInDays');
+//   // Step 1: Get booking details (end time, price, rateHourly, etc.)
+//   const updatedPayload = await getBookingDetails(payload); // Call common function
+
+//   // Step 2: Check availability (this will handle both one-time and recurring bookings)
+//   const result = await checkAvailability(contractorId, updatedPayload.startTime, updatedPayload.duration, days, bookingType);
+//   if (!result.available) {
+//     return { message: result.message || 'Slot is unavailable.' }; // Reject booking if unavailable
+//   }
+
+//   // Step 3: Create the booking (either one-time or recurring)
+//   if (bookingType === 'OneTime') {
+//     const booking = await createOneTimeBooking(updatedPayload); // Create one-time booking
+//     return booking;
+//   } else if (bookingType === 'Weekly') {
+//     const booking = await createRecurringBookingIntoDB(updatedPayload); // Create recurring bookings
+//     return booking;
+//   }
+// };
 const createBookingIntoDB = async (payload: TBooking) => {
-  const { bookingType, contractorId, days, periodInDays } = payload;
-  console.log(periodInDays, 'periodInDays');
+  const { bookingType, contractorId, day } = payload;
+
   // Step 1: Get booking details (end time, price, rateHourly, etc.)
   const updatedPayload = await getBookingDetails(payload); // Call common function
 
   // Step 2: Check availability (this will handle both one-time and recurring bookings)
-  const result = await checkAvailability(contractorId, updatedPayload.startTime, updatedPayload.duration, days, bookingType);
+  const result = await checkAvailability(contractorId, updatedPayload.startTime, day, bookingType);
   if (!result.available) {
     return { message: result.message || 'Slot is unavailable.' }; // Reject booking if unavailable
   }
 
   // Step 3: Create the booking (either one-time or recurring)
-  if (bookingType === 'Just Once') {
+  if (bookingType === 'OneTime') {
     const booking = await createOneTimeBooking(updatedPayload); // Create one-time booking
     return booking;
   } else if (bookingType === 'Weekly') {
@@ -95,7 +116,7 @@ const createBookingIntoDB = async (payload: TBooking) => {
 };
 
 // Function to check availability for both one-time and recurring bookings
-const checkAvailability = async (contractorId: any, startTime: any, duration: any, days: any, bookingType: any) => {
+const checkAvailability = async (contractorId: any, startTime: any, days: any, bookingType: any) => {
   const requestedTimeSlots = generateTimeSlots(startTime, addOneHour(startTime));
 
   const schedule = await MySchedule.findOne({ contractorId });
@@ -105,7 +126,7 @@ const checkAvailability = async (contractorId: any, startTime: any, duration: an
     let daySchedule;
     
     // Convert specific date to day name if one-time booking
-    if (bookingType === 'Just Once') {
+    if (bookingType === 'OneTime') {
       const requestedDay = getDayName(day); // Convert to day name
       daySchedule = schedule.schedules.find((s) => s.days === requestedDay);
     } 
@@ -148,38 +169,116 @@ const createOneTimeBooking = async (updatedPayload: TBooking) => {
 };
 
 // Function to create recurring bookings (for weekly or monthly)
-const createRecurringBookingIntoDB = async (updatedPayload: TBooking) => {
-  const { startTime, days, contractorId, periodInDays } = updatedPayload;
-  // Calculate end time and price (common logic)
-  const updatedBooking = await getBookingDetails(updatedPayload);
+// const createRecurringBookingIntoDB = async (updatedPayload: TBooking | any) => {
+//   const { startTime, day: days, contractorId, periodInDays } = updatedPayload;
+//   // Calculate end time and price (common logic)
+
+
+//   // const updatedBooking = await getBookingDetails(updatedPayload);
+
+//   const futureBookings: any[] = [];
+//   const currentDate = new Date();
+
+//  // Calculate the number of weeks to loop (periodInDays / 7)
+//   const numOfWeeks = periodInDays / 7;
+//       console.log('numOfWeeks', numOfWeeks)
+//   // Create future recurring bookings for the selected days
+//   for (let i = 0; i < numOfWeeks; i++) {
+//           console.log('time loop', i)
+
+//     const bookingDate = new Date(currentDate);
+//     bookingDate.setDate(bookingDate.getDate() + (i * 7)); // 7 days for weekly recurrence
+//       console.log('bookingDate', bookingDate)
+
+//     for (const day of days) {
+//       const daySchedule = await MySchedule.findOne({ contractorId });
+//       console.log('daySchedule', daySchedule)
+//       const requestedTimeSlots = generateTimeSlots(startTime, updatedPayload.endTime);
+//             console.log('requestedTimeSlots', requestedTimeSlots)
+
+//       const bookingPayload = {
+//         ...updatedPayload,
+//         day:day,
+//         bookingDate,
+//         timeSlots: requestedTimeSlots,
+//         recurring: true,
+//       };
+//       futureBookings.push(bookingPayload);
+//     }
+//   }
+//     console.log('futureBookings', futureBookings)
+
+//   // Check for conflicts with existing bookings before creating future bookings
+//   for (const booking of futureBookings) {
+//     const existingBooking = await Booking.findOne({
+//       contractorId,
+//       bookingDate: booking.bookingDate,
+//       status: { $ne: 'cancelled' },
+//     });
+
+//     console.log('existingBooking', existingBooking)
+//     if (existingBooking) throw new Error('Slot is already booked for the requested date');
+//     await Booking.create(booking); // Create new recurring booking
+//   }
+
+//   return futureBookings; // Return the created recurring bookings
+// };
+
+const createRecurringBookingIntoDB = async (updatedPayload: TBooking | any) => {
+  const { startTime, day: days, contractorId, periodInDays, endTime } = updatedPayload;
 
   const futureBookings: any[] = [];
-  const currentDate = new Date();
 
- // Calculate the number of weeks to loop (periodInDays / 7)
-  const numOfWeeks = periodInDays / 7;
+  // Normalize today to UTC midnight
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  // Start from tomorrow
+  const startDate = new Date(today);
 
-  // Create future recurring bookings for the selected days
-  for (let i = 0; i < numOfWeeks; i++) {
-    const bookingDate = new Date(currentDate);
-    bookingDate.setDate(bookingDate.getDate() + (i * 7)); // 7 days for weekly recurrence
+  startDate.setDate(startDate.getDate() + 1);
+
+  // End at 30 days from tomorrow (not including today)
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + periodInDays);
+
+  // Map day names to weekday numbers
+  const dayNameToNumber: Record<string, number> = {
+    Sunday: 0,
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6,
+  };
+
+  // Loop from tomorrow to endDate (inclusive)
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const currentWeekday = d.getDay();
 
     for (const day of days) {
-      const daySchedule = await MySchedule.findOne({ contractorId });
-      console.log('daySchedule', daySchedule)
-      const requestedTimeSlots = generateTimeSlots(startTime, updatedBooking.endTime);
-      const bookingPayload = {
-        ...updatedBooking,
-        days:day,
-        bookingDate,
-        timeSlots: requestedTimeSlots,
-        recurring: true,
-      };
-      futureBookings.push(bookingPayload);
+      const targetWeekday = dayNameToNumber[day];
+      if (currentWeekday === targetWeekday) {
+        const bookingDate = new Date(d);
+        bookingDate.setUTCHours(0, 0, 0, 0);
+
+        const requestedTimeSlots = generateTimeSlots(startTime, endTime);
+        const bookingPayload = {
+          ...updatedPayload,
+          day,
+          bookingDate,
+          timeSlots: requestedTimeSlots,
+          recurring: true,
+        };
+     
+            if(bookingDate.getDate() !== startDate.getDate()) {
+              futureBookings.push(bookingPayload);
+            }
+      }
     }
   }
 
-  // Check for conflicts with existing bookings before creating future bookings
+  // Optional: Check for conflicts and create bookings
   for (const booking of futureBookings) {
     const existingBooking = await Booking.findOne({
       contractorId,
@@ -187,12 +286,19 @@ const createRecurringBookingIntoDB = async (updatedPayload: TBooking) => {
       status: { $ne: 'cancelled' },
     });
 
-    if (existingBooking) throw new Error('Slot is already booked for the requested date');
-    await Booking.create(booking); // Create new recurring booking
+    if (existingBooking) {
+      throw new Error(
+        `Slot already booked on ${booking.bookingDate.toISOString()}`
+      );
+    }
+    
+    await Booking.create(booking);
   }
 
-  return futureBookings; // Return the created recurring bookings
+  return futureBookings;
 };
+
+
 
 // Cron job for automatic renewal of recurring bookings for Customer A
 
@@ -238,7 +344,7 @@ const checkAvailabilityIntoDB = async (contractorId: any, startTime: any, durati
     let daySchedule;
     
     // Convert specific date to day name if one-time booking
-    if (bookingType === 'Just Once') {
+    if (bookingType === 'OneTime') {
       const requestedDay = getDayName(day); // Convert to day name
       daySchedule = schedule.schedules.find((s) => s.days === requestedDay);
     } 

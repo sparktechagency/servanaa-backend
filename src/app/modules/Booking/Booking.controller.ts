@@ -5,8 +5,6 @@ import { BookingServices } from './Booking.service';
 
 const createBooking = catchAsync(async (req, res) => {
   const booking = req.body;
-  // console.log(booking, 'booking');
-  // return
   const result = await BookingServices.createBookingIntoDB(booking);
 
   sendResponse(res, {

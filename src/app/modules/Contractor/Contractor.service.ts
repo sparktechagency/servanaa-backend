@@ -47,7 +47,7 @@ const checkAvailabilityForContractor = async (
   bookingType: string,
   periodInDays: number
 ) => {
-
+console.log(contractorId, 'contractorId')
 
 if (!mongoose.Types.ObjectId.isValid(contractorId)) {
   console.log('Invalid contractorId provided');
@@ -90,22 +90,32 @@ if (!mongoose.Types.ObjectId.isValid(contractorId)) {
 
    // For weekly booking, check availability for each of the selected days and their future dates
   else if (bookingType === 'weekly') {
+    console.log( 'weekly')
+    console.log( 'days', days)
+    console.log( 'periodInDays', periodInDays)
     const numOfWeeks = periodInDays / 7; // Calculate the number of weeks based on periodInDays
+    console.log( 'numOfWeeks', numOfWeeks)
 
     for (let i = 0; i < numOfWeeks; i++) {
       const bookingDate = new Date(); // Current date
       bookingDate.setDate(bookingDate.getDate() + (i * 7)); // Add 7 days for weekly recurrence
+    console.log( 'bookingDate', bookingDate)
 
-      for (const day of days) {
-        const daySchedule = schedule.schedules.find(s => s.days === day);
-        if (!daySchedule) throw new Error(`Contractor is not available on ${day}`);
+const daysArray = Array.isArray(days) ? days : [days];
+
+      for (const d of daysArray) {
+            console.log( 'day=======', d, 'days', days)
+
+        const daySchedule = schedule.schedules.find(s => s.days === d);
+                  console.log( 'day', d)
+        if (!daySchedule) throw new Error(`Contractor is not available on ${d}`);
 
         const unavailableSlots = requestedTimeSlots.filter(
           slot => !daySchedule.timeSlots.includes(slot)
         );
 
         if (unavailableSlots.length > 0) {
-          return { available: false, message: `Requested slots for ${day} are unavailable.` };
+          return { available: false, message: `Requested slots for ${d} are unavailable.` };
         }
 
         // Check for existing bookings for each weekly recurrence
@@ -116,7 +126,7 @@ if (!mongoose.Types.ObjectId.isValid(contractorId)) {
         });
 
         if (existingBooking) {
-          return { available: false, message: `Time slot for ${day} is already booked.` };
+          return { available: false, message: `Time slot for ${d} is already booked.` };
         }
       }
     }
@@ -126,109 +136,121 @@ if (!mongoose.Types.ObjectId.isValid(contractorId)) {
 
 
 
-// const getAllAvailableContractorsFromDB = async (query: Record<string, unknown>) => {
-//   const { bookingType, startTime, duration, days, skills, skillsCategory, periodInDays, endTime } = query;
-//   const futureBookings: any[] = [];
-//   console.log(futureBookings, 'futureBookings')
-  
-//   // Find contractors based on skills and category filters
-//   const contractors = await Contractor.find({
-//     skills: skills,
-//     skillsCategory: skillsCategory,
-//   });
-
-//   // Array to hold available contractors
-//   const availableContractors = [];
-
-//   for (const contractor of contractors) {
-//     const availability = await checkAvailabilityForContractor(
-//       contractor._id.toString(),
-//       startTime as string,
-//       endTime as string,
-//       duration as number,
-//       days as string | string[], 
-//       bookingType as string,
-//       periodInDays as number // Added periodInDays for weekly checks
-//     );
-
-//     if (availability.available) {
-//       availableContractors.push(contractor);
-//     }
-//   }
-
-//   return {
-//     result: availableContractors,
-//     meta: {
-//       total: availableContractors.length,
-//     },
-//   };
-//   // const ContractorQuery = new QueryBuilder(
-//   //   Contractor.find(),
-//   //   query,
-//   // )
-//   //   .search(CONTRACTOR_SEARCHABLE_FIELDS)
-//   //   .filter()
-//   //   .sort()
-//   //   .paginate()
-//   //   .fields();
-
-//   // const result = await ContractorQuery.modelQuery;
-//   // const meta = await ContractorQuery.countTotal();
-//   // return {
-//   //   result,
-//   //   meta,
-//   // };
-// };
-
 const getAllAvailableContractorsFromDB = async (query: Record<string, unknown>) => {
-  console.log(query, 'query')
-
-
   const { bookingType, startTime, duration, days, skills, skillsCategory, periodInDays, endTime } = query;
+  const futureBookings: any[] = [];
+  console.log(futureBookings, 'futureBookings')
   
-  // Use QueryBuilder for basic querying: skills, skillsCategory, etc.
-  const ContractorQuery = new QueryBuilder(
-    Contractor.find({
+  // Find contractors based on skills and category filters
+  const contractors = await Contractor.find({
     skills: skills,
     skillsCategory: skillsCategory,
-  }),
-    query
-  )
-    .search(['skills', 'skillsCategory']) // Adjust this as per your fields
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
+  }).populate('myScheduleId');
+  console.log(contractors, 'contractors')
 
-  const contractors = await ContractorQuery.modelQuery; // Retrieve contractors
-  const meta = await ContractorQuery.countTotal();
+  // Array to hold available contractors
+  const availableContractors: any = [];
+  console.log(availableContractors, 'availableContractors')
 
-  const availableContractors = [];
-
-  // Now check availability manually using the contractor's schedule
   for (const contractor of contractors) {
-    // Call the checkAvailabilityForContractor for each contractor
     const availability = await checkAvailabilityForContractor(
       contractor._id.toString(),
       startTime as string,
       endTime as string,
       duration as number,
-      days as string | string[],
+      days as string[], 
       bookingType as string,
-      periodInDays as number
+      periodInDays as number // Added periodInDays for weekly checks
     );
 
-    // If the contractor is available, add them to the list
     if (availability.available) {
       availableContractors.push(contractor);
     }
   }
+  console.log(availableContractors, 'availableContractors')
 
   return {
     result: availableContractors,
-    meta, // Include pagination meta-data
+    meta: {
+      total: availableContractors.length,
+    },
   };
+  // const ContractorQuery = new QueryBuilder(
+  //   Contractor.find(),
+  //   query,
+  // )
+  //   .search(CONTRACTOR_SEARCHABLE_FIELDS)
+  //   .filter()
+  //   .sort()
+  //   .paginate()
+  //   .fields();
+
+  // const result = await ContractorQuery.modelQuery;
+  // const meta = await ContractorQuery.countTotal();
+  // return {
+  //   result,
+  //   meta,
+  // };
 };
+
+// const getAllAvailableContractorsFromDB = async (query: Record<string, unknown>) => {
+//   console.log(query, 'query')
+
+//   const { bookingType, startTime, duration, days, skills, skillsCategory, periodInDays, endTime } = query;
+  
+//   // Use QueryBuilder for basic querying: skills, skillsCategory, etc.
+//   const ContractorQuery = new QueryBuilder(
+//     Contractor.find({
+//     skills: skills,
+//     skillsCategory: skillsCategory,
+//   }),
+//     query
+//   )
+//     .search(['skills', 'skillsCategory']) // Adjust this as per your fields
+//     .filter()
+//     .sort()
+//     .paginate()
+//     .fields();
+//   console.log(ContractorQuery, 'ContractorQuery')
+
+//   const contractors = await ContractorQuery.modelQuery; // Retrieve contractors
+//     console.log(contractors, 'contractors')
+
+//   const meta = await ContractorQuery.countTotal();
+//     console.log(meta, 'meta')
+
+//   const availableContractors: any = [];
+//     console.log(availableContractors, 'availableContractors')
+
+//   // Now check availability manually using the contractor's schedule
+//   for (const contractor of contractors) {
+//         console.log(contractor, 'contractor')
+
+//     // Call the checkAvailabilityForContractor for each contractor
+//     const availability = await checkAvailabilityForContractor(
+//       contractor._id.toString(),
+//       startTime as string,
+//       endTime as string,
+//       duration as number,
+//       days as string | string[],
+//       bookingType as string,
+//       periodInDays as number
+//     );
+
+//     // If the contractor is available, add them to the list
+//     if (availability.available) {
+//       console.log(contractor, 'contractor inside')
+
+//       availableContractors.push(contractor);
+//     }
+//   }
+//       console.log(availableContractors, 'availableContractors')
+
+//   return {
+//     result: availableContractors,
+//     meta, // Include pagination meta-data
+//   };
+// };
 
 
 
