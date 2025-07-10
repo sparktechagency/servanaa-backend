@@ -303,6 +303,7 @@ function removeArrayItems<T>(existing: T[] = [], toRemove: T[] = [], key?: keyof
 }
 
 const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: any) => {
+    //  console.log('id=========', id)
   const userDataToUpdate = extractFields(payload || {}, userFields);
  
 
