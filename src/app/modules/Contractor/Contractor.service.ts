@@ -42,23 +42,30 @@ const checkAvailabilityForContractor = async (
   contractorId: string,
   startTime: string,
   endTime: string,
-  duration: number,
-  days: string | string[],
+  // duration: number,
+  days: any,
   bookingType: string,
   periodInDays: number
 ) => {
-console.log(contractorId, 'contractorId')
+    // console.log( 'contractorId', contractorId)
+    // console.log( 'startTime', startTime)
+    // console.log( 'endTime', endTime)
+    // console.log( 'days', days)
+    // console.log( 'bookingType', bookingType)
+    // console.log( 'periodInDays', periodInDays)
 
-if (!mongoose.Types.ObjectId.isValid(contractorId)) {
-  console.log('Invalid contractorId provided');
-  return { available: false, message: 'Invalid contractorId provided' };
-}
+// if (!mongoose.Types.ObjectId.isValid(contractorId)) {
+//   console.log('Invalid contractorId provided');
+//   return { available: false, message: 'Invalid contractorId provided' };
+// }
 
 
   // console.log(bookingType, 'bookingType');
   const requestedTimeSlots = generateTimeSlots(startTime, endTime);
   const schedule = await MySchedule.findOne({ contractorId });
-  
+      console.log( 'requestedTimeSlots', requestedTimeSlots)
+      console.log( 'schedule', schedule)
+
   if (!schedule) throw new Error('Contractor schedule not found');
 
   // For one-time booking, check for specific date availability
@@ -90,34 +97,34 @@ if (!mongoose.Types.ObjectId.isValid(contractorId)) {
 
    // For weekly booking, check availability for each of the selected days and their future dates
   else if (bookingType === 'weekly') {
-    console.log( 'weekly')
-    console.log( 'days', days)
-    console.log( 'periodInDays', periodInDays)
+
     const numOfWeeks = periodInDays / 7; // Calculate the number of weeks based on periodInDays
-    console.log( 'numOfWeeks', numOfWeeks)
+    console.log( 'weekly')
+    console.log( 'numOfWeeks', numOfWeeks)    
 
     for (let i = 0; i < numOfWeeks; i++) {
       const bookingDate = new Date(); // Current date
       bookingDate.setDate(bookingDate.getDate() + (i * 7)); // Add 7 days for weekly recurrence
     console.log( 'bookingDate', bookingDate)
 
-const daysArray = Array.isArray(days) ? days : [days];
+    // const daysArray = Array.isArray(days) ? days : [days];
 
-      for (const d of daysArray) {
-            console.log( 'day=======', d, 'days', days)
+      for (const oneday of days) {
+            console.log( 'day=======', oneday, 'days', days)
 
-        const daySchedule = schedule.schedules.find(s => s.days === d);
-                  console.log( 'day', d)
-        if (!daySchedule) throw new Error(`Contractor is not available on ${d}`);
+        const daySchedule = schedule.schedules.find(s => s.days === oneday);
+                  console.log( 'daySchedule', daySchedule)
+        if (!daySchedule) throw new Error(`Contractor is not available on ${oneday}`);
 
         const unavailableSlots = requestedTimeSlots.filter(
           slot => !daySchedule.timeSlots.includes(slot)
         );
 
         if (unavailableSlots.length > 0) {
-          return { available: false, message: `Requested slots for ${d} are unavailable.` };
+          // return { available: false, message: `Requested slots for ${oneday} are unavailable.` };
+          throw new Error(`Requested slots for ${oneday} are unavailable.`)
         }
-
+          console.log( 'bookingDate', bookingDate, 'final for testing')
         // Check for existing bookings for each weekly recurrence
         const existingBooking = await Booking.findOne({
           contractorId,
@@ -126,39 +133,79 @@ const daysArray = Array.isArray(days) ? days : [days];
         });
 
         if (existingBooking) {
-          return { available: false, message: `Time slot for ${d} is already booked.` };
+          return { available: false, message: `Time slot for ${oneday} is already booked.` };
         }
       }
     }
   }
+
+  
   return { available: true, message: 'Available' };
 };
 
 
 
 const getAllAvailableContractorsFromDB = async (query: Record<string, unknown>) => {
-  const { bookingType, startTime, duration, days, skills, skillsCategory, periodInDays, endTime } = query;
-  const futureBookings: any[] = [];
-  console.log(futureBookings, 'futureBookings')
+  const { bookingType, startTime, days, skills, skillsCategory, periodInDays, endTime } = query;
+  // const futureBookings: any[] = [];
+  // console.log('futureBookings', futureBookings,)
+  // console.log('bookingType', bookingType,)
+  // console.log('startTime', startTime,)
+  // console.log('duration', duration,)
+  // console.log('days', days,)
+  // console.log('skills', skills,)
+  // console.log('skillsCategory', skillsCategory )
+  // console.log('periodInDays', periodInDays )
+  // console.log('endTime', endTime )
   
   // Find contractors based on skills and category filters
   const contractors = await Contractor.find({
     skills: skills,
     skillsCategory: skillsCategory,
   }).populate('myScheduleId');
-  console.log(contractors, 'contractors')
-
+  // }).populate('myScheduleId');
+  if (contractors.length<=0) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'There is no Contractor for this skills and categories');
+  }
   // Array to hold available contractors
   const availableContractors: any = [];
-  console.log(availableContractors, 'availableContractors')
+  // console.log(availableContractors, 'availableContractors')
+
+
+
+
+let parsedDays: string | string[];
+
+if (bookingType === 'weekly') {
+  // Expecting an array of weekday names
+  try {
+    parsedDays = typeof days === 'string' ? JSON.parse(days) : days;
+    if (!Array.isArray(parsedDays)) throw new Error();
+  } catch {
+    throw new Error('Invalid format for days. Expected an array for weekly booking.');
+  }
+} else if (bookingType === 'oneTime') {
+  // Expecting a string date
+  if (typeof days !== 'string') {
+    throw new Error('Invalid format for days. Expected a string date for oneTime booking.');
+  }
+  parsedDays = days;
+} else {
+  throw new Error('Invalid bookingType');
+}
+
 
   for (const contractor of contractors) {
+  console.log( 'contractor',contractor)
+
+
     const availability = await checkAvailabilityForContractor(
       contractor._id.toString(),
       startTime as string,
       endTime as string,
-      duration as number,
-      days as string[], 
+      // duration as number,
+      parsedDays as any, 
+      // parsedDays as string[], 
       bookingType as string,
       periodInDays as number // Added periodInDays for weekly checks
     );
