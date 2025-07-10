@@ -12,6 +12,7 @@
 // // import { generateTimeSlots, getDayName } from './Booking.utils';
 // // import { generateTimeSlots, getDayName, getNextWeekDayDate } from './Booking.utils';
 // import cron from 'node-cron';
+// import cron from 'node-cron';
 
 // // import { Notification } from '../Notification/Notification.model';
 
@@ -261,6 +262,21 @@
 // cron.schedule('59 23 28-31 * *', async () => {
 //   const currentDate = new Date();
 //         console.log('currentDate', currentDate)
+
+///////////////]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+// Function to fetch customers with recurring bookings
+// const getAllCustomersWithRecurringBookings = async () => {
+//   // Assuming recurring bookings are marked with a "recurring" field set to true
+//   return await Booking.find({ recurring: true }, { contractorId: 1, _id: 1 });
+//   // return await Booking.find({ recurring: true }).distinct('customerId');
+// };
+///////////////]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+
+
+
+
+
+
 
 //   const customers = await getAllCustomersWithRecurringBookings(); // Fetch customers with recurring bookings
 //   for (const customer of customers) {
@@ -781,3 +797,225 @@
 //   await createRecurringBookingIntoDB({ ...existingBookings[0], startDate: newStartDate });
 // };
 ///////////////////////////////////////////////////////////////////////
+// Function to create recurring bookings (for weekly or monthly)
+// const createRecurringBookingIntoDB = async (updatedPayload: TBooking | any) => {
+//   const { startTime, day: days, contractorId, periodInDays } = updatedPayload;
+//   // Calculate end time and price (common logic)
+
+//   // const updatedBooking = await getBookingDetails(updatedPayload);
+
+//   const futureBookings: any[] = [];
+//   const currentDate = new Date();
+
+//  // Calculate the number of weeks to loop (periodInDays / 7)
+//   const numOfWeeks = periodInDays / 7;
+//       console.log('numOfWeeks', numOfWeeks)
+//   // Create future recurring bookings for the selected days
+//   for (let i = 0; i < numOfWeeks; i++) {
+//           console.log('time loop', i)
+
+//     const bookingDate = new Date(currentDate);
+//     bookingDate.setDate(bookingDate.getDate() + (i * 7)); // 7 days for weekly recurrence
+//       console.log('bookingDate', bookingDate)
+
+//     for (const day of days) {
+//       const daySchedule = await MySchedule.findOne({ contractorId });
+//       console.log('daySchedule', daySchedule)
+//       const requestedTimeSlots = generateTimeSlots(startTime, updatedPayload.endTime);
+//             console.log('requestedTimeSlots', requestedTimeSlots)
+
+//       const bookingPayload = {
+//         ...updatedPayload,
+//         day:day,
+//         bookingDate,
+//         timeSlots: requestedTimeSlots,
+//         recurring: true,
+//       };
+//       futureBookings.push(bookingPayload);
+//     }
+//   }
+//     console.log('futureBookings', futureBookings)
+
+//   // Check for conflicts with existing bookings before creating future bookings
+//   for (const booking of futureBookings) {
+//     const existingBooking = await Booking.findOne({
+//       contractorId,
+//       bookingDate: booking.bookingDate,
+//       status: { $ne: 'cancelled' },
+//     });
+
+//     console.log('existingBooking', existingBooking)
+//     if (existingBooking) throw new Error('Slot is already booked for the requested date');
+//     await Booking.create(booking); // Create new recurring booking
+//   }
+
+//   return futureBookings; // Return the created recurring bookings
+// };
+// =================================================
+// Main booking service function to handle both one-time and recurring bookings
+// const createBookingIntoDB = async (payload: TBooking) => {
+//   const { bookingType, contractorId, days, periodInDays } = payload;
+//   console.log(periodInDays, 'periodInDays');
+//   // Step 1: Get booking details (end time, price, rateHourly, etc.)
+//   const updatedPayload = await getBookingDetails(payload); // Call common function
+
+//   // Step 2: Check availability (this will handle both one-time and recurring bookings)
+//   const result = await checkAvailability(contractorId, updatedPayload.startTime, updatedPayload.duration, days, bookingType);
+//   if (!result.available) {
+//     return { message: result.message || 'Slot is unavailable.' }; // Reject booking if unavailable
+//   }
+
+//   // Step 3: Create the booking (either one-time or recurring)
+//   if (bookingType === 'OneTime') {
+//     const booking = await createOneTimeBooking(updatedPayload); // Create one-time booking
+//     return booking;
+//   } else if (bookingType === 'Weekly') {
+//     const booking = await createRecurringBookingIntoDB(updatedPayload); // Create recurring bookings
+//     return booking;
+//   }
+// };
+////////////////////////////////////////////////////===========
+// Schedule the cron job to run at 11:59 PM on the last day of the month
+// cron.schedule('59 23 28-31 * *', async () => {
+//   const currentDate = new Date();
+//   console.log('currentDate', currentDate);
+//   const customers = await getAllCustomersWithRecurringBookings(); // Fetch customers with recurring bookings
+//   for (const customer of customers) {
+//     const contractorId = customer?.contractorId;
+//     const customerId = customer._id;
+
+//     // Automatically renew recurring bookings for the next month
+//     await renewRecurringBookingForNextMonth(customerId, contractorId);
+//   }
+
+//   console.log('Recurring bookings for the next month created successfully!');
+// });
+
+// // Function to renew recurring bookings for Customer A after a period ends
+// const renewRecurringBookingForNextMonth = async (
+//   customerId: any,
+//   contractorId: any,
+// ) => {
+//   const existingBookings = await Booking.find({
+//     customerId,
+//     contractorId,
+//     status: { $ne: 'cancelled' },
+//   });
+
+//   const lastBookingDate =
+//     existingBookings[existingBookings.length - 1].bookingDate;
+//   const newStartDate = new Date(lastBookingDate);
+//   newStartDate.setMonth(newStartDate.getMonth() + 1); // Move to the next month
+
+//   // Create new recurring bookings for the next month
+//   await createRecurringBookingIntoDB({
+//     ...existingBookings[0],
+//     startDate: newStartDate,
+//   });
+// };
+////////////////////////////////////////////////////===========
+// Helper functions for time slot generation, day extraction
+// const generateTimeSlots = (startTime: string, endTime: string): string[] => {
+//   const timeSlots = [];
+//   let currentTime = startTime;
+
+//   while (currentTime < endTime) {
+//     const nextTime = addOneHour(currentTime);
+//     timeSlots.push(`${currentTime}-${nextTime}`);
+//     currentTime = nextTime;
+//   }
+
+//   return timeSlots;
+// };
+
+// const addOneHour = (time: string): string => {
+//   const [hours, minutes] = time.split(':').map(Number);
+//   const date = new Date(0, 0, 0, hours, minutes);
+//   date.setHours(date.getHours() + 1);
+//   return `${date.getHours().toString().padStart(2, '0')}:${date
+//     .getMinutes()
+//     .toString()
+//     .padStart(2, '0')}`;
+// };
+////////////////////
+// single booking is working here 
+
+
+// const checkAvailability = async (
+//   contractorId: string,
+//   startTime: string,
+//   endTime: string,
+// days: string | string[], // single date string like "2025-07-14"
+//   bookingType: string,
+// ) => {
+//    console.log('test')
+
+//   const requestedTimeSlots = generateTimeSlots(startTime, endTime);
+//   const schedule = await MySchedule.findOne({ contractorId });
+//   if (!schedule) throw new Error('Contractor schedule not found');
+//    console.log('test2')
+
+//   if (bookingType === 'OneTime') {
+//     console.log('OneTime')
+//     const requestedDate = new Date(days as string); // ex: "2025-07-14"
+//     requestedDate.setUTCHours(0, 0, 0, 0); // normalize to 00:00 UTC
+
+//     const dayName = getDayName(days as string); // "Monday"
+//     const daySchedule = schedule.schedules.find(s => s.days === dayName);
+//     if (!daySchedule) {
+//       return { available: false, message: `Contractor is not available on ${dayName}` };
+//     }
+
+//     const unavailableSlots = requestedTimeSlots.filter(
+//       (slot) => !daySchedule.timeSlots.includes(slot)
+//     );
+//     if (unavailableSlots.length > 0) {
+//       return { available: false, message: 'Requested slots are unavailable.' };
+//     }
+
+//     // ✅ Duplicate check using date and time slot match
+//     const existingBooking = await Booking.findOne({
+//       contractorId,
+//       bookingDate: requestedDate, // must match exactly (normalized date)
+//       timeSlots: { $in: requestedTimeSlots }, // any overlap
+//       status: { $ne: 'cancelled' },
+//     });
+
+//     if (existingBooking) {
+//       return { available: false, message: 'Time slot is already booked.' };
+//     }
+
+//     return { available: true };
+//   }
+
+//   // Weekly check — your existing logic can stay
+//     if (bookingType === 'weekly') {
+//       console.log(days, 'test3')
+//     for (const day of days) {
+//     const daySchedule = schedule.schedules.find((s) => s.days === day);
+//       if (!daySchedule) throw new Error(`Contractor is not available on ${day}`);
+
+//       const unavailableSlots = requestedTimeSlots.filter(
+//         (slot) => !daySchedule.timeSlots.includes(slot),
+//       );
+//       if (unavailableSlots.length > 0) {
+//         throw new Error('Requested slots are unavailable.');
+//       }
+//     }
+
+//       // Check for overlapping bookings for future recurring or one-time slots
+//   const existingBooking = await Booking.findOne({
+//     contractorId,
+//     days: { $in: days }, // This checks if the requested day matches any day in the booking collection
+//     startTime: { $gte: startTime, $lte: addOneHour(startTime) }, // Compare time range
+//     status: { $ne: 'cancelled' },
+//   });
+
+//   if (existingBooking) {
+//     return { available: false, message: 'Time slot is already booked.' };
+//   }
+//     }
+// };
+/////////////
+// for the get availale contractors
+// {{AMA}}/contractors/available?bookingType=weekly&startTime=14:00&endTime=15:00&duration=1&days=["Monday", "Saturday"]&skills=Electrician&skillsCategory=Electrical&periodInDays=30j

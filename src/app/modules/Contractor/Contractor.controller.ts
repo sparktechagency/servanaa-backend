@@ -31,7 +31,6 @@ const getAllContractors = catchAsync(async (req, res) => {
 });
 const getAllAvailableContractors = catchAsync(async (req, res) => {
     // const subCategory = req.body;
-    console.log('controller')
   const result = await ContractorServices.getAllAvailableContractorsFromDB(req.query);
   // const result = await ContractorServices.getAllContractorsFromDB(subCategory, req.query);
 
@@ -39,7 +38,7 @@ const getAllAvailableContractors = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Contractors are retrieved successfully',
-    meta: result.meta,
+    // meta: result.meta,
     data: result.result,
   });
 });
