@@ -139,7 +139,12 @@ const getMe = async (userEmail: string) => {
      throw new Error('User is Blocked'); 
   }else{
   if (user?.role === 'contractor') {
-    await user.populate('contractor');  // Populating contractor data
+    await user.populate({
+  path: 'contractor',
+  populate: {
+    path: 'myScheduleId'
+  }
+}); // Populating contractor data
   } else if (user?.role === 'customer') {
     await user.populate('customer');  // Populating customer data
   }
@@ -350,7 +355,8 @@ const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: an
     }
 
     // mySchedule
-    const existingSchedule = existingContractor?.mySchedule || [];
+    // const existingSchedule = existingContractor?.myScheduleId || [];
+   const existingSchedule = Array.isArray(existingContractor?.myScheduleId) ? existingContractor.myScheduleId : [existingContractor.myScheduleId];
     const addedSchedule = add.mySchedule || [];
     const removedSchedule = remove.mySchedule || [];
 
