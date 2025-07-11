@@ -72,8 +72,8 @@ const getRecentChats = async (req: Request, res: Response) => {
 };
 
 const getAllChats = catchAsync(async (req, res) => {
-  const { userId, chatId } = req.params; 
-  const result = await ChatServices.getAllChatsFromDB(userId, chatId);
+  const { id } = req.params; 
+  const result = await ChatServices.getAllChatsFromDB(id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

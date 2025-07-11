@@ -52,15 +52,20 @@ const getUnreadMessagesCountFromDB = async (receiverId: string) => {
 //   return { result, meta };
 // };
 
-const getAllChatsFromDB = async (userId: string, chatId: string) => {
-  return await Chat.find({
-    $or: [
-      { sender: userId, receiver: chatId },
-      { receiver: userId, sender: chatId },
-    ],
-  })
+const getAllChatsFromDB = async (id: string) => {
+  const messages = await Chat.find({
+    chatRoomId: id
+  }).sort({ createdAt: 1 })
+  // return await Chat.find({
+  //   $or: [
+  //     { sender: userId, receiver: chatId },
+  //     { receiver: userId, sender: chatId },
+  //   ],
+  // })
   .sort({ createdAt: -1 }) // Sort by the most recent message
-  .populate("sender receiver", "name image");  // Populate sender and receiver details
+  // .populate("sender receiver", "name image");  // Populate sender and receiver details
+
+  return messages;
 };
 
 

@@ -1018,4 +1018,4 @@
 // };
 /////////////
 // for the get availale contractors
-// {{AMA}}/contractors/available?bookingType=weekly&startTime=14:00&endTime=15:00&duration=1&days=["Monday", "Saturday"]&skills=Electrician&skillsCategory=Electrical&periodInDays=30j
+// {{AMA}}/contractors/available?bookingType=weekly&startTime=14:00&endTime=15:00&duration=1&days=["Monday", "Saturday"]&skills=Electrician&skillsCategory=Electrical&periodInDays=30
