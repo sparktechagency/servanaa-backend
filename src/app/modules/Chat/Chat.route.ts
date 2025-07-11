@@ -43,7 +43,7 @@ router.delete(
 );
 
 router.get(
-  '/messages/:userId/:chatId',
+  '/:id/messages',
   ChatControllers.getAllChats,
 );
 

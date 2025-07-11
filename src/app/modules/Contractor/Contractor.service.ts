@@ -142,15 +142,17 @@ const existingBooking = await Booking.findOne({
 
         const daySchedule = schedule.schedules.find(s => s.days === oneday);
                   console.log( 'daySchedule', daySchedule)
-        if (!daySchedule) throw new Error(`Contractor is not available on ${oneday}`);
+        if (!daySchedule) {
+          return { available: false, message: `Contractor is not available on ${oneday}` };
+        }
 
         const unavailableSlots = requestedTimeSlots.filter(
           slot => !daySchedule.timeSlots.includes(slot)
         );
 
         if (unavailableSlots.length > 0) {
-          // return { available: false, message: `Requested slots for ${oneday} are unavailable.` };
-          throw new Error(`Requested slots for ${oneday} are unavailable.`)
+          return { available: false, message: `Requested slots for ${oneday} are unavailable.` };
+          // throw new Error(`Requested slots for ${oneday} are unavailable.`)
         }
           console.log( 'bookingDate', bookingDate, 'final for testing')
         // Check for existing bookings for each weekly recurrence
@@ -173,6 +175,7 @@ const existingBooking = await Booking.findOne({
 
 const getAllAvailableContractorsFromDB = async (query: Record<string, unknown>) => {
   const { bookingType, startTime, days, skills, skillsCategory, periodInDays, endTime } = query;
+
   // const futureBookings: any[] = [];
   // console.log('futureBookings', futureBookings,)
   // console.log('bookingType', bookingType,)
@@ -221,9 +224,10 @@ if (bookingType === 'weekly') {
   throw new Error('Invalid bookingType');
 }
 
+  console.log( 'contractors',contractors)
 
   for (const contractor of contractors) {
-  console.log( 'contractor',contractor)
+  console.log( 'contractor main',contractor)
 
 
     const availability = await checkAvailabilityForContractor(
@@ -396,5 +400,4 @@ export const ContractorServices = {
   updateContractorIntoDB,
   deleteContractorFromDB,
   getAllAvailableContractorsFromDB,
-  checkAvailabilityForContractor 
 };
