@@ -9,6 +9,7 @@ import { TBooking } from './Booking.interface';
 import { Booking } from './Booking.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import { addOneHour, checkAvailability, createOneTimeBooking, createRecurringBookingIntoDB, generateTimeSlots, getBookingDetails, getDayName } from './Booking.utils';
+import { User } from '../User/user.model';
 
 
 const createBookingIntoDB = async (payload: TBooking) => {
@@ -104,6 +105,34 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
     meta,
   };
 };
+const getAllBookingsByUserFromDB = async (query: Record<string, unknown>, user: any) => {
+
+
+const  usr =  await User.findOne({email:user.userEmail}).select('_id role');
+console.log('usr', usr)
+const b:any = {};
+
+  if (user.role === 'customer') {
+    b.customerId = usr?._id;
+  }
+
+  if (user.role === 'contractor') {
+    b.contractorId = usr?._id;
+  }
+
+  const BookingQuery = new QueryBuilder(Booking.find(b).populate('customerId').populate('contractorId'), query)
+    .search(BOOKING_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+  const result = await BookingQuery.modelQuery;
+  const meta = await BookingQuery.countTotal();
+  return {
+    result,
+    meta,
+  };
+};
 
 const getSingleBookingFromDB = async (id: string) => {
   const result = await Booking.findById(id);
@@ -113,11 +142,15 @@ const getSingleBookingFromDB = async (id: string) => {
 const updateBookingIntoDB = async (id: string, payload: any) => {
   const booking = await Booking.findById(id);
   if (!booking) throw new Error('Booking not found');
+
+
   if (booking.isDeleted) throw new Error('Cannot update a deleted Booking');
+  console.log('payload', payload)
   const updatedData = await Booking.findByIdAndUpdate({ _id: id }, payload, {
     new: true,
     runValidators: true,
   });
+  console.log('updatedData', updatedData)
 
   if (!updatedData) {
     throw new Error('Booking cannot update');
@@ -162,5 +195,5 @@ export const BookingServices = {
   deleteBookingFromDB,
   updatePaymentStatusIntoDB,
   checkAvailabilityIntoDB,
-  // getAllBookingsByUserFromDB
+  getAllBookingsByUserFromDB
 };

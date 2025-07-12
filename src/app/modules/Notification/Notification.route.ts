@@ -21,6 +21,11 @@ router.patch(
   validateRequest(updateNotificationValidationSchema),
   NotificationControllers.updateNotification,
 );
+router.patch(
+  '/:id',
+  validateRequest(updateNotificationValidationSchema),
+  NotificationControllers.updateNotification,
+);
 
 router.delete(
   '/:id',

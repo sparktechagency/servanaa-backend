@@ -8,13 +8,12 @@
 // Term
 // Privacy
 // cancel policy
-
-// availability
 // notifcation 
+// availability
 // help and support
 // booking
-
 // chat
+
 // payment
 // Transaction History
 // ratings 

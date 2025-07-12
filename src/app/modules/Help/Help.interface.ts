@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 export type THelp = {
   userId: Types.ObjectId;
   clientMessage: string;
-  adminMessage: string;
+  adminMessage?: string;
   isDeleted: boolean;
 };
 
