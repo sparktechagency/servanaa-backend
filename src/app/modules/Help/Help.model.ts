@@ -3,8 +3,8 @@ import { Schema, model } from 'mongoose';
       
       const HelpSchema = new Schema<THelp, HelpModel>({
         userId: {type: Schema.Types.ObjectId, ref: "User", required: true },
-        clientMessage: { type: String },
-        adminMessage: { type: String, required: true },
+        clientMessage: { type: String, required: true },
+        adminMessage: { type: String },
         isDeleted: { type: Boolean, default: false },
       });
       

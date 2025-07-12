@@ -1,7 +1,8 @@
 import express from 'express';
 import { BookingControllers } from './Booking.controller';
 import validateRequest from '../../middlewares/validateRequest';
-import { bookingValidationSchema, updateBookingValidationSchema } from './Booking.validation';
+import { bookingValidationSchema } from './Booking.validation';
+// import { bookingValidationSchema, updateBookingValidationSchema } from './Booking.validation';
 import auth from '../../middlewares/auth';
 import { USER_ROLE } from '../User/user.constant';
 
@@ -15,18 +16,25 @@ router.post(
 );
 
 router.get(
+  '/all-bookings-by-user',
+  auth(USER_ROLE.superAdmin,  USER_ROLE.customer, USER_ROLE.contractor),
+  BookingControllers.getAllBookingsByUser,
+);
+
+router.get(
   '/:id',
   BookingControllers.getSingleBooking,
 );
 
 router.patch(
   '/payment-status-update/:id',
+  auth(USER_ROLE.superAdmin , USER_ROLE.customer, USER_ROLE.contractor),
   // validateRequest(updateBookingValidationSchema),
   BookingControllers.updatePaymentStatus,
 );
 router.patch(
   '/:id',
-  validateRequest(updateBookingValidationSchema),
+  // validateRequest(updateBookingValidationSchema),
   BookingControllers.updateBooking,
 );
 
@@ -39,9 +47,6 @@ router.get(
   '/',
   BookingControllers.getAllBookings,
 );
-// router.get(
-//   '/',
-//   BookingControllers.getAllBookingsByUser,
-// );
+
 
 export const BookingRoutes = router;

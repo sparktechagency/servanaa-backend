@@ -38,21 +38,22 @@ const getAllBookings = catchAsync(async (req, res) => {
     data: result.result,
   });
 });
-// const getAllBookingsByUser = catchAsync(async (req, res) => {
-//   const result = await BookingServices.getAllBookingsByUserFromDB(req.query);
+const getAllBookingsByUser = catchAsync(async (req, res) => {
+  const result = await BookingServices.getAllBookingsByUserFromDB(req.query, req.user);
 
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Bookings are retrieved successfully',
-//     meta: result.meta,
-//     data: result.result,
-//   });
-// });
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Bookings are retrieved successfully',
+    meta: result.meta,
+    data: result.result,
+  });
+});
 
 const updateBooking = catchAsync(async (req, res) => {
   const { id } = req.params;
   const booking = req.body;
+  console.log( "test",booking);
   const result = await BookingServices.updateBookingIntoDB(id, booking);
 
   sendResponse(res, {
@@ -95,5 +96,5 @@ export const BookingControllers = {
   deleteBooking,
   updatePaymentStatus,
 
-  // getAllBookingsByUser
+  getAllBookingsByUser
 };

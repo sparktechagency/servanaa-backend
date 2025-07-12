@@ -9,6 +9,11 @@ import AppError from '../../errors/AppError';
 
 // Create a chat message
 const createChatIntoDB = async (payload: Partial<TChat>) => {
+
+  if(!payload.chatRoomId || !payload.sender || !payload.receiver || !payload.message){
+    throw new AppError(httpStatus.BAD_REQUEST, "Missing required fields");
+  }
+
   const result = await Chat.create(payload);
 
   if (!result) {
@@ -63,7 +68,7 @@ const getAllChatsFromDB = async (id: string) => {
   //     { receiver: userId, sender: chatId },
   //   ],
   // })
-  .sort({ createdAt: -1 }) // Sort by the most recent message
+  // .sort({ createdAt: -1 }) // Sort by the most recent message
   // .populate("sender receiver", "name image");  // Populate sender and receiver details
 
   return messages;
