@@ -53,6 +53,7 @@ const getUnreadMessagesCountFromDB = async (receiverId: string) => {
 // };
 
 const getAllChatsFromDB = async (id: string) => {
+  console.log('id', id)
   const messages = await Chat.find({
     chatRoomId: id
   }).sort({ createdAt: 1 })

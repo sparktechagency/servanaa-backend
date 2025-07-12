@@ -3,6 +3,7 @@ import { Model } from 'mongoose';
 
 export type TChatRoom = {
   participants: string[];
+  isDeleted: boolean;
 };
 
 export interface ChatRoomModel extends Model<TChatRoom> {

@@ -3,6 +3,7 @@ import mongoose, { Schema, model } from 'mongoose';
       
       const ChatRoomSchema = new Schema<TChatRoom, ChatRoomModel>({
          participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+         isDeleted: { type: Boolean, default: false },
       }, { timestamps: true });
       
       ChatRoomSchema.statics.isChatRoomExists = async function (id: string) {

@@ -27,7 +27,22 @@ export const initializeChatSocket = (io: Server) => {
   }
 
   socket.on('sendMessage', async (data) => {
+
+    console.log(data, 'data==')
+    if(data.chatRoomId){
+      // const messages = await Chat.find({
+        //   chatRoomId: data.chatRoomId
+        // }).sort({ createdAt: 1 })
+        // const receiverSocketId = onlineUsers.get(data.receiver);
+        // if (receiverSocketId) {
+          //   io.to(receiverSocketId).emit('newMessage', messages);
+          // }
+          
+          data.chatRoomId = '6871ac67895288e8a3456af2'
+        }
+        console.log( 'after>>>>>', data)
     const message = await Chat.create(data);
+
     const receiverSocketId = onlineUsers.get(data.receiver);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('newMessage', message);

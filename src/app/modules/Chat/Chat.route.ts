@@ -1,8 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
 // import { upload } from '../../utils/upload.ts';
 import { ChatControllers } from './Chat.controller';
-import validateRequest from '../../middlewares/validateRequest';
-import { createChatValidationSchema } from './Chat.validation';
+// import validateRequest from '../../middlewares/validateRequest';
+// import { createChatValidationSchema } from './Chat.validation';
 
 
 const router = express.Router();
@@ -33,7 +33,7 @@ router.post("/read", ChatControllers.markAsRead);
 
 router.post(
   '/create-Chat',
-  validateRequest(createChatValidationSchema),
+  // validateRequest(createChatValidationSchema),
   ChatControllers.createChat,
 );
 
