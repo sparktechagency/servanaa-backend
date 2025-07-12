@@ -11,7 +11,10 @@ router.post(
   // validateRequest(createChatRoomValidationSchema),
   ChatRoomControllers.createChatRoom,
 );
-
+router.get(
+  '/my-chat-list/:id',
+  ChatRoomControllers.getAllMyChatRooms,
+);
 router.get(
   '/:id',
   ChatRoomControllers.getSingleChatRoom,
@@ -32,5 +35,6 @@ router.get(
   '/',
   ChatRoomControllers.getAllChatRooms,
 );
+
 
 export const ChatRoomRoutes = router;

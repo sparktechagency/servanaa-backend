@@ -9,9 +9,10 @@ import { ChatRoom } from './ChatRoom.model';
 const createChatRoomIntoDB = async (
   payload: any,
 ) => {
-
+ 
     const { contractorId, customerId } = payload;
-
+console.log('contractorId', contractorId)
+console.log('customerId', customerId)
   let room = await ChatRoom.findOne({
     participants: { $all: [contractorId, customerId] },
   });
@@ -24,13 +25,31 @@ const createChatRoomIntoDB = async (
   if (!room) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create ChatRoom');
   }
-
+ console.log('room', room)
   return room;
 };
 
 const getAllChatRoomsFromDB = async (query: Record<string, unknown>) => {
   const ChatRoomQuery = new QueryBuilder(
     ChatRoom.find(),
+    query,
+  )
+    .search(CHATROOM_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await ChatRoomQuery.modelQuery;
+  const meta = await ChatRoomQuery.countTotal();
+  return {
+    result,
+    meta,
+  };
+};
+const getAllMyChatRoomsFromDB = async (id: string, query: Record<string, unknown>) => {
+  const ChatRoomQuery = new QueryBuilder(
+    ChatRoom.find( { participants: id } ),
     query,
   )
     .search(CHATROOM_SEARCHABLE_FIELDS)
@@ -102,4 +121,5 @@ export const ChatRoomServices = {
   getSingleChatRoomFromDB,
   updateChatRoomIntoDB,
   deleteChatRoomFromDB,
+  getAllMyChatRoomsFromDB
 };

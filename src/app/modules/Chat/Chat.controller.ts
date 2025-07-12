@@ -7,7 +7,7 @@ import { ChatServices } from './Chat.service';
 import sendResponse from '../../utils/sendResponse';
 
 const createChat = catchAsync(async (req, res) => {
-  const { Chat: ChatData } = req.body;
+  const ChatData = req.body;
   const result = await ChatServices.createChatIntoDB(ChatData);
 
   sendResponse(res, {

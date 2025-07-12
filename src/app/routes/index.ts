@@ -21,6 +21,7 @@ import { NotificationRoutes } from '../modules/Notification/Notification.route';
 import { HelpRoutes } from '../modules/Help/Help.route';
 import { ContractorRoutes } from '../modules/Contractor/Contractor.route';
 import { MyScheduleRoutes } from '../modules/MySchedule/MySchedule.route';
+import { ChatRoomRoutes } from '../modules/ChatRoom/ChatRoom.route';
 
 const router = Router();
 
@@ -40,6 +41,10 @@ const moduleRoutes = [
   {
     path: '/services',
     route: ServiceRoutes,
+  },
+  {
+    path: '/chat-rooms',
+    route: ChatRoomRoutes,
   },
   {
     path: '/chats',

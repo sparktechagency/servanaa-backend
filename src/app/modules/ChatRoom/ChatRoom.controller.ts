@@ -27,6 +27,18 @@ const getSingleChatRoom = catchAsync(async (req, res) => {
   });
 });
 
+const getAllMyChatRooms = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await ChatRoomServices.getAllMyChatRoomsFromDB(id, req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'ChatRooms are retrieved successfully',
+    meta: result.meta,
+    data: result.result,
+  });
+});
 const getAllChatRooms = catchAsync(async (req, res) => {
   const result = await ChatRoomServices.getAllChatRoomsFromDB(req.query);
 
@@ -70,4 +82,5 @@ export const ChatRoomControllers = {
   getAllChatRooms,
   updateChatRoom,
   deleteChatRoom,
+  getAllMyChatRooms
 };
