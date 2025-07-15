@@ -5,6 +5,8 @@ import AppError from '../../errors/AppError';
 import { CHATROOM_SEARCHABLE_FIELDS } from './ChatRoom.constant';
 import mongoose from 'mongoose';
 import { ChatRoom } from './ChatRoom.model';
+import { User } from '../User/user.model';
+import { Chat } from '../Chat/Chat.model';
 
 const createChatRoomIntoDB = async (
   payload: any,
@@ -47,10 +49,32 @@ const getAllChatRoomsFromDB = async (query: Record<string, unknown>) => {
     meta,
   };
 };
-const getAllMyChatRoomsFromDB = async (id: string, query: Record<string, unknown>) => {
+// const getAllMyChatRoomsFromDB = async (id: string, query: Record<string, unknown>) => {
+//   const ChatRoomQuery = new QueryBuilder(
+//     ChatRoom.find( { participants: id } ),
+//     query,
+//   )
+//     .search(CHATROOM_SEARCHABLE_FIELDS)
+//     .filter()
+//     .sort()
+//     .paginate()
+//     .fields();
+
+//   const result = await ChatRoomQuery.modelQuery;
+//   const meta = await ChatRoomQuery.countTotal();
+//   return {
+//     result,
+//     meta,
+//   };
+// };
+
+const getAllMyChatRoomsFromDB = async (
+  userId: string,
+  query: Record<string, unknown>
+) => {
   const ChatRoomQuery = new QueryBuilder(
-    ChatRoom.find( { participants: id } ),
-    query,
+    ChatRoom.find({ participants: userId }),
+    query
   )
     .search(CHATROOM_SEARCHABLE_FIELDS)
     .filter()
@@ -58,13 +82,107 @@ const getAllMyChatRoomsFromDB = async (id: string, query: Record<string, unknown
     .paginate()
     .fields();
 
-  const result = await ChatRoomQuery.modelQuery;
+  const rooms = await ChatRoomQuery.modelQuery;
   const meta = await ChatRoomQuery.countTotal();
+
+  const enrichedRooms = await Promise.all(
+    rooms.map(async (room) => {
+      // Get the "other" participant (not the current user)
+      const otherUserId = room.participants.find(
+        (id: string) => id !== userId
+      );
+
+      if (!otherUserId) {
+        // If somehow user is chatting with themselves or invalid data
+        return {
+          ...room.toObject(),
+          otherUserName: null,
+          otherUserImage: null,
+          lastMessage: null,
+          lastMessageTime: null,
+        };
+      }
+
+      // Fetch user and last message in parallel
+      const [otherUser, lastMessage] = await Promise.all([
+        User.findById(otherUserId).select('fullName img').lean(),
+        Chat.findOne({ chatRoomId: room._id })
+          .sort({ createdAt: -1 })
+          .select('message createdAt')
+          .lean(),
+      ]);
+
+      return {
+        ...room.toObject(),
+        otherUserName: otherUser?.fullName || null,
+        otherUserImage: otherUser?.img || null,
+        lastMessage: lastMessage?.message || null,
+      //  lastMessageTime: lastMessage && lastMessage.createdAt ? new Date(lastMessage.createdAt) : null,
+        lastMessageTime: lastMessage?.createdAt || null,
+      };
+    
+//     return {
+//   ...room.toObject(),
+//   otherUserName: otherUser?.fullName || null,
+//   otherUserImage: otherUser?.img || null,
+//   lastMessage: lastMessage?.message || null,
+//   lastMessageTime: (lastMessage?.createdAt instanceof Date || typeof lastMessage?.createdAt === 'string')
+//     ? new Date(lastMessage.createdAt)
+//     : null,
+// };
+
+    })
+  );
+
   return {
-    result,
+    result: enrichedRooms,
     meta,
   };
 };
+
+
+// const getAllMyChatRoomsFromDB = async (userId: string, query: Record<string, unknown>) => {
+//   const ChatRoomQuery = new QueryBuilder(
+//     ChatRoom.find({ participants: userId }),
+//     query,
+//   )
+//     .search(CHATROOM_SEARCHABLE_FIELDS)
+//     .filter()
+//     .sort()
+//     .paginate()
+//     .fields();
+
+//   const rooms = await ChatRoomQuery.modelQuery;
+//   const meta = await ChatRoomQuery.countTotal();
+
+//   const enrichedRooms = await Promise.all(
+//     rooms.map(async (room) => {
+//       const otherUserId = room.participants.find((id: string) => id !== userId);
+
+
+      
+//     const [otherUser, lastMessage] = await Promise.all([
+//   User.findById(otherUserId).select('fullName img').lean(),
+//   Chat.findOne({ chatRoomId: room._id }).sort({ createdAt: -1 }).select('message createdAt').lean(),
+// ]);
+
+// const lastMessageWithCreatedAt = lastMessage as any;
+
+// return {
+//   ...room.toObject(),
+//   otherUserName: otherUser?.fullName || null,
+//   otherUserImage: otherUser?.img || null,
+//   lastMessage: lastMessageWithCreatedAt.message || null,
+//   lastMessageTime: lastMessageWithCreatedAt.createdAt || null,
+// };
+//     })
+//   );
+
+//   return {
+//     result: enrichedRooms,
+//     meta,
+//   };
+// };
 
 const getSingleChatRoomFromDB = async (id: string) => {
   const result = await ChatRoom.findById(id);
