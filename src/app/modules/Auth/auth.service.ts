@@ -10,6 +10,7 @@ import { createToken, verifyToken } from './auth.utils';
 import config from '../../config/index';
 
 const loginUser = async (payload: TLoginUser) => {
+  console.log(payload, 'req.body');
 
   const user = await User.isUserExistsByCustomEmail(payload.email);
 

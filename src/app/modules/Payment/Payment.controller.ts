@@ -60,7 +60,7 @@ const createPayment = catchAsync(async (req, res) => {
   // const { payment: PaymentData } = req.body;
   // const result = await PaymentServices.createPaymentIntoDB(PaymentData);
   const result = await PaymentServices.createPaymentIntoDB(req.body);
-
+  console.log('result', result)
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

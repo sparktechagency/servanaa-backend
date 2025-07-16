@@ -4,17 +4,12 @@ import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 
 import { Transaction } from './transaction.model';
-import { Actor } from '../Actor/actor.model';
 import { TTransaction } from './transaction.interface';
 import Stripe from 'stripe';
 import { withdrawRequestSearchableFields } from './transaction.constant';
 import QueryBuilder from '../../builder/QueryBuilder';
 import config from '../../config';
 // import mongoose from 'mongoose';
-import { Competition } from '../Competetion/competetion.model';
-import { PaymentServices } from '../storeCOde/stripePaymentService';
-import { CompetitionResult } from '../CompetitionResult/competetionResult.model';
-import { RevenueSharingActor } from '../RevenueSharingToActor/competetionResult.model';
 const stripe = new Stripe(config.stripe_secret_key as string);
 
 const createSingleTransactionIntoDB = async (
@@ -23,26 +18,26 @@ const createSingleTransactionIntoDB = async (
 ) => {
 
 
-  let actor = null;
+  // let actor = null;
 
   if (user.role === 'actor') {
-    actor = await Actor.findOne({ email: user.userEmail }).populate('userId');
+    // actor = await Actor.findOne({ email: user.userEmail }).populate('userId');
   }
 
 
-  if (!actor) {
-    throw new AppError(
-      httpStatus.CONFLICT,
-      "Actor not found"
-    );
-  }
+  // if (!actor) {
+  //   throw new AppError(
+  //     httpStatus.CONFLICT,
+  //     "Actor not found"
+  //   );
+  // }
 
 
 
-  const competition = await Competition.findById(payload.competitionId);
+  // const competition = await Competition.findById(payload.competitionId);
 
-  payload.amount = competition?.entryFee as string
-  payload.actorId = actor?._id
+  // payload.amount = competition?.entryFee as string
+  // payload.actorId = actor?._id
 
 
 

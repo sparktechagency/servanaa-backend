@@ -8,6 +8,8 @@ export type TChat = {
   message: string;
   image?: string;
   isRead: boolean;
+  createdAt?: Date; // <-- add this
+  updatedAt?: Date; // <-- optional but recommended
 }
 
 export interface ChatModel extends Model<TChat> {
