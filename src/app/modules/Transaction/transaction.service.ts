@@ -84,17 +84,17 @@ const updateSingleTransactionIntoDB = async (
   });
 
   if (result) {
-    const competitionResultData = await CompetitionResult.findOne({ competitionId: result?.competitionId, winnerId: result?.actorId });
-    if (competitionResultData) {
-      competitionResultData.withdrawalStatus = "approved";
-      await competitionResultData.save();
-    }
+    // const competitionResultData = await CompetitionResult.findOne({ competitionId: result?.competitionId, winnerId: result?.actorId });
+    // if (competitionResultData) {
+    //   competitionResultData.withdrawalStatus = "approved";
+    //   await competitionResultData.save();
+    // }
 
-    const revenueSharingActorData = await RevenueSharingActor.findOne({ competitionId: result?.competitionId, profitRecipientId: result?.actorId });
-    if (revenueSharingActorData) {
-      revenueSharingActorData.withdrawalStatus = "approved";
-      await revenueSharingActorData.save();
-    }
+    // const revenueSharingActorData = await RevenueSharingActor.findOne({ competitionId: result?.competitionId, profitRecipientId: result?.actorId });
+    // if (revenueSharingActorData) {
+    //   revenueSharingActorData.withdrawalStatus = "approved";
+    //   await revenueSharingActorData.save();
+    // }
 
     return result
   }
