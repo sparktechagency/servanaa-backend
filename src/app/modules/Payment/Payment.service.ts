@@ -6,8 +6,8 @@ import { PAYMENT_SEARCHABLE_FIELDS } from './Payment.constant';
 import mongoose from 'mongoose';
 // import { TPayment } from './Payment.interface';
 import { Payment } from './Payment.model';
-import { User } from '../User/user.model';
-import { Card } from '../Card/Card.model';
+// import { User } from '../User/user.model';
+// import { Card } from '../Card/Card.model';
 import Stripe from 'stripe';
 import config from '../../config';
 import { Buffer } from 'buffer';
@@ -19,38 +19,45 @@ const endpointSecret = config.stripe_webhook_secret as string;
 const createPaymentIntoDB = async (
   payload: any,
 ) => {
-  const { userId, cardId, amount } = payload;
+  // const { userId, cardId, amount } = payload;
+  const { amount } = payload;
 
-  if (!userId || !cardId || !amount) {
-    // throw new AppError(httpStatus.BAD_REQUEST, 'userId and paymentMethodId are required');
-    return { error: 'Missing params' }
-  };
+  // if (!userId || !cardId || !amount) {
+  //   // throw new AppError(httpStatus.BAD_REQUEST, 'userId and paymentMethodId are required');
+  //   return { error: 'Missing params' }
+  // };
 
-const user = await User.findById(userId);
+// const user = await User.findById(userId);
   // if (!user) {
   //   throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
   // }
-  if (!user || !user.customerId) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'User or Stripe customer not found');
-  }
+  // if (!user || !user.customerId) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, 'User or Stripe customer not found');
+  // }
 
 
-  const card = await Card.findById(cardId);
-  if (!card) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Card not found');
-    // return res.status(404).json({ error: 'Card not found' });
-  }
+  // const card = await Card.findById(cardId);
+  // if (!card) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, 'Card not found');
+  //   // return res.status(404).json({ error: 'Card not found' });
+  // }
 
 
     try {
+    // const paymentIntent = await stripe.paymentIntents.create({
+    //   amount,
+    //   currency: 'usd',
+    //   customer: user.customerId,
+    //   payment_method: card.paymentMethodId,
+    //   // off_session: true,
+    //   // confirm: false,
+    // });
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: 'usd',
-      customer: user.customerId,
-      payment_method: card.paymentMethodId,
-      // off_session: true,
-      // confirm: false,
-    });
+    amount,
+    currency: 'usd',
+    automatic_payment_methods: { enabled: true },
+  });
 
 
     return { clientSecret: paymentIntent.client_secret, status: paymentIntent.status }
