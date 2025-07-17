@@ -72,6 +72,9 @@ const getAllMyChatRoomsFromDB = async (
   userId: string,
   query: Record<string, unknown>
 ) => {
+
+  console.log('userId', userId)
+
   const ChatRoomQuery = new QueryBuilder(
     ChatRoom.find({ participants: userId }),
     query
@@ -105,7 +108,7 @@ const getAllMyChatRoomsFromDB = async (
 
       // Fetch user and last message in parallel
       const [otherUser, lastMessage] = await Promise.all([
-        User.findById(otherUserId).select('fullName img').lean(),
+        User.findById(otherUserId).select('fullName img  _id').lean(),
         Chat.findOne({ chatRoomId: room._id })
           .sort({ createdAt: -1 })
           .select('message createdAt')
@@ -116,6 +119,7 @@ const getAllMyChatRoomsFromDB = async (
         ...room.toObject(),
         otherUserName: otherUser?.fullName || null,
         otherUserImage: otherUser?.img || null,
+        otherUserId: otherUser?._id || null,
         lastMessage: lastMessage?.message || null,
       //  lastMessageTime: lastMessage && lastMessage.createdAt ? new Date(lastMessage.createdAt) : null,
         lastMessageTime: lastMessage?.createdAt || null,
