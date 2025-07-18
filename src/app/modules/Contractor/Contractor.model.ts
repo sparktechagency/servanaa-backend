@@ -7,6 +7,8 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
     dob: { type: String, default:'' },
     gender: { type: String , default:''},
+    experience: { type: String , default:''},
+    bio: { type: String , default:''},
     city: { type: String, default:'' },
     language: { type: String, default:'' },
     location: { type: String, default: '' },

@@ -1,3 +1,3 @@
 export const withdrawRequestSearchableFields = [
-  'paymentStatus',
+  'transactionId',  'type',  'contractorName',
 ];

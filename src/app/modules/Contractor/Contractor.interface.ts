@@ -4,6 +4,8 @@ import { Model, Types } from 'mongoose';
 export type TContractor = {
    userId: Types.ObjectId;
    rateHourly: number;
+   experience: string;
+   bio: string;
    skillsCategory?: string;   
    dob?: string;
    gender?: string;

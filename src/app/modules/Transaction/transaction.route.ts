@@ -11,32 +11,32 @@ const router = express.Router();
 
 router.post(
   '/create-transaction',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   validateRequest(createTransactionValidationSchema),
   TransactionControllers.createSingleTransaction,
 );
 
 router.get(
   '/all-withdrawal-requests',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor, USER_ROLE.judge, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   TransactionControllers.getAllwithdrawalRequests,
 );
 router.get(
   '/',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor, USER_ROLE.judge, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   TransactionControllers.getAllTransactions,
 );
 
 
 router.get(
   '/:id',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   TransactionControllers.getSingleTransactionRequest,
 );
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   validateRequest(updateTransactionValidationSchema),
   TransactionControllers.updateSingleTransaction,
 );
@@ -44,13 +44,13 @@ router.patch(
 
 router.post(
   '/send-withdrawal-request',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   validateRequest(updateTransactionValidationSchema),
   TransactionControllers.singleWithdrawalRequest,
 );
 router.post(
   '/send-withdrawal-request-revenue',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   validateRequest(updateTransactionValidationSchema),
   TransactionControllers.singleWithdrawalRequestRevenue,
 );
@@ -59,13 +59,13 @@ router.post(
 
 router.post(
   '/withdrawal-process',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   validateRequest(processValidationSchema),
   TransactionControllers.singleWithdrawalProcess,
 );
 router.post(
   '/send-withdrawal-process-revenue',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.actor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
   validateRequest(processValidationSchema),
   TransactionControllers.singleWithdrawalProcessRevenue,
 );

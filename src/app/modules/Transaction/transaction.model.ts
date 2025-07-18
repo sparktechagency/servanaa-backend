@@ -4,27 +4,23 @@ import { TransactionModel, TTransaction } from './transaction.interface';
 
 const transactionSchema: Schema = new Schema<TTransaction>(
   {
-    competitionId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Competition',
-      required: true,
-    },
-    actorId: { type: Schema.Types.ObjectId, ref: 'Actor', required: true },
-    amount: { type: String, required: true },
+    transactionId: { type: String, required: true, unique: true },
+    contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    contractorName: { type: String, required: true },
+    amount: { type: Number, required: true },
     type: {
       type: String,
-      enum: ['entry_fee', 'withdrawal'],
-      default: 'entry_fee',
+      enum: ['gold', 'platinum', 'Diamond'],
+      required: true,
     },
     paymentStatus: {
       type: String,
       enum: ['pending', 'completed', 'failed'],
       default: 'pending',
     },
-    adminPermission: {
-      type: String,
-      enum: ['pending', 'approved', 'rejected' ],
-      default: 'pending',
+    date: {
+      type: Date,
+      default: Date.now,
     },
     isDeleted: {
       type: Boolean,

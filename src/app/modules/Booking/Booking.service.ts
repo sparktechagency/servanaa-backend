@@ -109,7 +109,7 @@ const getAllBookingsByUserFromDB = async (query: Record<string, unknown>, user: 
 
 
 const  usr =  await User.findOne({email:user.userEmail}).select('_id role');
-console.log('usr', usr)
+// console.log('usr', usr)
 const b:any = {};
 
   if (user.role === 'customer') {
@@ -197,3 +197,4 @@ export const BookingServices = {
   checkAvailabilityIntoDB,
   getAllBookingsByUserFromDB
 };
+

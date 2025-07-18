@@ -18,19 +18,6 @@ const createSingleTransactionIntoDB = async (
 ) => {
 
 
-  // let actor = null;
-
-  if (user.role === 'actor') {
-    // actor = await Actor.findOne({ email: user.userEmail }).populate('userId');
-  }
-
-
-  // if (!actor) {
-  //   throw new AppError(
-  //     httpStatus.CONFLICT,
-  //     "Actor not found"
-  //   );
-  // }
 
 
 
@@ -42,18 +29,18 @@ const createSingleTransactionIntoDB = async (
 
 
   // checking if the actor has already participated in the competition
-  const existingTransaction = await Transaction.findOne({
-    competitionId: payload.competitionId,
-    actorId: payload.actorId,
-  });
+  // const existingTransaction = await Transaction.findOne({
+  //   competitionId: payload.competitionId,
+  //   actorId: payload.actorId,
+  // });
 
 
-  if (existingTransaction) {
-    throw new AppError(
-      httpStatus.CONFLICT,
-      'Transaction has already been created.'
-    );
-  }
+  // if (existingTransaction) {
+  //   throw new AppError(
+  //     httpStatus.CONFLICT,
+  //     'Transaction has already been created.'
+  //   );
+  // }
 
 
   const newTransaction = await Transaction.create(payload);

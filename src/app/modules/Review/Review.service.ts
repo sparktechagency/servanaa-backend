@@ -6,10 +6,24 @@ import { REVIEW_SEARCHABLE_FIELDS } from './Review.constant';
 import mongoose from 'mongoose';
 import { TReview } from './Review.interface';
 import { Review } from './Review.model';
+import { User } from '../User/user.model';
+import { Contractor } from '../Contractor/Contractor.model';
+import { Booking } from '../Booking/Booking.model';
 
 const createReviewIntoDB = async (
   payload: TReview,
+  user: any
 ) => {
+  
+  const usr =  await User.findOne({email:user.userEmail}).select(' fullName img _id role');
+  console.log('usr', usr)
+
+  if (!usr) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  payload.customerId = usr?._id; 
+
   const result = await Review.create(payload);
   
   if (!result) {
@@ -43,6 +57,7 @@ const getAllReviewsFromDB = async (query: Record<string, unknown>) => {
     meta,
   };
 };
+
 // const getAllReviewsFromDB = async (query: Record<string, unknown>) => {
 //   const ReviewQuery = new QueryBuilder(
 //     Review.find(),
@@ -63,9 +78,36 @@ const getAllReviewsFromDB = async (query: Record<string, unknown>) => {
 // };
 
 const getSingleReviewFromDB = async (id: string) => {
+
+
+
   const result = await Review.findById(id);
 
   return result;
+};
+const getAverageReviewFromDB = async (id: string) => {
+   const contractorId = id;
+   const user = await User.findById(contractorId).populate({
+    path: 'contractor',
+    populate: {
+      path: 'myScheduleId'
+    }});
+
+      // Fetch only latest 3 reviews
+  const threeReviews = await Review.find({ contractorId })
+    .sort({ createdAt: -1 })
+    .limit(3);
+
+   const reviews = await Review.find({ contractorId });
+   const totalRatings = reviews.length;
+   const totalStars = reviews.reduce((sum, r) => sum + r.stars, 0);
+   const averageRating = totalRatings > 0 ? (totalStars / totalRatings).toFixed(1) : "No ratings yet";
+
+
+   const completedOrder = await Booking.find({ contractorId, status: 'completed' });
+   const totalCompletedOrder = completedOrder.length;
+
+     return {user, averageRating, totalCompletedOrder, reviews: threeReviews};
 };
 
 const updateReviewIntoDB = async (id: string, payload: any) => {
@@ -117,4 +159,5 @@ export const ReviewServices = {
   getSingleReviewFromDB,
   updateReviewIntoDB,
   deleteReviewFromDB,
+  getAverageReviewFromDB
 };

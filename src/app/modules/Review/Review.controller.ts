@@ -4,8 +4,8 @@ import sendResponse from '../../utils/sendResponse';
 import { ReviewServices } from './Review.service';
 
 const createReview = catchAsync(async (req, res) => {
-  const { review: ReviewData } = req.body;
-  const result = await ReviewServices.createReviewIntoDB(ReviewData);
+  const ReviewData = req.body;
+  const result = await ReviewServices.createReviewIntoDB(ReviewData, req.user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -18,6 +18,17 @@ const createReview = catchAsync(async (req, res) => {
 const getSingleReview = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await ReviewServices.getSingleReviewFromDB(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Review is retrieved successfully',
+    data: result,
+  });
+});
+const getAverageReview = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await ReviewServices.getAverageReviewFromDB(id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -70,4 +81,5 @@ export const ReviewControllers = {
   getAllReviews,
   updateReview,
   deleteReview,
+  getAverageReview
 };
