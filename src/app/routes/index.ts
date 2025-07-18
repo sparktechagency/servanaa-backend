@@ -22,6 +22,7 @@ import { HelpRoutes } from '../modules/Help/Help.route';
 import { ContractorRoutes } from '../modules/Contractor/Contractor.route';
 import { MyScheduleRoutes } from '../modules/MySchedule/MySchedule.route';
 import { ChatRoomRoutes } from '../modules/ChatRoom/ChatRoom.route';
+import { TransactionRoutes } from '../modules/Transaction/transaction.route';
 
 const router = Router();
 
@@ -97,6 +98,10 @@ const moduleRoutes = [
   {
     path: '/payments',
     route: PaymentRoutes,
+  },
+  {
+    path: '/transactions',
+    route: TransactionRoutes,
   },
   {
     path: '/cancels',

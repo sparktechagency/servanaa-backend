@@ -2,12 +2,13 @@
 import { Model, Types } from 'mongoose';
 
 export type TTransaction = {
-  amount: string;
-  competitionId: Types.ObjectId;
-  actorId: Types.ObjectId;
-  paymentStatus: 'pending' | 'completed' | 'failed';
-  type: 'entry_fee' | 'withdrawal';
-  adminPermission: 'pending' | 'approved' | 'rejected';
+  transactionId: string;
+  contractorId: Types.ObjectId;
+  contractorName: string;
+  type: 'gold' | 'platinum' | 'Diamond';
+  date: Date;
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  amount: number;
   isDeleted: boolean;
 };
 
