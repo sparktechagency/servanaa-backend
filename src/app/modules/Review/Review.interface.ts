@@ -2,13 +2,10 @@
 import { Model , Types} from 'mongoose';
 
 export type TReview = {
-  userName: string;
-  userImg: string;
-  clientId: Types.ObjectId;
-  providerId: Types.ObjectId;
+  customerId: Types.ObjectId;
+  contractorId: Types.ObjectId;
   description?: string;
-  improveText?: string[];
-  star: number;
+  stars: number;
   isDeleted: boolean;
 };
 
