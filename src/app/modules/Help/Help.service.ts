@@ -6,10 +6,21 @@ import { HELP_SEARCHABLE_FIELDS } from './Help.constant';
 import mongoose from 'mongoose';
 import { THelp } from './Help.interface';
 import { Help } from './Help.model';
+import { User } from '../User/user.model';
 
 const createHelpIntoDB = async (
   payload: THelp,
+  user: any
 ) => {
+
+  const usr =  await User.findOne({email:user.userEmail}).select(' fullName img _id role');
+  console.log('usr', usr)
+
+  if (!usr) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  payload.userId = usr?._id;
   const result = await Help.create(payload);
   
   if (!result) {

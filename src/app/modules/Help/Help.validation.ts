@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createHelpValidationSchema = z.object({
   body: z.object({
-      userId: z.string().min(1),
+      // userId: z.string().min(1),
       clientMessage: z.string(),
       adminMessage: z.string().optional(),
       isDeleted: z.boolean().default(false),

@@ -5,7 +5,7 @@ import { HelpServices } from './Help.service';
 
 const createHelp = catchAsync(async (req, res) => {
   const help = req.body;
-  const result = await HelpServices.createHelpIntoDB(help);
+  const result = await HelpServices.createHelpIntoDB(help, req.user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
