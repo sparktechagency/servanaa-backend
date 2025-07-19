@@ -12,6 +12,7 @@ router.post(
   '/create-customer', 
    UserControllers.createCustomer,
 );
+
 router.post(
   '/create-contractor', 
     UserControllers.createContractor,
@@ -65,7 +66,7 @@ router.delete(
 
 router.get(
   '/',
-  auth(USER_ROLE.superAdmin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   UserControllers.getAllUsers,
 );
 

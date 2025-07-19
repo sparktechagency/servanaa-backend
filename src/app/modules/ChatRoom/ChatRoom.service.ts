@@ -8,28 +8,57 @@ import { ChatRoom } from './ChatRoom.model';
 import { User } from '../User/user.model';
 import { Chat } from '../Chat/Chat.model';
 
-const createChatRoomIntoDB = async (
-  payload: any,
-) => {
+// const createChatRoomIntoDB = async (
+//   payload: any,
+// ) => {
  
-    const { contractorId, customerId } = payload;
-console.log('contractorId', contractorId)
-console.log('customerId', customerId)
-  let room = await ChatRoom.findOne({
-    participants: { $all: [contractorId, customerId] },
-  });
+//     const { contractorId, customerId } = payload;
+// console.log('contractorId', contractorId)
+// console.log('customerId', customerId)
+//   let room = await ChatRoom.findOne({
+//     participants: { $all: [contractorId, customerId] },
+//   });
 
-  if (!room) {
-    room = await ChatRoom.create({ participants: [contractorId, customerId] });
-  }
+//   if (!room) {
+//     room = await ChatRoom.create({ participants: [contractorId, customerId] });
+//   }
 
   
+//   if (!room) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create ChatRoom');
+//   }
+//  console.log('room', room)
+//   return room;
+// };
+
+// import mongoose from 'mongoose';
+
+const createChatRoomIntoDB = async (payload: any) => {
+  const { contractorId, customerId } = payload;
+
+
+  const contractorObjId = new mongoose.Types.ObjectId(contractorId);
+  const customerObjId = new mongoose.Types.ObjectId(customerId);
+
+  // 🔍 Make sure to check with both $all and $size to avoid [A, B] vs [B, A] duplicates
+  let room = await ChatRoom.findOne({
+    participants: { $all: [contractorObjId, customerObjId], $size: 2 },
+  });
+
+
+
+  if (!room) {
+    room = await ChatRoom.create({ participants: [contractorObjId, customerObjId] });
+  }
+
   if (!room) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create ChatRoom');
   }
- console.log('room', room)
+
+  console.log('room', room);
   return room;
 };
+
 
 const getAllChatRoomsFromDB = async (query: Record<string, unknown>) => {
   const ChatRoomQuery = new QueryBuilder(
@@ -72,9 +101,6 @@ const getAllMyChatRoomsFromDB = async (
   userId: string,
   query: Record<string, unknown>
 ) => {
-
-  console.log('userId', userId)
-
   const ChatRoomQuery = new QueryBuilder(
     ChatRoom.find({ participants: userId }),
     query
@@ -86,13 +112,18 @@ const getAllMyChatRoomsFromDB = async (
     .fields();
 
   const rooms = await ChatRoomQuery.modelQuery;
+
+
   const meta = await ChatRoomQuery.countTotal();
 
   const enrichedRooms = await Promise.all(
     rooms.map(async (room) => {
+
       // Get the "other" participant (not the current user)
       const otherUserId = room.participants.find(
-        (id: string) => id !== userId
+        (id: string) => {
+          return id.toString() !== userId;
+        }
       );
 
       if (!otherUserId) {
@@ -137,6 +168,7 @@ const getAllMyChatRoomsFromDB = async (
 
     })
   );
+
 
   return {
     result: enrichedRooms,

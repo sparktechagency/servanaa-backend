@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 import { TReview } from './Review.interface';
 import { Review } from './Review.model';
 import { User } from '../User/user.model';
-import { Contractor } from '../Contractor/Contractor.model';
+// import { Contractor } from '../Contractor/Contractor.model';
 import { Booking } from '../Booking/Booking.model';
 
 const createReviewIntoDB = async (
