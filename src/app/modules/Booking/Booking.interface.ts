@@ -1,6 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { Model, Types } from 'mongoose';
 
+// Define DaySchedule type
+export type DaySchedule = {
+  days: string;
+  timeSlots: string[];
+}
+
+
 export type TBooking = {
   customerId: Types.ObjectId;
   contractorId: Types.ObjectId;

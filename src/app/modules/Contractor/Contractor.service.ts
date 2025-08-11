@@ -77,7 +77,7 @@ const checkAvailabilityForContractor = async (
     if (!daySchedule) throw new Error(`Contractor is not available on ${requestedDay}`);
 
     const unavailableSlots = requestedTimeSlots.filter(
-      slot => !daySchedule.timeSlots.includes(slot)
+      (slot:any) => !daySchedule.timeSlots.includes(slot)
     );
       console.log( 'unavailableSlots', unavailableSlots)
     if (unavailableSlots.length > 0) {
@@ -141,7 +141,7 @@ const existingBooking = await Booking.findOne({
         }
 
         const unavailableSlots = requestedTimeSlots.filter(
-          slot => !daySchedule.timeSlots.includes(slot)
+          (slot:any) => !daySchedule.timeSlots.includes(slot)
         );
 
         if (unavailableSlots.length > 0) {
