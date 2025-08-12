@@ -1,27 +1,28 @@
-FROM node:22 AS builder
-
+FROM node:22  AS builder
+# RUN apk add --no-cache python3 make g++ 
 WORKDIR /app
 
-COPY package.json ./ 
+COPY package.json  ./
 
+# RUN yarn cache clean
 RUN npm cache clean --force
+
+# RUN yarn install --frozen-lockfile
+# RUN npm install --production
 RUN npm install
 
 COPY . .
 
-RUN npm run build 
+# RUN yarn build
+RUN npm run build
 
-# Temporarily skip the build to bypass TypeScript error
-# RUN npm run build 
-
-FROM node:22
+FROM node:22 
 
 WORKDIR /app
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
 
 EXPOSE 5001
 
-CMD ["npm", "start"]
+CMD ["npm","run", "start:prod"]

@@ -13,9 +13,7 @@
 // help and support
 // booking
 // chat
-// payment
-
-
+ 
 // Transaction History
 // ratings 
 // subscription

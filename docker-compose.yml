@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5001:5001" # Match the PORT from your .env file
+      - "5002:5002" # Match the PORT from your .env file
     volumes:
       - .:/app
       - /app/node_modules
     env_file:
       - .env # Specify your .env file
-    command: npm start # Or your relevant start script
+    command: npm run start:dev # Or your relevant start script

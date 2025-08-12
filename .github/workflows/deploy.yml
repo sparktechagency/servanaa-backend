@@ -2,7 +2,7 @@ name: CI/CD to AWS EC2 with Docker Compose
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ deploy ]
 
 jobs:
   build:
@@ -46,8 +46,8 @@ jobs:
     # Step 2: Configure SSH Key
     - name: Configure SSH Key
       run: |
-        echo "${{ secrets.EC2_KEY }}" > /tmp/pro-key.pem
-        chmod 600 /tmp/pro-key.pem
+        echo "${{ secrets.EC2_KEY }}" > /tmp/servana-backend-key.pem
+        chmod 600 /tmp/servana-backend-key.pem
     
     # Step 3: Add EC2 Host to known_hosts
     - name: Add EC2 Host to known_hosts
@@ -58,21 +58,21 @@ jobs:
     # Step 4: Ensure EC2 Permissions
     - name: Ensure EC2 Permissions
       run: |
-        ssh -i /tmp/pro-key.pem ubuntu@34.239.222.210 << 'EOF'
-        sudo chown -R ubuntu:ubuntu /var/www/service-provider-backend
-        sudo chmod -R 755 /var/www/service-provider-backend
+        ssh -i /tmp/servana-backend-key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+        sudo chown -R ubuntu:ubuntu /var/www/servanaa-backend
+        sudo chmod -R 755 /var/www/servanaa-backend
         EOF
     
     # Step 5: Copy Files to EC2
     - name: Copy Files to EC2
       run: |
-        scp -i /tmp/pro-key.pem -r . ubuntu@34.239.222.210:/var/www/service-provider-backend
+        scp -i /tmp/servana-backend-key.pem -r . ubuntu@${{ secrets.EC2_HOST }}:/var/www/servanaa-backend
     
     # Step 6: Deploy Application
     - name: Deploy Application
       run: |
-        ssh -i /tmp/pro-key.pem ubuntu@34.239.222.210 << 'EOF'
-        cd /var/www/service-provider-backend
+        ssh -i /tmp/servana-backend-key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+        cd /var/www/servanaa-backend
         # docker compose down || true
         docker compose up -d --build
         EOF
