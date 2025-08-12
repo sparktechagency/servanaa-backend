@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./dist/server.js",
-    "dev": "tsx watch src/server.ts",
+    "start:prod": "node ./dist/server.js",
+    "start:dev": "tsx watch src/server.ts",
     "create:module": "node create-module.js",
     "build": "tsc",
     "lint": "eslint src --ignore-path .eslintignore --ext .ts",
