@@ -22,7 +22,8 @@ import { HelpRoutes } from '../modules/Help/Help.route';
 import { ContractorRoutes } from '../modules/Contractor/Contractor.route';
 import { MyScheduleRoutes } from '../modules/MySchedule/MySchedule.route';
 import { ChatRoomRoutes } from '../modules/ChatRoom/ChatRoom.route';
-import { TransactionRoutes } from '../modules/Transaction/transaction.route';
+// import { TransactionRoutes } from '../modules/Transaction/transaction.route';
+import { ReportRoutes } from '../modules/Report/Report.route';
 
 const router = Router();
 
@@ -99,10 +100,10 @@ const moduleRoutes = [
     path: '/payments',
     route: PaymentRoutes,
   },
-  {
-    path: '/transactions',
-    route: TransactionRoutes,
-  },
+  // {
+  //   path: '/transactions',
+  //   route: TransactionRoutes,
+  // },
   {
     path: '/cancels',
     route: CancelRoutes,
@@ -122,6 +123,10 @@ const moduleRoutes = [
   {
     path: '/availabilities',
     route: MyScheduleRoutes,
+  },
+  {
+    path: '/reports',
+    route: ReportRoutes,
   },
 ];
 

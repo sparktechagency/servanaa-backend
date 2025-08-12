@@ -26,6 +26,7 @@ const getSingleReview = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
 const getAverageReview = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await ReviewServices.getAverageReviewFromDB(id);

@@ -8,8 +8,7 @@ const NotificationSchema = new Schema<TNotification, NotificationModel>({
     required: true,
   },
   message: { type: String, required: true },
-  isRead: { type: Boolean, default: false },
-  isDeleted: { type: Boolean, default: false },
+  isRead: { type: [String], default: [] },
 }, { timestamps: true });
 
 NotificationSchema.statics.isNotificationExists = async function (id: string) {

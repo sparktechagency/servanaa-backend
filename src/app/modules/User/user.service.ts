@@ -96,6 +96,9 @@ export const createContractorIntoDB = async (payload: any) => {
     const newUser = await User.create(payload);
     if (!newUser) throw new Error('Failed to create user'); 
 
+contractor.userId = newUser._id
+contractor.save()
+
   // Populate user field in contractor document
   const populatedContractor = await User.findById(newUser?._id).populate({
     path: 'contractor',

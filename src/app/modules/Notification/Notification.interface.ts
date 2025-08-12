@@ -5,8 +5,7 @@ export type TNotification = {
   userId: Schema.Types.ObjectId;
   title: string;
   message: string; 
-  isRead: boolean;
-  isDeleted: boolean;
+  isRead: string[];
 }
 
 

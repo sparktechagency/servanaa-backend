@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import { Contractor } from './Contractor.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import { Booking } from '../Booking/Booking.model';
+import { Review } from '../Review/Review.model';
 // import { ObjectId } from 'mongoose';
 
 // Helper function to generate time slots
@@ -23,7 +24,6 @@ const generateTimeSlots = (startTime: string, endTime: string): string[] => {
 
   return timeSlots;
 };
-
 const addOneHour = (time: string): string => {
   const [hours, minutes] = time.split(':').map(Number);
   const date = new Date(0, 0, 0, hours, minutes);
@@ -36,7 +36,6 @@ export const getDayName = (dateStr: string):string => {
   const options: Intl.DateTimeFormatOptions = { weekday: 'long' };  // We want the full name of the weekday
   return new Intl.DateTimeFormat('en-US', options).format(date);  // Format the date to get the weekday name
 };
-
 // Utility function to check availability
 const checkAvailabilityForContractor = async (
   contractorId: string,
@@ -63,7 +62,6 @@ const checkAvailabilityForContractor = async (
   // console.log(bookingType, 'bookingType');
   const requestedTimeSlots = generateTimeSlots(startTime, endTime);
   const schedule = await MySchedule.findOne({ contractorId });
-      console.log( 'requestedTimeSlots', requestedTimeSlots)
       // console.log( 'schedule', schedule)
 
   if (!schedule) throw new Error('Contractor schedule not found');
@@ -79,7 +77,7 @@ const checkAvailabilityForContractor = async (
     if (!daySchedule) throw new Error(`Contractor is not available on ${requestedDay}`);
 
     const unavailableSlots = requestedTimeSlots.filter(
-      slot => !daySchedule.timeSlots.includes(slot)
+      (slot:any) => !daySchedule.timeSlots.includes(slot)
     );
       console.log( 'unavailableSlots', unavailableSlots)
     if (unavailableSlots.length > 0) {
@@ -127,34 +125,29 @@ const existingBooking = await Booking.findOne({
   else if (bookingType === 'weekly') {
 
     const numOfWeeks = periodInDays / 7; // Calculate the number of weeks based on periodInDays
-    console.log( 'weekly')
-    console.log( 'numOfWeeks', numOfWeeks)    
+
 
     for (let i = 0; i < numOfWeeks; i++) {
       const bookingDate = new Date(); // Current date
       bookingDate.setDate(bookingDate.getDate() + (i * 7)); // Add 7 days for weekly recurrence
-    console.log( 'bookingDate', bookingDate)
 
     // const daysArray = Array.isArray(days) ? days : [days];
 
       for (const oneday of days) {
-            console.log( 'day=======', oneday, 'days', days)
 
         const daySchedule = schedule.schedules.find(s => s.days === oneday);
-                  console.log( 'daySchedule', daySchedule)
         if (!daySchedule) {
           return { available: false, message: `Contractor is not available on ${oneday}` };
         }
 
         const unavailableSlots = requestedTimeSlots.filter(
-          slot => !daySchedule.timeSlots.includes(slot)
+          (slot:any) => !daySchedule.timeSlots.includes(slot)
         );
 
         if (unavailableSlots.length > 0) {
           return { available: false, message: `Requested slots for ${oneday} are unavailable.` };
           // throw new Error(`Requested slots for ${oneday} are unavailable.`)
         }
-          console.log( 'bookingDate', bookingDate, 'final for testing')
         // Check for existing bookings for each weekly recurrence
         const existingBooking = await Booking.findOne({
           contractorId,
@@ -224,10 +217,8 @@ if (bookingType === 'weekly') {
   throw new Error('Invalid bookingType');
 }
 
-  console.log( 'contractors',contractors)
 
   for (const contractor of contractors) {
-  console.log( 'contractor main',contractor)
 
 
     const availability = await checkAvailabilityForContractor(
@@ -245,7 +236,6 @@ if (bookingType === 'weekly') {
       availableContractors.push(contractor);
     }
   }
-  console.log(availableContractors, 'availableContractors===')
 
   return {
     result: availableContractors,
@@ -271,68 +261,10 @@ if (bookingType === 'weekly') {
   // };
 };
 
-// const getAllAvailableContractorsFromDB = async (query: Record<string, unknown>) => {
-//   console.log(query, 'query')
-
-//   const { bookingType, startTime, duration, days, skills, skillsCategory, periodInDays, endTime } = query;
-  
-//   // Use QueryBuilder for basic querying: skills, skillsCategory, etc.
-//   const ContractorQuery = new QueryBuilder(
-//     Contractor.find({
-//     skills: skills,
-//     skillsCategory: skillsCategory,
-//   }),
-//     query
-//   )
-//     .search(['skills', 'skillsCategory']) // Adjust this as per your fields
-//     .filter()
-//     .sort()
-//     .paginate()
-//     .fields();
-//   console.log(ContractorQuery, 'ContractorQuery')
-
-//   const contractors = await ContractorQuery.modelQuery; // Retrieve contractors
-//     console.log(contractors, 'contractors')
-
-//   const meta = await ContractorQuery.countTotal();
-//     console.log(meta, 'meta')
-
-//   const availableContractors: any = [];
-//     console.log(availableContractors, 'availableContractors')
-
-//   // Now check availability manually using the contractor's schedule
-//   for (const contractor of contractors) {
-//         console.log(contractor, 'contractor')
-
-//     // Call the checkAvailabilityForContractor for each contractor
-//     const availability = await checkAvailabilityForContractor(
-//       contractor._id.toString(),
-//       startTime as string,
-//       endTime as string,
-//       duration as number,
-//       days as string | string[],
-//       bookingType as string,
-//       periodInDays as number
-//     );
-
-//     // If the contractor is available, add them to the list
-//     if (availability.available) {
-//       console.log(contractor, 'contractor inside')
-
-//       availableContractors.push(contractor);
-//     }
-//   }
-//       console.log(availableContractors, 'availableContractors')
-
-//   return {
-//     result: availableContractors,
-//     meta, // Include pagination meta-data
-//   };
-// };
 
 const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
   const ContractorQuery = new QueryBuilder(
-    Contractor.find(),
+    Contractor.find().populate('userId'), // userId is a User reference
     query,
   )
     .search(CONTRACTOR_SEARCHABLE_FIELDS)
@@ -341,13 +273,41 @@ const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
-  const result = await ContractorQuery.modelQuery;
+  const contractors = await ContractorQuery.modelQuery;
+
+
+  const result = await Promise.all(contractors.map(async (contractorDoc) => {
+    const contractor = contractorDoc.toObject();
+
+    const userId = contractor.userId?._id || contractor.userId;
+
+    // Ensure it's an ObjectId
+    const contractorUserId = new mongoose.Types.ObjectId(userId);
+
+    const reviews = await Review.find({ contractorId: contractorUserId });
+
+    // console.log(`Found ${reviews.length} reviews for contractor userId ${contractorUserId}`);
+
+    const totalRatings = reviews.length;
+    const totalStars = reviews.reduce((sum, r) => sum + r.stars, 0);
+    const averageRating = totalRatings > 0 ? totalStars / totalRatings : 0;
+
+    contractor.ratings = Number(averageRating.toFixed(1));
+
+    return contractor;
+  }));
+
   const meta = await ContractorQuery.countTotal();
+
   return {
     result,
     meta,
   };
 };
+
+
+
+
 const getSingleContractorFromDB = async (id: string) => {
   const result = await Contractor.findById(id).populate('myScheduleId');
 
@@ -394,6 +354,7 @@ const deleteContractorFromDB = async (id: string) => {
 
   return deletedService;
 };
+
 export const ContractorServices = {
   getAllContractorsFromDB,
   getSingleContractorFromDB,

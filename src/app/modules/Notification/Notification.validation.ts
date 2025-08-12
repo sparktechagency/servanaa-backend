@@ -13,6 +13,6 @@ export const updateNotificationValidationSchema = z.object({
       userId: z.string().optional(),
       title: z.string().optional(),
       message: z.string().optional(),
-      isRead: z.boolean().optional(),
+      isRead: z.array(z.string()).min(1).optional(),
     }),
   })

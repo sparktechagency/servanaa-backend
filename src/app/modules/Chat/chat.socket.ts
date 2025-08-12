@@ -25,6 +25,7 @@ export const initializeChatSocket = (io: Server) => {
     }
 
   const senderSocketId = onlineUsers.get(data.sender);
+  console.log('senderSocketId', senderSocketId)
   if (senderSocketId) {
     io.to(senderSocketId).emit('newMessage', message); // ✅ send to sender too
   }

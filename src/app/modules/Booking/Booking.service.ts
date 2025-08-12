@@ -5,7 +5,7 @@ import httpStatus from 'http-status';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { BOOKING_SEARCHABLE_FIELDS } from './Booking.constant';
-import { TBooking } from './Booking.interface';
+import { DaySchedule, TBooking } from './Booking.interface';
 import { Booking } from './Booking.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import { addOneHour, checkAvailability, createOneTimeBooking, createRecurringBookingIntoDB, generateTimeSlots, getBookingDetails, getDayName } from './Booking.utils';
@@ -54,7 +54,7 @@ const checkAvailabilityIntoDB = async (
   if (!schedule) throw new Error('Contractor schedule not found');
 
   for (const day of days) {
-    let daySchedule;
+    let daySchedule:any;
 
     // Convert specific date to day name if one-time booking
     if (bookingType === 'OneTime') {
@@ -67,7 +67,7 @@ const checkAvailabilityIntoDB = async (
     if (!daySchedule) throw new Error(`Contractor is not available on ${day}`);
 
     const unavailableSlots = requestedTimeSlots.filter(
-      (slot) => !daySchedule.timeSlots.includes(slot),
+      (slot:any) => !daySchedule.timeSlots.includes(slot),
     );
 
     if (unavailableSlots.length > 0) {

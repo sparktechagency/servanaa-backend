@@ -1,3 +1,3 @@
-export const withdrawRequestSearchableFields = [
-  'transactionId',  'type',  'contractorName',
-];
+// export const withdrawRequestSearchableFields = [
+//   'transactionId',  'type',  'contractorName',
+// ];

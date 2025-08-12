@@ -210,7 +210,7 @@ export const checkAvailability = async (
     }
 
     const unavailableSlots = requestedTimeSlots.filter(
-      (slot) => !daySchedule.timeSlots.includes(slot),
+      (slot:any) => !daySchedule.timeSlots.includes(slot),
     );
     if (unavailableSlots.length > 0) {
       return { available: false, message: 'Requested slots are unavailable.' };
@@ -233,7 +233,7 @@ export const checkAvailability = async (
 
   if (bookingType === 'Weekly') {
     for (const day of days) {
-      let daySchedule;
+      let daySchedule:any;
 
       // Convert specific date to day name if one-time booking
       if (bookingType === 'OneTime') {
@@ -247,7 +247,7 @@ export const checkAvailability = async (
         throw new Error(`Contractor is not available on ${day}`);
 
       const unavailableSlots = requestedTimeSlots.filter(
-        (slot) => !daySchedule.timeSlots.includes(slot),
+        (slot:any) => !daySchedule.timeSlots.includes(slot),
       );
 
       if (unavailableSlots.length > 0) {
