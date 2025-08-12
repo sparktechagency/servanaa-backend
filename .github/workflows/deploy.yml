@@ -55,10 +55,14 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
   
-    # Step 4: Ensure EC2 Permissions
-    - name: Ensure EC2 Permissions
+    # Step 4: Ensure EC2 Permissions and Create Directory
+    - name: Ensure EC2 Permissions and Create Directory
       run: |
         ssh -i /tmp/servana-backend-key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+        # Ensure the directory exists
+        sudo mkdir -p /var/www/servanaa-backend
+
+        # Set the appropriate permissions
         sudo chown -R ubuntu:ubuntu /var/www/servanaa-backend
         sudo chmod -R 755 /var/www/servanaa-backend
         EOF
