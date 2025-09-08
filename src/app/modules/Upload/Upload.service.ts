@@ -11,10 +11,11 @@ import AppError from '../../errors/AppError';
 const createUploadIntoDB = async (
   file: any,
 ) => {
+   console.log('file.location',file.location);
   // const fileUrl = `/uploads/${file.filename}`;  
   // const result = fileUrl;  
  const result = file.location;
-
+ console.log('musa',result);
   return result;
 };
 

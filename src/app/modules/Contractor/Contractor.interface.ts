@@ -12,18 +12,18 @@ export type TContractor = {
    city?: string;
    language?: string;
    location: string;
-   ratings: number;
-   skills: string | string[];  
+   ratings: number; 
+   skills: string |  [];  
    subscriptionStatus:  "pending" | "active" | "failed" | "cancelled"  | "paused";
    customerId: string;
    paymentMethodId: string;
-   certificates: string[]; 
+   certificates: string[];  
   //  materials: string[]; 
    materials?: {
    name: string; // The day of the week (e.g., "Monday")
    unit?: { type: string},
    price: { type: number},
-    }[];
+    }[]; 
   //  mySchedule?: {
   //  day: string; // The day of the week (e.g., "Monday")
   //  startTime: { type: string},

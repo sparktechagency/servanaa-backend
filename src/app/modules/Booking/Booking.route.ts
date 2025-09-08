@@ -17,12 +17,13 @@ router.post(
 
 router.get(
   '/all-bookings-by-user',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.customer, USER_ROLE.contractor),
+  // auth(USER_ROLE.superAdmin,  USER_ROLE.customer, USER_ROLE.contractor),
   BookingControllers.getAllBookingsByUser,
 );
 
 router.get(
   '/:id',
+    auth(USER_ROLE.superAdmin , USER_ROLE.customer, USER_ROLE.contractor),
   BookingControllers.getSingleBooking,
 );
 
@@ -45,6 +46,7 @@ router.delete(
 
 router.get(
   '/',
+//  auth(USER_ROLE.superAdmin , USER_ROLE.customer, USER_ROLE.contractor),
   BookingControllers.getAllBookings,
 );
 

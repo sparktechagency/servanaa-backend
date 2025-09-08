@@ -66,7 +66,7 @@ router.delete(
 
 router.get(
   '/',
-  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  // auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   UserControllers.getAllUsers,
 );
 
@@ -84,7 +84,7 @@ router.get(
 
 router.get(
   '/:id',
-  auth(USER_ROLE.superAdmin),
+  // auth(USER_ROLE.superAdmin),
   UserControllers.getSingleUser,
 );
 

@@ -45,8 +45,6 @@ const createChatRoomIntoDB = async (payload: any) => {
     participants: { $all: [contractorObjId, customerObjId], $size: 2 },
   });
 
-
-
   if (!room) {
     room = await ChatRoom.create({ participants: [contractorObjId, customerObjId] });
   }

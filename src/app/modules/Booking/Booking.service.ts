@@ -12,7 +12,15 @@ import { addOneHour, checkAvailability, createOneTimeBooking, createRecurringBoo
 import { User } from '../User/user.model';
 
 
-const createBookingIntoDB = async (payload: TBooking) => {
+const createBookingIntoDB = async (payload: TBooking, usr:any) => {
+
+// const user = await User.isUserExistsByCustomEmail(usr.userEmail)
+// console.log(user, 'musa')
+// if(!user){
+//   throw new Error('User not found');
+// }
+// payload.customerId = user?._id
+
   const { bookingType, contractorId, day:days } = payload;
   // Step 1: Get booking details (end time, price, rateHourly, etc.)
   const updatedPayload = await getBookingDetails(payload); // Call common function
@@ -30,6 +38,7 @@ const createBookingIntoDB = async (payload: TBooking) => {
 
         updatedPayload.bookingDate = requestedDate;
         updatedPayload.day = dayName;
+        // updatedPayload.customerId = user?._id
     const booking = await createOneTimeBooking(updatedPayload); // Create one-time booking
     return booking;
   } else if (bookingType === 'Weekly') {
@@ -91,7 +100,13 @@ const checkAvailabilityIntoDB = async (
 };
 
 const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
-  const BookingQuery = new QueryBuilder(Booking.find(), query)
+  const BookingQuery = new QueryBuilder(Booking.find().populate({
+      path: 'contractorId',  // Populate contractorId
+      populate: {
+        path: 'contractor',  // Populate contractor field inside contractorId
+        select: 'ratings rateHourly' // Specify the fields you want from contractor
+      }
+    }).populate('subCategoryId', 'name'), query)
     .search(BOOKING_SEARCHABLE_FIELDS)
     .filter()
     .sort()
@@ -100,13 +115,17 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
 
   const result = await BookingQuery.modelQuery;
   const meta = await BookingQuery.countTotal();
+
+
+   console.log("result=========",result)
+
   return {
     result,
     meta,
   };
 };
 const getAllBookingsByUserFromDB = async (query: Record<string, unknown>, user: any) => {
-
+  console.log("ahmad Musa")
 
 const  usr =  await User.findOne({email:user.userEmail}).select('_id role');
 // console.log('usr', usr)
@@ -120,7 +139,7 @@ const b:any = {};
     b.contractorId = usr?._id;
   }
 
-  const BookingQuery = new QueryBuilder(Booking.find(b).populate('customerId').populate('contractorId'), query)
+  const BookingQuery = new QueryBuilder(Booking.find(b).populate('customerId').populate('contractorId').populate('subCategoryId'), query)
     .search(BOOKING_SEARCHABLE_FIELDS)
     .filter()
     .sort()
