@@ -157,7 +157,7 @@ const getMe = async (userEmail: string) => {
 };
 const getSingleUserIntoDB = async (id: string) => {
 // Fetch the user from the database first
-  const user = await User.findById(id);
+  const user = await User.findById(id).populate('contractor').populate('customer');
   // Check the role and populate the respective field
   if (!user) {
     throw new Error('User not found');

@@ -7,6 +7,7 @@ import AppError from '../../errors/AppError';
 
 
 const loginUser = catchAsync(async (req, res) => {
+  console.log("teeeeeeeee")
   const result = await AuthServices.loginUser(req.body);
 
   const { refreshToken, accessToken } = result;
