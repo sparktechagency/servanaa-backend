@@ -154,7 +154,7 @@ const b:any = {};
 };
 
 const getSingleBookingFromDB = async (id: string) => {
-  const result = await Booking.findById(id);
+  const result = await Booking.findById(id).populate("contractorId subCategoryId");
   return result;
 };
 
