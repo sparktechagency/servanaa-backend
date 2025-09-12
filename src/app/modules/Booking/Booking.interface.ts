@@ -7,13 +7,13 @@ export type DaySchedule = {
   timeSlots: string[];
 }
 
-
 export type TBooking = {
   customerId: Types.ObjectId;
   contractorId: Types.ObjectId;
   subCategoryId: Types.ObjectId;
   rateHourly: number;
   bookingDate: Date;
+  files: string[]; // Array of file URLs or IDs
   periodInDays: number;
   questions: { question: string; answer: string }[]; // Array of question-answer objects
   material: { name: string; unit: string; price: number }[]; // Array of material objects with name, unit, and price

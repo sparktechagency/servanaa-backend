@@ -52,10 +52,13 @@ const getAllBookingsByUser = catchAsync(async (req, res) => {
 });
 
 const updateBooking = catchAsync(async (req, res) => {
+
+     const fileUrls = (req.files as Express.MulterS3.File[]).map(f => f.location); 
+
   const { id } = req.params;
   const booking = req.body;
   console.log( "test",booking);
-  const result = await BookingServices.updateBookingIntoDB(id, booking);
+  const result = await BookingServices.updateBookingIntoDB(id, booking, fileUrls);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

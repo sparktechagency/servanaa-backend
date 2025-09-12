@@ -174,8 +174,8 @@ const getSingleUserIntoDB = async (id: string) => {
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  const studentQuery = new QueryBuilder(User.find({ role: { $ne: 'superAdmin' } })
-    .populate('contractor', 'location')   // Populating location from contractor
+  const studentQuery = new QueryBuilder(User.find({ role: { $ne: 'superAdmin'} })
+    .populate('contractor', 'location ratings rateHourly skillsCategory')   // Populating location from contractor
     .populate('customer', 'location'),    // Populating location from customer
     query)
     .search(usersSearchableFields)

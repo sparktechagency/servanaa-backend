@@ -40,6 +40,7 @@ export const updateBookingValidationSchema = z.object({
   body: z.object({
   customerId: z.string().optional(),
   contractorId: z.string().optional(),
+  files: z.array(z.string()).optional(),
   // categoryId: z.string().optional(),
   subCategoryId: z.string().optional(),
   materialId: z.string().optional(),
