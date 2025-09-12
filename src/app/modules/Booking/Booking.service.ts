@@ -26,6 +26,9 @@ const createBookingIntoDB = async (payload: TBooking, usr:any) => {
   const updatedPayload = await getBookingDetails(payload); // Call common function
   // Step 2: Check availability (this will handle both one-time and recurring bookings)
   const result = await checkAvailability(contractorId, updatedPayload.startTime, days, bookingType);
+
+  console.log('availability result', result);
+
   if (!result?.available) {
       throw new Error('Booking not available');// Reject booking if unavailable
   }
@@ -76,10 +79,13 @@ const checkAvailabilityIntoDB = async (
     if (!daySchedule) throw new Error(`Contractor is not available on ${day}`);
 
     const unavailableSlots = requestedTimeSlots.filter(
-      (slot:any) => !daySchedule.timeSlots.includes(slot),
+      (slot) => !daySchedule.timeSlots.includes(slot),
     );
 
-    if (unavailableSlots.length > 0) {
+
+  console.log('unavailableSlotsmm', unavailableSlots);
+
+    if (unavailableSlots.length === 0) {
       return { available: false, message: 'Requested slots are unavailable.' };
     }
   }
@@ -158,13 +164,21 @@ const getSingleBookingFromDB = async (id: string) => {
   return result;
 };
 
-const updateBookingIntoDB = async (id: string, payload: any) => {
+const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   const booking = await Booking.findById(id);
   if (!booking) throw new Error('Booking not found');
 
+  console.log('files', files);
+  if (files && files.length > 0) {
+    // const fileUrls = files.map((file: any) => file.location); // Extract S3 URLs
+    payload.files = files; // Assuming file.location contains the S3 URL
+    
+  }
+
+
+
 
   if (booking.isDeleted) throw new Error('Cannot update a deleted Booking');
-  console.log('payload', payload)
   const updatedData = await Booking.findByIdAndUpdate({ _id: id }, payload, {
     new: true,
     runValidators: true,
@@ -178,6 +192,7 @@ const updateBookingIntoDB = async (id: string, payload: any) => {
   return updatedData;
 };
 const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
+
   const booking = await Booking.findOne({
     clientId: id,
     paymentStatus: 'pending',

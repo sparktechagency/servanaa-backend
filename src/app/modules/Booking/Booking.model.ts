@@ -50,6 +50,7 @@ const BookingSchema = new Schema<TBooking, BookingModel>(
       required: true,
     },
     duration: { type: Number, required: true }, // duration as string
+    files: { type: [String] }, // duration as string
     periodInDays: { type: Number}, // duration as string
 bookingDate: {
   type: Date,

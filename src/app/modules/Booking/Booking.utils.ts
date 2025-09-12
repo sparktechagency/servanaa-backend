@@ -189,18 +189,28 @@ export const checkAvailability = async (
   days: any,
   bookingType: any,
 ) => {
+
+console.log('checkAvailability called with:', contractorId, startTime, days, bookingType );
+
   const requestedTimeSlots = generateTimeSlots(
     startTime,
     addOneHour(startTime),
   );
 
+  console.log('requestedTimeSlots', requestedTimeSlots);
+
   const schedule = await MySchedule.findOne({ contractorId });
   if (!schedule) throw new Error('Contractor schedule not found');
+
+  console.log('schedule', schedule);
 
   if (bookingType === 'OneTime') {
     const requestedDate = new Date(days as string); // ex: "2025-07-14"
     requestedDate.setUTCHours(0, 0, 0, 0); // normalize to 00:00 UTC
     const dayName = getDayName(days as string); // "Monday"
+    
+    console.log('requestedDate', requestedDate, 'dayName', dayName);
+    
     const daySchedule = schedule.schedules.find((s) => s.days === dayName);
     if (!daySchedule) {
       return {
@@ -209,9 +219,16 @@ export const checkAvailability = async (
       };
     }
 
+    console.log('daySchedule', daySchedule);
+
+
     const unavailableSlots = requestedTimeSlots.filter(
       (slot:any) => !daySchedule.timeSlots.includes(slot),
     );
+
+        console.log('unavailableSlots', unavailableSlots );
+
+
     if (unavailableSlots.length > 0) {
       return { available: false, message: 'Requested slots are unavailable.' };
     }
