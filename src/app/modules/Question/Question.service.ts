@@ -29,8 +29,11 @@ const createFaqIntoDB = async (
 };
 
 const getAllFaqsFromDB = async (query: Record<string, unknown>) => {
+
+
+
   const FaqQuery = new QueryBuilder(
-    Faq.find(),
+    Faq.find().populate('subCategoryId', 'name img'),
     query,
   )
     .search(FAQ_SEARCHABLE_FIELDS)
@@ -48,7 +51,7 @@ const getAllFaqsFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleFaqFromDB = async (id: string) => {
-  const result = await Faq.findById(id);
+  const result = await Faq.findById(id).populate('subCategoryId', 'name img');
 
   return result;
 };

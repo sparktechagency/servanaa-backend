@@ -3,11 +3,14 @@ import { CategoryControllers } from './Category.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { createCategoryValidationSchema, updateCategoryValidationSchema } from './Category.validation';
 import { uploadFileS3 } from '../../utils/UploaderS3';
+import { USER_ROLE } from '../User/user.constant';
+import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
 router.post(
   '/create-category',
+  auth(USER_ROLE.superAdmin),
   uploadFileS3(true).single('file'),
     (req: Request, res: Response, next: NextFunction) => {
       if (req.body.data) {
