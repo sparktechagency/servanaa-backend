@@ -17,7 +17,7 @@ export default {
   reset_pass_ui_link: process.env.RESET_PASS_UI_LINK,
   admin_email_user: process.env.ADMIN_EMAIL_USER,
   email_app_password: process.env.EMAIL_APP_PASSWORD,
-  super_admin_email: process.env.SUPER_ADMIN_EMAIL, 
+  super_admin_email: process.env.SUPER_ADMIN_EMAIL,
   super_admin_password: process.env.SUPER_ADMIN_PASSWORD,
   stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
   stripe_secret_key: process.env.STRIPE_SECRET_KEY,
@@ -26,6 +26,7 @@ export default {
   account_sid: process.env.TWILIO_ACCOUNT_SID,
   auth_token: process.env.TWILIO_AUTH_TOKEN,
   twilio_phone_number: process.env.TWILIO_PHONE_NUMBER,
+  frontend_url: process.env.FRONTEND_URL,
   s3: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -35,9 +36,5 @@ export default {
     s3ForcePathStyle: true,
     sslEnabled: true,
     signatureVersion: 'v4'
-  },
+  }
 };
-
-
-
-
