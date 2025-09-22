@@ -3,13 +3,11 @@
 // 3. withdraw
 // 4. support
 
-
-// price
+// price 
 // feature listing
 // instant booking eligibilitis
 // Customer Review Booster
-// Support 
-
+// Support
 
 // job categories
 // Customer Branding

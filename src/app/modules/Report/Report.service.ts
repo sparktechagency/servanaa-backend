@@ -25,7 +25,7 @@ const result = await Report.create(payload);
 
 const getAllReportsFromDB = async (query: Record<string, unknown>) => {
   const ReportQuery = new QueryBuilder(
-    Report.find().populate('userId', 'fullName'),
+    Report.find().populate('userId', 'fullName email'),
     query,
   )
     .search(REPORT_SEARCHABLE_FIELDS)

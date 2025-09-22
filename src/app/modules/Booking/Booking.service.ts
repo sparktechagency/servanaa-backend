@@ -8,11 +8,14 @@ import { BOOKING_SEARCHABLE_FIELDS } from './Booking.constant';
 import { DaySchedule, TBooking } from './Booking.interface';
 import { Booking } from './Booking.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
-import { addOneHour, checkAvailability, createOneTimeBooking, createRecurringBookingIntoDB, generateTimeSlots, getBookingDetails, getDayName } from './Booking.utils';
+import { addOneHour, checkAvailability, checkOrderDate, createOneTimeBooking, createRecurringBookingIntoDB, generateTimeSlots, getBookingDetails, getDayName } from './Booking.utils';
 import { User } from '../User/user.model';
+import { NotificationServices } from '../Notification/Notification.service';
 
 
 const createBookingIntoDB = async (payload: TBooking, usr:any) => {
+
+ console.log("hello")
 
 // const user = await User.isUserExistsByCustomEmail(usr.userEmail)
 // console.log(user, 'musa')
@@ -22,6 +25,7 @@ const createBookingIntoDB = async (payload: TBooking, usr:any) => {
 // payload.customerId = user?._id
 
   const { bookingType, contractorId, day:days } = payload;
+   checkOrderDate(days);
   // Step 1: Get booking details (end time, price, rateHourly, etc.)
   const updatedPayload = await getBookingDetails(payload); // Call common function
   // Step 2: Check availability (this will handle both one-time and recurring bookings)
@@ -43,9 +47,35 @@ const createBookingIntoDB = async (payload: TBooking, usr:any) => {
         updatedPayload.day = dayName;
         // updatedPayload.customerId = user?._id
     const booking = await createOneTimeBooking(updatedPayload); // Create one-time booking
+
+// if (!mongoose.Types.ObjectId.isValid(booking.contractorId)) {
+//     throw new Error('Invalid contractorId');
+// }
+
+const pay = {
+    userId: booking.contractorId, // If already ObjectId, no need to convert
+    type: 'bookingCreate',
+    title: 'One Time Booking',
+    message: 'A booking has been confirmed.',
+    isRead: []
+};
+    await NotificationServices.createNotificationIntoDB(pay);
+    
     return booking;
+
   } else if (bookingType === 'Weekly') {
     const booking = await createRecurringBookingIntoDB(updatedPayload); // Create recurring bookings
+
+      const pay = {
+        userId: booking[0]?.contractorId.toString(), // Pass as string
+        title: 'Recurrin Booking',
+        message: 'A recurring booking has been confirmed.', 
+        isRead: []
+    }
+    
+ 
+    await NotificationServices.createNotificationIntoDB(pay);
+
     return booking;
   }
 };

@@ -290,3 +290,22 @@ console.log('checkAvailability called with:', contractorId, startTime, days, boo
     return { available: true };
   }
 };
+
+
+export function checkOrderDate(days:any) {
+    const today = new Date(); // Get the current date (today)
+    const orderDate = new Date(days); // Convert 'days' to a Date object
+
+    // Set the time of today to 00:00:00 to ignore the time part
+    today.setHours(0, 0, 0, 0);
+    orderDate.setHours(0, 0, 0, 0); // Set the order date to 00:00:00
+
+    // Check if the order date is in the past
+    if (orderDate < today) {
+        // If the order date is in the past, throw an error
+        throw new Error('Date should be future');
+    }
+
+    // If the order date is today or in the future, return the order date in the desired format
+    return orderDate.toISOString(); // This will give you the format: YYYY-MM-DDTHH:mm:ss.sssZ
+}
