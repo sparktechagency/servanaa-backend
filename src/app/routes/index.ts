@@ -8,7 +8,7 @@ import { ServiceRoutes } from '../modules/Service/Service.route';
 import { AboutRoutes } from '../modules/About/About.route';
 import { TermRoutes } from '../modules/Term/Term.route';
 import { PrivacyRoutes } from '../modules/Privacy/Privacy.route';
-import {  QuestionRoutes } from '../modules/Question/Question.route';
+import { QuestionRoutes } from '../modules/Question/Question.route';
 import { CardRoutes } from '../modules/Card/Card.route';
 import { ReviewRoutes } from '../modules/Review/Review.route';
 import { BookingRoutes } from '../modules/Booking/Booking.route';
@@ -24,81 +24,86 @@ import { MyScheduleRoutes } from '../modules/MySchedule/MySchedule.route';
 import { ChatRoomRoutes } from '../modules/ChatRoom/ChatRoom.route';
 // import { TransactionRoutes } from '../modules/Transaction/transaction.route';
 import { ReportRoutes } from '../modules/Report/Report.route';
+import { SubscriptionRoutes } from '../modules/Subscription/Subscription.route';
 
 const router = Router();
 
 const moduleRoutes = [
   {
     path: '/users',
-    route: UserRoutes,
+    route: UserRoutes
   },
   {
     path: '/auth',
-    route: AuthRoutes,
+    route: AuthRoutes
   },
   {
     path: '/otps',
-    route: OtpRoutes,
+    route: OtpRoutes
   },
   {
     path: '/services',
-    route: ServiceRoutes,
+    route: ServiceRoutes
   },
   {
     path: '/chat-rooms',
-    route: ChatRoomRoutes,
+    route: ChatRoomRoutes
   },
   {
     path: '/chats',
-    route: ChatRoutes,
+    route: ChatRoutes
   },
   {
     path: '/upload',
-    route: UploadRoutes,
+    route: UploadRoutes
   },
   {
     path: '/abouts',
-    route: AboutRoutes,
+    route: AboutRoutes
   },
   {
     path: '/terms',
-    route: TermRoutes,
+    route: TermRoutes
   },
   {
     path: '/privacies',
-    route: PrivacyRoutes,
+    route: PrivacyRoutes
   },
   {
     path: '/questions',
-    route: QuestionRoutes,
+    route: QuestionRoutes
   },
   {
     path: '/cards',
-    route: CardRoutes,
+    route: CardRoutes
   },
   {
     path: '/reviews',
-    route: ReviewRoutes,
+    route: ReviewRoutes
+  },
+  {
+    path: '/subscriptions',
+    route: SubscriptionRoutes
   },
   {
     path: '/bookings',
-    route: BookingRoutes,
+    route: BookingRoutes
   },
   {
     path: '/categories',
-    route: CategoryRoutes,
+    route: CategoryRoutes
   },
   {
     path: '/sub-categories',
-    route: SubCategoryRoutes,
+    route: SubCategoryRoutes
   },
   {
     path: '/materials',
-    route: MaterialRoutes,
+    route: MaterialRoutes
   },
   {
     path: '/payments',
-    route: PaymentRoutes,
+    route: PaymentRoutes
   },
   // {
   //   path: '/transactions',
@@ -106,30 +111,30 @@ const moduleRoutes = [
   // },
   {
     path: '/cancels',
-    route: CancelRoutes,
+    route: CancelRoutes
   },
   {
     path: '/notifications',
-    route: NotificationRoutes,
+    route: NotificationRoutes
   },
   {
     path: '/helps',
-    route: HelpRoutes,
+    route: HelpRoutes
   },
   {
     path: '/contractors',
-    route: ContractorRoutes,
+    route: ContractorRoutes
   },
   {
     path: '/availabilities',
-    route: MyScheduleRoutes,
+    route: MyScheduleRoutes
   },
   {
     path: '/reports',
-    route: ReportRoutes,
-  },
+    route: ReportRoutes
+  }
 ];
 
-moduleRoutes.forEach((route) => router.use(route.path, route.route));
+moduleRoutes.forEach(route => router.use(route.path, route.route));
 
 export default router;
