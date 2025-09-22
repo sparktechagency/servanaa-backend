@@ -28,7 +28,7 @@ const getSingleNotification = catchAsync(async (req, res) => {
 });
 
 const getAllNotifications = catchAsync(async (req, res) => {
-  const result = await NotificationServices.getAllNotificationsFromDB(req.query);
+  const result = await NotificationServices.getAllNotificationsFromDB(req.query, req.user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

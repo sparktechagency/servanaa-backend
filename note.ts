@@ -1,3 +1,21 @@
+// 1. notification
+// 2. payment and transaction earning
+// 3. withdraw
+// 4. support
+
+// price 
+// feature listing
+// instant booking eligibilitis
+// Customer Review Booster
+// Support
+
+// job categories
+// Customer Branding
+// insight Dashboard
+// Verified Badge
+// multiple staff account
+// service areas
+
 // const updateUserIntoDB = async (id: string, payload?: any, file?: any, user?: any) => {
 //   console.log('id', id)
 //   console.log('payload', payload)
