@@ -6,7 +6,6 @@ import { UserServices } from './user.service';
 import sendResponse from '../../utils/sendResponse';
 import config from '../../config';
 
-
 // const addMobileNumber = catchAsync(async (req, res) => {
 //   const { user: userData } = req.body;
 //   const result = await UserServices.addMobileNumberIntoDB(userData, req.user);
@@ -21,48 +20,48 @@ import config from '../../config';
 const createCustomer = catchAsync(async (req, res) => {
   const userData = req.body;
   const result = await UserServices.createCustomerIntoDB(userData);
-   const { refreshToken, accessToken, userCustomer:user} = result;
+  const { refreshToken, accessToken, userCustomer: user } = result;
 
-    // const { refreshToken, accessToken, needsPasswordChange } = result;
-  
-    res.cookie('refreshToken', refreshToken, {
-      secure: config.NODE_ENV === 'production',
-      // secure: true, 
-      httpOnly: true,
-      sameSite: 'none',
-      maxAge: 1000 * 60 * 60 * 24 * 365,
-    });
-  
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Customer is created and otp is send succesfully!',   
-      data: {accessToken, user},
-    });
+  // const { refreshToken, accessToken, needsPasswordChange } = result;
+
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    // secure: true,
+    httpOnly: true,
+    sameSite: 'none',
+    maxAge: 1000 * 60 * 60 * 24 * 365
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Customer is created and otp is send succesfully!',
+    data: { accessToken, user }
+  });
 });
 
-const   createContractor = catchAsync(async (req, res) => {
-  const  userData  = req.body;
+const createContractor = catchAsync(async (req, res) => {
+  const userData = req.body;
   const result = await UserServices.createContractorIntoDB(userData);
-   const { refreshToken, accessToken, populatedContractor:user } = result;
-  
-    res.cookie('refreshToken', refreshToken, {
-      secure: config.NODE_ENV === 'production',
-      // secure: true, 
-      httpOnly: true,
-      sameSite: 'none',
-      maxAge: 1000 * 60 * 60 * 24 * 365,
-    });
-  
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Contractor is created and otp is send succesfully!',   
-      data: {
-        accessToken,
-        user,
-      },
-    });
+  const { refreshToken, accessToken, populatedContractor: user } = result;
+
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    // secure: true,
+    httpOnly: true,
+    sameSite: 'none',
+    maxAge: 1000 * 60 * 60 * 24 * 365
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Contractor is created and otp is send succesfully!',
+    data: {
+      accessToken,
+      user
+    }
+  });
 });
 
 const getMe = catchAsync(async (req, res) => {
@@ -74,7 +73,7 @@ const getMe = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'User is retrieved succesfully',
-    data: result,
+    data: result
   });
 });
 const getSingleUser = catchAsync(async (req, res) => {
@@ -86,7 +85,7 @@ const getSingleUser = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'User is retrieved succesfully',
-    data: result,
+    data: result
   });
 });
 const changeStatus = catchAsync(async (req, res) => {
@@ -98,7 +97,7 @@ const changeStatus = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Status is updated succesfully',
-    data: result,
+    data: result
   });
 });
 const getAllUsers = catchAsync(async (req, res) => {
@@ -109,7 +108,7 @@ const getAllUsers = catchAsync(async (req, res) => {
     success: true,
     message: 'Users are retrieved succesfully',
     meta: result.meta,
-    data: result.result,
+    data: result.result
   });
 });
 // const getAllApprovalFalseUsers = catchAsync(async (req, res) => {
@@ -131,21 +130,28 @@ const getUsersMonthly = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Users are retrieved succesfully',
-    data: result,
+    data: result
   });
 });
 
 const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const  userData  = req.body; 
+  const userData = req.body;
 
-  const result = await UserServices.updateUserIntoDB(id, userData, req.file as any, req.user);
+  const result = await UserServices.updateUserIntoDB(
+    id,
+    userData,
+    req.file as any,
+    req.user
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: req.file ? 'User data and profile image updated successfully' : 'User data updated successfully',
-    data: result,
+    message: req.file
+      ? 'User data and profile image updated successfully'
+      : 'User data updated successfully',
+    data: result
   });
 });
 // const updateApproval = catchAsync(async (req, res) => {
@@ -168,10 +174,9 @@ const deleteUser = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'User is deleted successfully',
-    data: result,
+    data: result
   });
 });
-
 
 const getAllProviders = catchAsync(async (req, res) => {
   const result = await UserServices.getAllProvidersFromDB(req.query);
@@ -181,7 +186,7 @@ const getAllProviders = catchAsync(async (req, res) => {
     success: true,
     message: 'Providers are retrieved succesfully',
     meta: result.meta,
-    data: result.result,
+    data: result.result
   });
 });
 // const getAllPreferedProviders = catchAsync(async (req, res) => {
@@ -204,15 +209,13 @@ const getAllClients = catchAsync(async (req, res) => {
     success: true,
     message: 'Clients are retrieved succesfully',
     meta: result.meta,
-    data: result.result,
+    data: result.result
   });
 });
 
-
-
 export const UserControllers = {
- createCustomer,
- createContractor,
+  createCustomer,
+  createContractor,
   getSingleUser,
   getUsersMonthly,
   deleteUser,
@@ -221,7 +224,7 @@ export const UserControllers = {
   changeStatus,
   getAllUsers,
   getAllClients,
-  getAllProviders,
+  getAllProviders
   // updateApproval,
   // getAllApprovalFalseUsers,
   // addMobileNumber,
