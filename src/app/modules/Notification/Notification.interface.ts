@@ -1,9 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { Model, Schema } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type TNotification = {
-  userId: Schema.Types.ObjectId;
+  userId: Types.ObjectId;
+  // userId: Schema.Types.ObjectId;
   title: string;
+  type: 'bookingCreate | bookingUpdate ';
   message: string; 
   isRead: string[];
 }
