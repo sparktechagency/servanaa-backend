@@ -28,7 +28,10 @@ router.post(
   SubscriptionControllers.createSubscriptionPlan
 );
 
-router.get('/plans', SubscriptionControllers.getAllSubscriptionPlans);
+router.get('/plans', 
+  //  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
+  SubscriptionControllers.getAllSubscriptionPlans
+);
 
 router.get('/plans/:id', SubscriptionControllers.getSingleSubscriptionPlan);
 

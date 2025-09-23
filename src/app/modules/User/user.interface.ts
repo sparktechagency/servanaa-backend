@@ -6,6 +6,7 @@ export type TUser = {
   fullName: string;
   customer?: Types.ObjectId;
   contractor?: Types.ObjectId;
+  stripeAccountId?: string;
   email: string;
   password: string;
   customerId?: string;

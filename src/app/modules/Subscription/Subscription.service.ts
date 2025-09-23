@@ -1375,7 +1375,7 @@ export class SubscriptionService {
       },
       { $sort: { totalRevenue: -1 } }
     ]);
-
+ 
     const totalRevenue = planRevenue.reduce(
       (sum, plan) => sum + plan.totalRevenue,
       0
@@ -1642,3 +1642,5 @@ export class SubscriptionService {
     };
   }
 }
+
+

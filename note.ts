@@ -3,11 +3,18 @@
 // 3. withdraw
 // 4. support
 
-// price 
-// feature listing
-// instant booking eligibilitis
-// Customer Review Booster
-// Support
+// price $49/month
+// Standard email support
+// Unlimited region & cities
+// Access single category 
+
+// price $99/month
+// Higher ranking in search & categories
+// Eligible for auto-accept jobs
+// Automated follow-ups to boost 5-star reviews
+// Priority support + phone line
+// Unlimited region & cities
+// Access single category 
 
 // job categories
 // Customer Branding

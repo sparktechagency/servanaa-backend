@@ -25,6 +25,8 @@ import { ChatRoomRoutes } from '../modules/ChatRoom/ChatRoom.route';
 // import { TransactionRoutes } from '../modules/Transaction/transaction.route';
 import { ReportRoutes } from '../modules/Report/Report.route';
 import { PaymentRoutes } from '../modules/payment/stripePaymentRoute';
+import { SubscriptionRoutes } from '../modules/Subscription/Subscription.route';
+import { TransactionRoutes } from '../modules/Transaction/transaction.route';
 
 const router = Router();
 
@@ -101,10 +103,10 @@ const moduleRoutes = [
     path: '/payments',
     route: PaymentRoutes,
   },
-  // {
-  //   path: '/transactions',
-  //   route: TransactionRoutes,
-  // },
+  {
+    path: '/transactions',
+    route: TransactionRoutes,
+  },
   {
     path: '/cancels',
     route: CancelRoutes,
@@ -128,6 +130,10 @@ const moduleRoutes = [
   {
     path: '/reports',
     route: ReportRoutes,
+  },
+  {
+    path: '/subscriptions',
+    route: SubscriptionRoutes,
   },
 ];
 

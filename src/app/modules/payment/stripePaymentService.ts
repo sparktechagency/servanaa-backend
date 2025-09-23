@@ -90,28 +90,28 @@ const checkAccountStatusIntoDB = async (id: any) => {
   if (!account?.requirements?.currently_due?.includes("external_account")) {
     // Bank info is complete, trigger transfer process
     // const transactions = await Transaction.findOne({ actorId:actor?._id });
-    const transactions = await Transaction.findOne({ actorId: actor?._id, paymentStatus: 'pending' });
-    const competetionResult = await CompetitionResult.findOne({ _id: transactions?.competitionId });
-    if (transactions?.adminPermission == 'approved') {
+    // const transactions = await Transaction.findOne({ actorId: actor?._id, paymentStatus: 'pending' });
+    // const competetionResult = await CompetitionResult.findOne({ _id: transactions?.competitionId });
+    // if (transactions?.adminPermission == 'approved') {
 
-      const result = await withdrawalProcessPaymentIntoDB(transactions, stripeAccountId as string);
-      if (result) {
-        transactions.paymentStatus = 'completed';
-        await transactions.save();
-
-
-        if (competetionResult) {
-          competetionResult.withdrawalStatus = 'received';
-          await competetionResult.save();
-        }
-      }
-      return result;
+    //   const result = await withdrawalProcessPaymentIntoDB(transactions, stripeAccountId as string);
+    //   if (result) {
+    //     transactions.paymentStatus = 'completed';
+    //     await transactions.save();
 
 
+    //     if (competetionResult) {
+    //       competetionResult.withdrawalStatus = 'received';
+    //       await competetionResult.save();
+    //     }
+    //   }
+    //   return result;
 
-    } else {
-      return { message: "Admin permission is pending" };
-    }
+
+
+    // } else {
+    //   return { message: "Admin permission is pending" };
+    // }
   } else {
 
     let accountLink = null;
@@ -163,7 +163,7 @@ const checkAccountStatusIntoDB = async (id: any) => {
 };
 
 const checkBankStatusIntoDB = async (id: any) => {
-  const actor = await Actor.findById(id).populate('userId');
+  const actor = await User.findById(id).populate('userId');
   const stripeAccountId = actor?.stripeAccountId
   // Check if bank information is now complete
 
@@ -173,28 +173,28 @@ const checkBankStatusIntoDB = async (id: any) => {
   if (!account?.requirements?.currently_due?.includes("external_account")) {
     // Bank info is complete, trigger transfer process
     // const transactions = await Transaction.findOne({ actorId:actor?._id });
-    const transactions = await Transaction.findOne({ actorId: actor?._id, paymentStatus: 'pending' });
-    const competetionResult = await CompetitionResult.findOne({ _id: transactions?.competitionId });
-    if (transactions?.adminPermission == 'approved') {
+    // const transactions = await Transaction.findOne({ actorId: actor?._id, paymentStatus: 'pending' });
+    // const competetionResult = await CompetitionResult.findOne({ _id: transactions?.competitionId });
+    // if (transactions?.adminPermission == 'approved') {
 
-      const result = await withdrawalProcessPaymentIntoDB(transactions, stripeAccountId as string);
-      if (result) {
-        transactions.paymentStatus = 'completed';
-        await transactions.save();
-
-
-        if (competetionResult) {
-          competetionResult.withdrawalStatus = 'received';
-          await competetionResult.save();
-        }
-      }
-      return result;
+    //   const result = await withdrawalProcessPaymentIntoDB(transactions, stripeAccountId as string);
+    //   if (result) {
+    //     transactions.paymentStatus = 'completed';
+    //     await transactions.save();
 
 
+    //     if (competetionResult) {
+    //       competetionResult.withdrawalStatus = 'received';
+    //       await competetionResult.save();
+    //     }
+    //   }
+    //   return result;
 
-    } else {
-      return { message: "Admin permission is pending" };
-    }
+
+
+    // } else {
+    //   return { message: "Admin permission is pending" };
+    // }
   } else {
     return { message: "Bank information still incomplete" };
   }
@@ -205,12 +205,12 @@ const checkPaymentCompletefromDB = async (user: any, payload: any) => {
 
   let actor = null;
 
-  if (user.role === 'actor') {
-    actor = await Actor.findOne({ email: user.userEmail });
-  }
+  // if (user.role === 'actor') {
+  //   actor = await Actor.findOne({ email: user.userEmail });
+  // }
 
-  const existingTransaction = await Transaction.findOne({ competitionId: payload.competitionId, actorId: actor?._id, paymentStatus: 'completed' });
-  return existingTransaction
+  // const existingTransaction = await Transaction.findOne({ competitionId: payload.competitionId, actorId: actor?._id, paymentStatus: 'completed' });
+  // return existingTransaction
 };
 const webhookToService = async (data: any, headers: any) => {
   const event = stripe.webhooks.constructEvent(
@@ -224,13 +224,13 @@ const webhookToService = async (data: any, headers: any) => {
     const account = event.data.object;
 
     if (account.charges_enabled) {
-      const actor = await Actor.findOne({ stripeAccountId: account.id });
-      if (actor) {
-        await Transaction.updateMany(
-          { actorId: actor._id, type: 'withdrawal', status: 'pending' },
-          { status: 'ready' }
-        );
-      }
+      // const actor = await Actor.findOne({ stripeAccountId: account.id });
+      // if (actor) {
+      //   await Transaction.updateMany(
+      //     { actorId: actor._id, type: 'withdrawal', status: 'pending' },
+      //     { status: 'ready' }
+      //   );
+      // }
     }
   }
 
@@ -240,7 +240,7 @@ const webhookToService = async (data: any, headers: any) => {
 export const PaymentServices = {
   checkPaymentCompletefromDB,
   webhookToService,
-  withdrawalProcessPaymentIntoDB,
+  // withdrawalProcessPaymentIntoDB,
   createSingleStripePaymentIntoDB,
   confirmStripePaymentIntoDB,
   checkAccountStatusIntoDB,

@@ -7,6 +7,7 @@ export type TContractor = {
   experience: string;
   bio: string;
   skillsCategory?: string;
+  balance?: number;
   dob?: string;
   gender?: string;
   city?: string;

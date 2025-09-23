@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import router from './app/routes/index';
-import { PaymentControllers } from './app/modules/Payment/Payment.controller';
+// import { PaymentControllers } from './app/modules/Payment/Payment.controller';
 import globalErrorHandler from './app/middlewares/globalErrorhandler';
 import Stripe from 'stripe';
 import config from './app/config';
@@ -30,11 +30,11 @@ app.post(
 //   SubscriptionControllers.handleWebhook
 // );
 
-app.post(
-  '/api/v1/payments/webhook',
-  express.raw({ type: 'application/json' }),
-  PaymentControllers.webhook
-);
+// app.post(
+//   '/api/v1/payments/webhook',
+//   express.raw({ type: 'application/json' }),
+//   PaymentControllers.webhook
+// );
 
 // Middleware
 app.use(helmet()); // Security headers

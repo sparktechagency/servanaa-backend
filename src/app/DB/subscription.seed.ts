@@ -4,7 +4,7 @@ import { SubscriptionPlan } from '../modules/Subscription/Subscription.model';
 
 const stripe = new Stripe(config.stripe_secret_key!);
 
-export default async function initializeDefaultPlans () {
+export default async function seedSubscriptionPlans () {
   // Check if plans already exist
   const existingPlans = await SubscriptionPlan.find();
   if (existingPlans.length > 0) {
@@ -18,9 +18,10 @@ export default async function initializeDefaultPlans () {
       duration: 1,
       price: 49,
       features: [
-        'Basic stats only',
+        'price $49/month',
         'Standard email support',
-        'Optional custom branding ($19/month)'
+        'Unlimited region & cities',
+        'Access single category'
       ],
       serviceAreas: 5,
       featuredListing: false,
@@ -40,18 +41,27 @@ export default async function initializeDefaultPlans () {
       duration: 1,
       price: 99,
       features: [
-        'Unlimited regions & cities',
+        'price $99/month',
         'Higher ranking in search & categories',
         'Eligible for auto-accept jobs',
-        'Multiple staff accounts',
-        'Access to all available categories',
-        'Verified badge plus premium badge highlight',
-        'Full access to bookings, earnings, and review breakdown',
-        'Priority support + phone line',
         'Automated follow-ups to boost 5-star reviews',
-        'Custom branding included (Business logo & name displayed)',
-        'NEW CUSTOMERS GET FREE ACCESS FOR FIRST 6 MONTHS'
+        'Priority support + phone line',
+        'Unlimited region & cities',
+        'Access single category',
       ],
+      // features: [
+      //   'Unlimited regions & cities',
+      //   'Higher ranking in search & categories',
+      //   'Eligible for auto-accept jobs',
+      //   'Multiple staff accounts',
+      //   'Access to all available categories',
+      //   'Verified badge plus premium badge highlight',
+      //   'Full access to bookings, earnings, and review breakdown',
+      //   'Priority support + phone line',
+      //   'Automated follow-ups to boost 5-star reviews',
+      //   'Custom branding included (Business logo & name displayed)',
+      //   'NEW CUSTOMERS GET FREE ACCESS FOR FIRST 6 MONTHS'
+      // ],
       serviceAreas: -1,
       featuredListing: true,
       instantBookingEligibility: true,
