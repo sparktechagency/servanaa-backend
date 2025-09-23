@@ -3,7 +3,7 @@ import { Model, Types } from 'mongoose';
 
 export type TCustomer = {
   userId: Types.ObjectId;
-  dob?: string; 
+  dob?: string;
   gender?: string;
   city?: string;
   language?: string;

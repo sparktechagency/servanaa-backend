@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import cron from 'node-cron';
 import mongoose from 'mongoose';
-import { Subscription } from '../modules/Subscription/Subscription.model';
-import { Contractor } from '../modules/Contractor/Contractor.model';
+import { Subscription } from '../Subscription/Subscription.model';
+import { Contractor } from '../Contractor/Contractor.model';
 
 const cronLocks = new Map<string, boolean>();
 

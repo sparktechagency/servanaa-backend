@@ -17,78 +17,6 @@ const stripe = new Stripe(config.stripe_secret_key!);
 const processedEvents = new Map<string, boolean>();
 
 export class SubscriptionService {
-  // static async initializeDefaultPlans () {
-  //   // Check if plans already exist
-  //   const existingPlans = await SubscriptionPlan.find();
-  //   if (existingPlans.length > 0) {
-  //     return { message: 'Plans already exist', plans: existingPlans };
-  //   }
-
-  //   const plans = [
-  //     {
-  //       name: 'Gold Plan',
-  //       type: 'gold' as const,
-  //       duration: 3,
-  //       price: 99,
-  //       features: ['Basic support', '10 bookings/month', 'Basic analytics']
-  //     },
-  //     {
-  //       name: 'Platinum Plan',
-  //       type: 'platinum' as const,
-  //       duration: 6,
-  //       price: 199,
-  //       features: [
-  //         'Priority support',
-  //         '50 bookings/month',
-  //         'Advanced analytics',
-  //         'SMS notifications'
-  //       ]
-  //     },
-  //     {
-  //       name: 'Diamond Plan',
-  //       type: 'diamond' as const,
-  //       duration: 12,
-  //       price: 399,
-  //       features: [
-  //         '24/7 support',
-  //         'Unlimited bookings',
-  //         'All features',
-  //         'Priority listing'
-  //       ]
-  //     }
-  //   ];
-
-  //   const createdPlans = [];
-
-  //   for (const planData of plans) {
-  //     // Create Stripe price
-  //     const stripePrice = await stripe.prices.create({
-  //       unit_amount: planData.price * 100,
-  //       currency: 'usd',
-  //       recurring: {
-  //         interval: 'month',
-  //         interval_count: planData.duration
-  //       },
-  //       product_data: {
-  //         name: planData.name
-  //       }
-  //     });
-
-  //     // Create plan in database
-  //     const plan = await SubscriptionPlan.create({
-  //       ...planData,
-  //       stripePriceId: stripePrice.id,
-  //       isActive: true
-  //     });
-
-  //     createdPlans.push(plan);
-  //   }
-
-  //   return { message: 'Plans created successfully', plans: createdPlans };
-  // }
-
-  // Main webhook event handler with idempotency
-
   static async initializeDefaultPlans () {
     // Check if plans already exist
     const existingPlans = await SubscriptionPlan.find();
@@ -98,36 +26,71 @@ export class SubscriptionService {
 
     const plans = [
       {
-        name: 'Test Gold Plan (3 min)',
-        type: 'gold' as const,
-        duration: 1, // This will be interpreted as minutes for testing
-        price: 1, // $0.01 for testing
-        features: ['Basic support', '10 bookings/month', 'Basic analytics']
+        name: 'Basic Plan',
+        type: 'basic' as const,
+        duration: 1,
+        price: 49,
+        features: [
+          'Basic stats only',
+          'Standard email support',
+          'Optional custom branding ($19/month)'
+        ],
+        serviceAreas: 5,
+        featuredListing: false,
+        instantBookingEligibility: false,
+        multipleStaffAccounts: false,
+        jobCategories: 2,
+        verifiedBadge: true,
+        insightsDashboard: 'basic',
+        support: 'standard',
+        customerReviewBooster: false,
+        customBranding: false,
+        customBrandingPrice: 19
       },
       {
-        name: 'Test Platinum Plan (5 min)',
-        type: 'platinum' as const,
-        duration: 2, // 5 minutes for testing
-        price: 2, // $0.02 for testing
+        name: 'Premium Plan',
+        type: 'premium' as const,
+        duration: 1, // monthly
+        price: 99,
         features: [
-          'Priority support',
-          '50 bookings/month',
-          'Advanced analytics',
-          'SMS notifications'
-        ]
+          'Unlimited regions & cities',
+          'Higher ranking in search & categories',
+          'Eligible for auto-accept jobs',
+          'Multiple staff accounts',
+          'Access to all available categories',
+          'Verified badge plus premium badge highlight',
+          'Full access to bookings, earnings, and review breakdown',
+          'Priority support + phone line',
+          'Automated follow-ups to boost 5-star reviews',
+          'Custom branding included (Business logo & name displayed)',
+          'NEW CUSTOMERS GET FREE ACCESS FOR FIRST 6 MONTHS'
+        ],
+        serviceAreas: -1, // unlimited
+        featuredListing: true,
+        instantBookingEligibility: true,
+        multipleStaffAccounts: true,
+        jobCategories: -1, // all categories
+        verifiedBadge: true,
+        premiumBadge: true,
+        insightsDashboard: 'full',
+        support: 'priority',
+        customerReviewBooster: true,
+        customBranding: true,
+        customBrandingPrice: 0, // included
+        newCustomerFreeMonths: 6
       }
     ];
 
     const createdPlans = [];
 
     for (const planData of plans) {
+      // Create Stripe price
       const stripePrice = await stripe.prices.create({
-        unit_amount: planData.price * 100, // Convert to cents
+        unit_amount: planData.price * 100,
         currency: 'usd',
         recurring: {
-          interval: 'day', // Use 'minute' instead of 'month'
-          interval_count: planData.duration,
-          trial_period_days: 0
+          interval: 'month',
+          interval_count: planData.duration
         },
         product_data: {
           name: planData.name
@@ -144,8 +107,68 @@ export class SubscriptionService {
       createdPlans.push(plan);
     }
 
-    return { message: 'Test plans created successfully', plans: createdPlans };
+    return { message: 'Plans created successfully', plans: createdPlans };
   }
+
+  // Main webhook event handler with idempotency
+
+  // static async initializeDefaultPlans () {
+  //   // Check if plans already exist
+  //   const existingPlans = await SubscriptionPlan.find();
+  //   if (existingPlans.length > 0) {
+  //     return { message: 'Plans already exist', plans: existingPlans };
+  //   }
+
+  //   const plans = [
+  //     {
+  //       name: 'Test Gold Plan (3 min)',
+  //       type: 'gold' as const,
+  //       duration: 1, // This will be interpreted as minutes for testing
+  //       price: 1, // $0.01 for testing
+  //       features: ['Basic support', '10 bookings/month', 'Basic analytics']
+  //     },
+  //     {
+  //       name: 'Test Platinum Plan (5 min)',
+  //       type: 'platinum' as const,
+  //       duration: 2, // 5 minutes for testing
+  //       price: 2, // $0.02 for testing
+  //       features: [
+  //         'Priority support',
+  //         '50 bookings/month',
+  //         'Advanced analytics',
+  //         'SMS notifications'
+  //       ]
+  //     }
+  //   ];
+
+  //   const createdPlans = [];
+
+  //   for (const planData of plans) {
+  //     const stripePrice = await stripe.prices.create({
+  //       unit_amount: planData.price * 100, // Convert to cents
+  //       currency: 'usd',
+  //       recurring: {
+  //         interval: 'day', // Use 'minute' instead of 'month'
+  //         interval_count: planData.duration,
+  //         trial_period_days: 0
+  //       },
+  //       product_data: {
+  //         name: planData.name
+  //       }
+  //     });
+
+  //     // Create plan in database
+  //     const plan = await SubscriptionPlan.create({
+  //       ...planData,
+  //       stripePriceId: stripePrice.id,
+  //       isActive: true
+  //     });
+
+  //     createdPlans.push(plan);
+  //   }
+
+  //   return { message: 'Test plans created successfully', plans: createdPlans };
+  // }
 
   static async handleWebhookEvent (event: Stripe.Event) {
     if (processedEvents.has(event.id)) {

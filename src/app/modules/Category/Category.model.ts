@@ -1,15 +1,20 @@
 import { Schema, model } from 'mongoose';
-      import { TCategory, CategoryModel } from './Category.interface';
-      
-      const CategorySchema = new Schema<TCategory, CategoryModel>({
-        name: { type: String, required: true, unique:true },
-        img: { type: String, required: true },
-        isDeleted: { type: Boolean, default: false },
-      },  { timestamps: true });
-      
-      CategorySchema.statics.isCategoryExists = async function (id: string) {
-        return await this.findOne({ _id: id, isDeleted: false });
-      };
-      
-      export const Category = model<TCategory, CategoryModel>('Category', CategorySchema);
-      
+import { TCategory, CategoryModel } from './Category.interface';
+
+const CategorySchema = new Schema<TCategory, CategoryModel>(
+  {
+    name: { type: String, required: true, unique: true },
+    img: { type: String, required: true },
+    isDeleted: { type: Boolean, default: false }
+  },
+  { timestamps: true }
+);
+
+CategorySchema.statics.isCategoryExists = async function (id: string) {
+  return await this.findOne({ _id: id, isDeleted: false });
+};
+
+export const Category = model<TCategory, CategoryModel>(
+  'Category',
+  CategorySchema
+);

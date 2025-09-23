@@ -173,23 +173,11 @@ const getAllAvailableContractorsFromDB = async (
     endTime
   } = query;
 
-  // const futureBookings: any[] = [];
-  // console.log('futureBookings', futureBookings,)
-  // console.log('bookingType', bookingType,)
-  // console.log('startTime', startTime,)
-  // console.log('duration', duration,)
-  // console.log('days', days,)
-  // console.log('skills', skills,)
-  // console.log('skillsCategory', skillsCategory )
-  // console.log('periodInDays', periodInDays )
-  // console.log('endTime', endTime )
-
-  // Find contractors based on skills and category filters
   const contractors = await Contractor.find({
     skills: skills,
     skillsCategory: skillsCategory
   }).populate('myScheduleId');
-  // }).populate('myScheduleId');
+
   if (contractors.length <= 0) {
     throw new AppError(
       httpStatus.BAD_REQUEST,

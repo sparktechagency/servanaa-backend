@@ -5,32 +5,18 @@ import { updateContractorValidationSchema } from './Contractor.validation';
 
 const router = express.Router();
 
+router.get('/available', ContractorControllers.getAllAvailableContractors);
 
-router.get(
-  '/available',
-  ContractorControllers.getAllAvailableContractors,
-);
-
-router.get(
-  '/:id',
-  ContractorControllers.getSingleContractor,
-);
+router.get('/:id', ContractorControllers.getSingleContractor);
 
 router.patch(
   '/:id',
   validateRequest(updateContractorValidationSchema),
-  ContractorControllers.updateContractor,
+  ContractorControllers.updateContractor
 );
 
-router.delete(
-  '/:id',
-  ContractorControllers.deleteContractor,
-);
+router.delete('/:id', ContractorControllers.deleteContractor);
 
-router.get(
-  '/',
-  ContractorControllers.getAllContractors,
-);
-
+router.get('/', ContractorControllers.getAllContractors);
 
 export const ContractorRoutes = router;

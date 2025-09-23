@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { User } from "./user.model";
+import { User } from './user.model';
 
 // Admin ID
 export const findLastAdminId = async () => {
   const lastAdmin: any = await User.findOne(
     {
-      role: 'admin',
+      role: 'admin'
     },
     {
       id: 1,
-      _id: 0,
-    },
+      _id: 0
+    }
   )
     .sort({
-      createdAt: -1,
+      createdAt: -1
     })
     .lean();
 
@@ -39,15 +39,15 @@ export const generateAdminId = async () => {
 export const findLastJudgeId = async () => {
   const lastJudge: any = await User.findOne(
     {
-      role: 'judge',
+      role: 'judge'
     },
     {
       id: 1,
-      _id: 0,
-    },
+      _id: 0
+    }
   )
     .sort({
-      createdAt: -1,
+      createdAt: -1
     })
     .lean();
 
@@ -73,15 +73,15 @@ export const generateJudgeId = async () => {
 export const findLastActorId = async () => {
   const lastActor: any = await User.findOne(
     {
-      role: 'actor',
+      role: 'actor'
     },
     {
       id: 1,
-      _id: 0,
-    },
+      _id: 0
+    }
   )
     .sort({
-      createdAt: -1,
+      createdAt: -1
     })
     .lean();
 
