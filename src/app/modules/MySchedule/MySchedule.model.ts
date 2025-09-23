@@ -6,23 +6,31 @@ const ScheduleDaySchema = new Schema({
   days: {
     type: String,
     required: true,
-    enum: daysOfWeek,
+    enum: daysOfWeek
   },
   timeSlots: {
     type: [String], // e.g., ["09:00-10:00", "10:00-11:00"]
-    required: true,
-  },
+    required: true
+  }
 });
-const MyScheduleSchema = new Schema<TMySchedule, MyScheduleModel>({
-  contractorId: { type: Schema.Types.ObjectId, ref: 'Contractor', unique:true, required: true, },
- schedules: {
-    type: [ScheduleDaySchema], // Array of day + slots
-    required: true,
+const MyScheduleSchema = new Schema<TMySchedule, MyScheduleModel>(
+  {
+    contractorId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Contractor',
+      unique: true,
+      required: true
+    },
+    schedules: {
+      type: [ScheduleDaySchema], // Array of day + slots
+      required: true
+    },
+    isDeleted: { type: Boolean }
   },
-  isDeleted: { type: Boolean},
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true
+  }
+);
 
 MyScheduleSchema.statics.isMyScheduleExists = async function (id: string) {
   return await this.findOne({ _id: id, isDeleted: false });
@@ -30,5 +38,5 @@ MyScheduleSchema.statics.isMyScheduleExists = async function (id: string) {
 
 export const MySchedule = model<TMySchedule, MyScheduleModel>(
   'MySchedule',
-  MyScheduleSchema,
+  MyScheduleSchema
 );

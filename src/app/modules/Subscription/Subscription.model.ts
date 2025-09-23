@@ -21,12 +21,27 @@ export interface TSubscription {
 
 export interface TSubscriptionPlan {
   name: string;
-  type: 'gold' | 'platinum' | 'diamond';
+  type: 'basic' | 'premium';
   duration: number;
   price: number;
   stripePriceId: string;
   features: string[];
+  serviceAreas: number; // -1 for unlimited
+  featuredListing: boolean;
+  instantBookingEligibility: boolean;
+  multipleStaffAccounts: boolean;
+  jobCategories: number; // -1 for all categories
+  verifiedBadge: boolean;
+  premiumBadge?: boolean;
+  insightsDashboard: 'basic' | 'full';
+  support: 'standard' | 'priority';
+  customerReviewBooster: boolean;
+  customBranding: boolean;
+  customBrandingPrice: number;
+  newCustomerFreeMonths?: number;
   isActive: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const subscriptionSchema = new Schema<TSubscription>(
@@ -87,7 +102,7 @@ const subscriptionPlanSchema = new Schema<TSubscriptionPlan>(
     name: { type: String, required: true },
     type: {
       type: String,
-      enum: ['gold', 'platinum', 'diamond'],
+      enum: ['basic', 'premium'],
       required: true,
       unique: true
     },
@@ -95,13 +110,33 @@ const subscriptionPlanSchema = new Schema<TSubscriptionPlan>(
     price: { type: Number, required: true, min: 0 },
     stripePriceId: { type: String, required: true, unique: true },
     features: [{ type: String, required: true }],
+    serviceAreas: { type: Number, required: true }, // -1 for unlimited
+    featuredListing: { type: Boolean, default: false },
+    instantBookingEligibility: { type: Boolean, default: false },
+    multipleStaffAccounts: { type: Boolean, default: false },
+    jobCategories: { type: Number, required: true }, // -1 for all categories
+    verifiedBadge: { type: Boolean, default: true },
+    premiumBadge: { type: Boolean, default: false },
+    insightsDashboard: {
+      type: String,
+      enum: ['basic', 'full'],
+      required: true
+    },
+    support: {
+      type: String,
+      enum: ['standard', 'priority'],
+      required: true
+    },
+    customerReviewBooster: { type: Boolean, default: false },
+    customBranding: { type: Boolean, default: false },
+    customBrandingPrice: { type: Number, default: 0 },
+    newCustomerFreeMonths: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true }
   },
   {
     timestamps: true
   }
 );
-
 subscriptionPlanSchema.index({ type: 1, isActive: 1 });
 
 export const Subscription = model<TSubscription>(
