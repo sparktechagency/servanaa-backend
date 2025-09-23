@@ -3,7 +3,7 @@ import { TNotification, NotificationModel } from './Notification.interface';
 import { TypeValues } from './Notification.constant';
 
 const NotificationSchema = new Schema<TNotification, NotificationModel>({
-  userId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+  userId: { type: Schema.Types.ObjectId, ref: 'User' },
   title: {
     type: String,
     required: true,

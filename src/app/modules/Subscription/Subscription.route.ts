@@ -19,7 +19,7 @@ router.post(
   auth(USER_ROLE.superAdmin),
   SubscriptionControllers.initializeDefaultPlans
 );
-
+ 
 // Subscription Plan Routes (Admin only)
 router.post(
   '/plans',

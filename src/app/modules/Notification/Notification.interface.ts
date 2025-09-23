@@ -2,8 +2,7 @@
 import { Model, Types } from 'mongoose';
 
 export type TNotification = {
-  userId: Types.ObjectId;
-  // userId: Schema.Types.ObjectId;
+  userId?: Types.ObjectId;
   title: string;
   type: 'bookingCreate | bookingUpdate ';
   message: string; 
