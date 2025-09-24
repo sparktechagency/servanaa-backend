@@ -22,6 +22,8 @@ import {
 import { User } from '../User/user.model';
 import { NotificationServices } from '../Notification/Notification.service';
 import { NOTIFICATION_TYPES } from '../Notification/Notification.constant';
+import { Contractor } from '../Contractor/Contractor.model';
+import { Customer } from '../Customer/Customer.model';
 
 const createBookingIntoDB = async (payload: TBooking, usr: any) => {
   console.log('=== SERVICE LEVEL DEBUG ===');
@@ -82,6 +84,15 @@ const createBookingIntoDB = async (payload: TBooking, usr: any) => {
     updatedPayload.day = dayName;
 
     const booking = await createOneTimeBooking(updatedPayload);
+
+    if (!booking) {
+      throw new Error('Failed to create booking');
+    }
+
+      const customerData = await Customer.findById(booking.customerId);
+      if(!customerData) throw new Error('No customer found');
+      customerData.balance = (customerData.balance || 0) + (booking.price || 0);
+      await customerData.save();
 
     // Create notifications
     const notifications = [];
@@ -294,9 +305,14 @@ const getSingleBookingFromDB = async (id: string) => {
 };
 
 const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
+ 
+
 
   const booking = await Booking.findById(id);
   if (!booking) throw new Error('Booking not found');
+
+
+
 
   if (files && files.length > 0) {
     // const fileUrls = files.map((file: any) => file.location); // Extract S3 URLs
@@ -304,15 +320,61 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   }
 
   if (booking.isDeleted) throw new Error('Cannot update a deleted Booking');
+
+
+
   const updatedData = await Booking.findByIdAndUpdate({ _id: id }, payload, {
     new: true,
     runValidators: true
   });
-  console.log('updatedData', updatedData);
-
-  if (!updatedData) {
+ if (!updatedData) {
     throw new Error('Booking cannot update');
   }
+  if(updatedData?.status === 'completed'){
+      console.log('completed');
+      // Notify contractor of payment transfer
+
+      const contractorData = await Contractor.findById(updatedData.contractorId);
+      const customerData = await Customer.findById(updatedData.customerId);
+      if(!customerData) throw new Error('No customer found');
+      if(!contractorData) throw new Error('No contractor found');
+
+      contractorData.balance = (contractorData.balance || 0) + (updatedData.price || 0);
+      customerData.balance = (customerData?.balance ?? 0) - (updatedData.price || 0);
+      await contractorData.save();
+      await customerData.save();
+
+
+      await NotificationServices.createNotificationIntoDB({
+        userId: updatedData.customerId,
+        type: NOTIFICATION_TYPES.WORK_COMPLETED,
+        title: 'Work Completed',
+        message: 'Your work has been marked as completed',
+        bookingId: updatedData._id,
+        isRead: []
+      });
+  }
+
+    if(updatedData?.status === 'ongoing'){
+      // console.log('completed');
+      // Notify contractor of payment transfer
+
+      // const contractorData = await Contractor.findById(updatedData.contractorId);
+      // if(!contractorData) throw new Error('No contractor found');
+      // contractorData.balance = (contractorData.balance || 0) + (updatedData.price || 0);
+      // await contractorData.save();
+
+
+      await NotificationServices.createNotificationIntoDB({
+        userId: updatedData.customerId,
+        type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,
+        title: 'Work Accepted',
+        message: 'Your work has been Started',
+        bookingId: updatedData._id,
+        isRead: []
+      });
+  }
+
 
   return updatedData;
 };

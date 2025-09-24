@@ -56,6 +56,29 @@ const createStripePayment = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const createStripeCheckoutSession = catchAsync(async (req, res) => {
+  const result =
+    await PaymentServices.createStripeCheckoutSessionIntoDB(req.user,req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment checkout is created succesfully',
+    data: result,
+  });
+});
+const verifyStripeSession = catchAsync(async (req, res) => {
+
+  // console.log('req.query', req.query);
+
+  const result =
+    await PaymentServices.verifyStripeSessionIntoDB( req.query?.session_id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment checkout is created succesfully',
+    data: result,
+  });
+});
 
 
 const confirmStripePayment = catchAsync(async (req, res) => {
@@ -115,7 +138,9 @@ export const PaymentControllers = {
   createStripePayment,
   confirmStripePayment,
   checkAccountStatus,
-  checkBankStatus
+  checkBankStatus,
+  createStripeCheckoutSession,
+  verifyStripeSession
 };
 
 

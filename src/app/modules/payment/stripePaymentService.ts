@@ -68,6 +68,94 @@ const createSingleStripePaymentIntoDB = async (
   //     description: 'Competition Entry Fee',
   // });
 }
+const createStripeCheckoutSessionIntoDB = async (
+  user: any,
+  paymentData: any,
+): Promise<string> => {
+ 
+// console.log('paymentData', paymentData)
+// if(user?.email === undefined || user?.email === null){
+// user.email = user.email || 'ahmadmusa9805@gmail.com'
+
+// }
+
+const email = user?.email || 'ahmadmusa9805@gmail.com'
+
+const { serviceId = 'ahmadmusa', unitAmount = 50, currency= 'USD' } = paymentData;
+
+    let session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      success_url: `${'http://localhost:5173'}/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${'http://localhost:5173'}/cancel`,
+      customer_email: `${email}`,
+      // customer_email: `${user?.email}`,
+      // client_reference_id: serviceId,
+      metadata: {
+        payUser: 'ahmadmusa',
+        // payUserType: payUserRole,
+        // receiveUser: receiveUser.toHexString(),
+        // receiveUserType: receiveUserRole,
+        // serviceId: serviceId,
+        // stripeAccountId: bankAccount?.stripeAccountId,
+        // partnerId: partnerId,
+        // winBid: bidDetails.price,
+      },
+      line_items: [
+        {
+          price_data: {
+            currency: currency,
+            unit_amount: Number(parseFloat(unitAmount).toFixed(2)),
+            product_data: {
+              name: 'Servana Service Payment',
+              // name: service.service,
+              description:  `Service ID: ahmadmusa`,
+              // description:  `Service ID: ${serviceId} | ${service.description}`,
+            },
+          },
+          quantity: 1,
+        },
+      ],
+    });
+
+    return session.url as string;
+} 
+
+const verifyStripeSessionIntoDB = async (sessionId: any) => {
+
+  console.log('sessionId', sessionId)
+
+  if (!sessionId) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'sessionId is required');
+  }
+ 
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    //payment_status = "no_payment_required", "paid", "unpaid"
+    if (session.payment_status !== "paid") {
+        throw new AppError(httpStatus.BAD_REQUEST, "Payment Failled");
+    }
+ 
+    const metadata = session?.metadata;
+    if(!metadata){
+        throw new AppError(httpStatus.BAD_REQUEST, "Invalid Session Id");
+    }
+   
+
+
+    //update database base on metadata = session.metadata
+    // const result = await OrderModel.updateOne({
+    //   _id: metadata.orderId,
+    //   userId: metadata.userId
+    // }, {
+    //   paymentStatus: "paid"
+    // })
+ 
+    return 'payment successfully';
+  } catch (err:any) {
+    throw new Error(err)
+  }
+};
 
 const confirmStripePaymentIntoDB = async (paymentIntentId: string) => {
   const confirmedPaymentIntent =
@@ -75,10 +163,6 @@ const confirmStripePaymentIntoDB = async (paymentIntentId: string) => {
 
   return confirmedPaymentIntent;
 };
-
-
- 
-
 
 const checkAccountStatusIntoDB = async (id: any) => {
   const actor = await User.findById(id).populate('userId');
@@ -244,5 +328,7 @@ export const PaymentServices = {
   createSingleStripePaymentIntoDB,
   confirmStripePaymentIntoDB,
   checkAccountStatusIntoDB,
-  checkBankStatusIntoDB
+  checkBankStatusIntoDB,
+  createStripeCheckoutSessionIntoDB,
+  verifyStripeSessionIntoDB,
 };

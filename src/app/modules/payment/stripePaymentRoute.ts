@@ -10,6 +10,16 @@ router.post(
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   PaymentControllers.createStripePayment,
 );
+router.get(
+  '/create-checkout-session',
+  // auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  PaymentControllers.createStripeCheckoutSession,
+);
+router.get(
+  '/stripe/success',
+  // auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  PaymentControllers.verifyStripeSession,
+);
 router.post(
   '/check-payment-complete',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),

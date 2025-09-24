@@ -7,6 +7,7 @@ const CustomerSchema = new Schema<TCustomer, CustomerModel>({
   gender: { type: String, default: '' },
   city: { type: String, default: '' },
   language: { type: String, default: '' },
+  balance: { type: Number, default: 0 },
   location: { type: String, default: '' },
   isDeleted: { type: Boolean, default: false }
 });

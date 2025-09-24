@@ -5,8 +5,9 @@ import { TransactionModel, TTransaction } from './transaction.interface';
 const transactionSchema: Schema = new Schema<TTransaction>(
    {
     transactionId: { type: String, unique: true },
-    contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    customerId: { type: String },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    // contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    // customerId: { type: String },
     bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' },
     type: {
       type: String,

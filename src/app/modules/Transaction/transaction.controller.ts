@@ -52,10 +52,10 @@ const updateSingleTransaction = catchAsync(async (req, res) => {
 });
 
 const singleWithdrawalRequest = catchAsync(async (req, res) => {
-  const { transaction: transactionData } = req.body;
+  const transactionData = req.body;
   const result = await TransactionServices.singleWithdrawalRequestIntoDB(
-    req.user,
     transactionData,
+    req.user,
   );
 
   sendResponse(res, {

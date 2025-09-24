@@ -10,6 +10,7 @@ import Stripe from 'stripe';
 import QueryBuilder from '../../builder/QueryBuilder';
 import config from '../../config';
 import { Booking } from '../Booking/Booking.model';
+import { User } from '../User/user.model';
 // import mongoose from 'mongoose';
 const stripe = new Stripe(config.stripe_secret_key as string);
 
@@ -110,32 +111,34 @@ const updateSingleTransactionIntoDB = async (
 };
 
 const singleWithdrawalRequestIntoDB = async (user: any, payload: any) => {
-  let actor = null;
+//   const user = await User.findOne({ email: usr.userEmail }).populate('contractor');
 
-  if (user.role === 'actor') {
-    actor = await Actor.findOne({ email: user.userEmail }).populate('userId');
+  let userData = null;
+
+  if (user?.role === 'contractor') {
+    userData = await User.findOne({ email: user.userEmail }).populate('contractor');
   }
 
-  const getCompetitionResult = await CompetitionResult.findOne({ competitionId: payload.competitionId, winnerId: actor?._id });
+//   const getCompetitionResult = await CompetitionResult.findOne({ competitionId: payload.competitionId, winnerId: actor?._id });
 
-  const id = getCompetitionResult?._id
+//   const id = getCompetitionResult?._id
 
-  await CompetitionResult.findByIdAndUpdate(id, { withdrawalStatus: "pending" }, {
-    new: true,
-    runValidators: true,
-  });
+//   await CompetitionResult.findByIdAndUpdate(id, { withdrawalStatus: "pending" }, {
+//     new: true,
+//     runValidators: true,
+//   });
 
-  if (!getCompetitionResult) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'Competition Result not found'
-    )
-  }
+//   if (!getCompetitionResult) {
+//     throw new AppError(
+//       httpStatus.BAD_REQUEST,
+//       'Competition Result not found'
+//     )
+//   }
 
   const transactionData = {
-    actorId: actor?._id,
-    competitionId: payload.competitionId,
-    type: 'withdrawal',
+    userId: userData?._id,
+    // competitionId: payload.competitionId,
+    type: 'withdraw',
     amount: payload?.amount,
   };
 
@@ -149,27 +152,27 @@ const singleWithdrawalRequestIntoDB = async (user: any, payload: any) => {
     }
 
     // Check if the actor has a Stripe account ID, create one if they don’t
-    if (!actor?.stripeAccountId) {
+    if (!userData?.stripeAccountId) {
       const account = await stripe.accounts.create({
         type: 'express',
-        email: actor?.email,
+        email: userData?.email,
       });
 
       // Assign the Stripe account ID to the actor and save it
-      if (actor) {
-        actor.stripeAccountId = account.id;
-        await actor.save(); // Ensure save is part of the transaction
+      if (userData) {
+        userData.stripeAccountId = account.id;
+        await userData.save(); // Ensure save is part of the transaction
         // await actor.save({ session }); // Ensure save is part of the transaction
       }
 
       let accountLink = null;
 
       // // Create an account link for Stripe onboarding if the actor has a Stripe account ID
-      if (actor && actor.stripeAccountId) {
+      if (userData && userData.stripeAccountId) {
         accountLink = await stripe.accountLinks.create({
-          account: actor.stripeAccountId,
-          refresh_url: `https://app.performroom.com/perform-learn/session/bank-info-required?actorId=${actor?._id}`,
-          return_url: `https://app.performroom.com/perform-learn/session/bank-info-successfull?actorId=${actor?._id}`, // Include actorId here
+          account: userData.stripeAccountId,
+          refresh_url: `https://localhost/session/bank-info-required?userId=${userData?._id}`,
+          return_url: `https://localhost/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
           type: 'account_onboarding',
         });
       }
@@ -181,7 +184,7 @@ const singleWithdrawalRequestIntoDB = async (user: any, payload: any) => {
 
 
     ///
-    const stripeAccountId = actor?.stripeAccountId
+    const stripeAccountId = userData?.stripeAccountId
     const account = await stripe.accounts.retrieve(stripeAccountId as string);
 
 
@@ -191,11 +194,11 @@ const singleWithdrawalRequestIntoDB = async (user: any, payload: any) => {
       let accountLink = null;
 
       // Create an account link for Stripe onboarding if the actor has a Stripe account ID
-      if (actor && actor.stripeAccountId) {
+      if (userData && userData.stripeAccountId) {
         accountLink = await stripe.accountLinks.create({
-          account: actor.stripeAccountId,
-          refresh_url: `https://app.performroom.com/perform-learn/session/bank-info-required?actorId=${actor?._id}`,
-          return_url: `https://app.performroom.com/perform-learn/session/bank-info-successfull?actorId=${actor?._id}`, // Include actorId here
+          account: userData.stripeAccountId,
+          refresh_url: `https://localhost/session/bank-info-required?userId=${userData?._id}`,
+          return_url: `https://localhost/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
           type: 'account_onboarding',
         });
       }
