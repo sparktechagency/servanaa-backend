@@ -13,7 +13,7 @@ import { CardRoutes } from '../modules/Card/Card.route';
 import { ReviewRoutes } from '../modules/Review/Review.route';
 import { BookingRoutes } from '../modules/Booking/Booking.route';
 import { CategoryRoutes } from '../modules/Category/Category.route';
-import { PaymentRoutes } from '../modules/Payment/Payment.route';
+// import { PaymentRoutes } from '../modules/Payment/Payment.route';
 import { SubCategoryRoutes } from '../modules/SubCategory/SubCategory.route';
 import { MaterialRoutes } from '../modules/Material/Material.route';
 import { CancelRoutes } from '../modules/Cancel/Cancel.route';
@@ -24,6 +24,9 @@ import { MyScheduleRoutes } from '../modules/MySchedule/MySchedule.route';
 import { ChatRoomRoutes } from '../modules/ChatRoom/ChatRoom.route';
 // import { TransactionRoutes } from '../modules/Transaction/transaction.route';
 import { ReportRoutes } from '../modules/Report/Report.route';
+import { PaymentRoutes } from '../modules/payment/stripePaymentRoute';
+import { SubscriptionRoutes } from '../modules/Subscription/Subscription.route';
+import { TransactionRoutes } from '../modules/Transaction/transaction.route';
 
 const router = Router();
 
@@ -100,10 +103,10 @@ const moduleRoutes = [
     path: '/payments',
     route: PaymentRoutes,
   },
-  // {
-  //   path: '/transactions',
-  //   route: TransactionRoutes,
-  // },
+  {
+    path: '/transactions',
+    route: TransactionRoutes,
+  },
   {
     path: '/cancels',
     route: CancelRoutes,
@@ -127,6 +130,10 @@ const moduleRoutes = [
   {
     path: '/reports',
     route: ReportRoutes,
+  },
+  {
+    path: '/subscriptions',
+    route: SubscriptionRoutes,
   },
 ];
 

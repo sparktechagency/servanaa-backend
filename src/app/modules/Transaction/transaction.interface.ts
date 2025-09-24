@@ -1,18 +1,20 @@
-// /* eslint-disable no-unused-vars */
-// import { Model, Types } from 'mongoose';
+/* eslint-disable no-unused-vars */
+import { Model, Types } from 'mongoose';
 
-// export type TTransaction = {
-//   transactionId: string;
+export type TTransaction = {
+  transactionId?: string;
+  userId: Types.ObjectId;
 //   contractorId: Types.ObjectId;
-//   contractorName: string;
-//   type: 'gold' | 'platinum' | 'Diamond';
-//   date: Date;
-//   paymentStatus: 'pending' | 'paid' | 'failed';
-//   amount: number;
-//   isDeleted: boolean;
-// };
+//   customerId?: string;
+  bookingId?: Types.ObjectId;
+  type: 'booking' | 'withdraw' | 'subscription';
+  date: Date;
+  paymentStatus: 'pending' | 'paid' | 'rejected';
+  amount: number;
+  isDeleted: boolean;
+};
 
-// //for creating static
-// export interface TransactionModel extends Model<TTransaction> {
-//   isUserExists(id: string): Promise<TTransaction | null>;
-// }
+//for creating static
+export interface TransactionModel extends Model<TTransaction> {
+  isUserExists(id: string): Promise<TTransaction | null>;
+}

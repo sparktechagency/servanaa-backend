@@ -11,6 +11,7 @@ const userSchema = new Schema<TUser, UserModel>(
     fullName: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true, select: false },
+    stripeAccountId: { type: String },
     customerId: { type: String },
     contactNo: { type: String, required: true },
     otpVerified: { type: Boolean, default: false },
@@ -19,32 +20,30 @@ const userSchema = new Schema<TUser, UserModel>(
       type: String,
       enum: ['customer', 'superAdmin', 'contractor'],
       required: true,
-      default: 'customer',
+      default: 'customer'
     },
     status: {
       type: String,
       enum: Object.values(UserStatus),
       // enum: ['active', 'blocked'],
-      default: 'active',
+      default: 'active'
     },
     passwordChangedAt: { type: Date, required: true, default: Date.now },
-   contractor: { type: Schema.Types.ObjectId, ref: 'Contractor' },
-   customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
-    isDeleted: { type: Boolean, default: false },
+    contractor: { type: Schema.Types.ObjectId, ref: 'Contractor' },
+    customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
+    isDeleted: { type: Boolean, default: false }
   },
   {
-    timestamps: true,
-  },
+    timestamps: true
+  }
 );
 
-
-  userSchema.virtual('archieves', {
+userSchema.virtual('archieves', {
   ref: 'Archieve',
   localField: '_id',
   foreignField: 'archieveCategoryId', // exact field name in ThingToKnow schema
-  justOne: false,
+  justOne: false
 });
-
 
 userSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -54,7 +53,7 @@ userSchema.pre('save', async function (next) {
   const user = this; // doc
   user.password = await bcrypt.hash(
     user.password,
-    Number(config.bcrypt_salt_rounds),
+    Number(config.bcrypt_salt_rounds)
   );
   next();
 });
@@ -71,14 +70,14 @@ userSchema.statics.isUserExistsByCustomEmail = async function (email: string) {
 
 userSchema.statics.isPasswordMatched = async function (
   plainTextPassword,
-  hashedPassword,
+  hashedPassword
 ) {
   return await bcrypt.compare(plainTextPassword, hashedPassword);
 };
 
 userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
   passwordChangedTimestamp: Date,
-  jwtIssuedTimestamp: number,
+  jwtIssuedTimestamp: number
 ) {
   const passwordChangedTime =
     new Date(passwordChangedTimestamp).getTime() / 1000;

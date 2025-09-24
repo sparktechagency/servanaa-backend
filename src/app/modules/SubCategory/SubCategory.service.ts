@@ -7,12 +7,8 @@ import mongoose from 'mongoose';
 import { TSubCategory } from './SubCategory.interface';
 import { SubCategory } from './SubCategory.model';
 
-const createSubCategoryIntoDB = async (
-  payload: TSubCategory,
-  file:any
-) => {
-
-  if(file) {
+const createSubCategoryIntoDB = async (payload: TSubCategory, file: any) => {
+  if (file) {
     payload.img = file.location;
     console.log(file.location, 'file.location');
     console.log(payload.img, 'payload.img');
@@ -21,7 +17,7 @@ const createSubCategoryIntoDB = async (
   }
 
   const result = await SubCategory.create(payload);
-  
+
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create SubCategory');
   }
@@ -32,7 +28,7 @@ const createSubCategoryIntoDB = async (
 const getAllSubCategorysFromDB = async (query: Record<string, unknown>) => {
   const SubCategoryQuery = new QueryBuilder(
     SubCategory.find().populate('categoryId', 'name'),
-    query,
+    query
   )
     .search(SUBCATEGORY_SEARCHABLE_FIELDS)
     .filter()
@@ -44,7 +40,7 @@ const getAllSubCategorysFromDB = async (query: Record<string, unknown>) => {
   const meta = await SubCategoryQuery.countTotal();
   return {
     result,
-    meta,
+    meta
   };
 };
 
@@ -54,17 +50,18 @@ const getSingleSubCategoryFromDB = async (id: string) => {
   return result;
 };
 
-const updateSubCategoryIntoDB = async (id: string, payload: any, file?: any) => {
-
-  if(file) {
+const updateSubCategoryIntoDB = async (
+  id: string,
+  payload: any,
+  file?: any
+) => {
+  if (file) {
     payload.img = file.location;
   }
 
   const isDeletedService = await mongoose.connection
     .collection('subcategories')
-    .findOne(
-      { _id: new mongoose.Types.ObjectId(id) },
-    );
+    .findOne({ _id: new mongoose.Types.ObjectId(id) });
 
   if (!isDeletedService) {
     throw new Error('SubCategory not found');
@@ -77,7 +74,7 @@ const updateSubCategoryIntoDB = async (id: string, payload: any, file?: any) => 
   const updatedData = await SubCategory.findByIdAndUpdate(
     { _id: id },
     payload,
-    { new: true, runValidators: true },
+    { new: true, runValidators: true }
   );
 
   if (!updatedData) {
@@ -88,9 +85,7 @@ const updateSubCategoryIntoDB = async (id: string, payload: any, file?: any) => 
 };
 
 const deleteSubCategoryFromDB = async (id: string) => {
-  const deletedService = await SubCategory.findByIdAndDelete(
-    id,
-  );
+  const deletedService = await SubCategory.findByIdAndDelete(id);
 
   if (!deletedService) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete SubCategory');
@@ -104,5 +99,5 @@ export const SubCategoryServices = {
   getAllSubCategorysFromDB,
   getSingleSubCategoryFromDB,
   updateSubCategoryIntoDB,
-  deleteSubCategoryFromDB,
+  deleteSubCategoryFromDB
 };

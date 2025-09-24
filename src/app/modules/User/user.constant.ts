@@ -1,13 +1,10 @@
 export const USER_ROLE = {
   superAdmin: 'superAdmin',
   customer: 'customer',
-  contractor: 'contractor',
+  contractor: 'contractor'
 } as const;
 
-
-export const usersSearchableFields = [
-  'email','fullName', 'contactNo'
-];
+export const usersSearchableFields = ['email', 'fullName', 'contactNo'];
 
 export const UserStatus = ['active', 'blocked'];
 
@@ -18,7 +15,7 @@ export const userFields = [
   'contactNo',
   'img',
   'otpVerified',
-  'status',
+  'status'
   // add other common user fields you want to update
 ];
 
@@ -28,7 +25,7 @@ export const customerFields = [
   'gender',
   'city',
   'language',
-  'location',
+  'location'
   // add other customer-specific fields here
 ];
 
@@ -42,10 +39,12 @@ export const contractorFields = [
   'language',
   'location',
   'ratings',
-  'subscriptionStatus',
   'skills',
   'certificates',
   'materials',
-  'mySchedule',
+  'mySchedule'
   // add other contractor-specific fields here
 ];
+
+
+

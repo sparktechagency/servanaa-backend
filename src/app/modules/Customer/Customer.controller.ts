@@ -11,7 +11,7 @@ const createCustomer = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Customer is created successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -23,7 +23,7 @@ const getSingleCustomer = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Customer is retrieved successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -35,7 +35,7 @@ const getAllCustomers = catchAsync(async (req, res) => {
     success: true,
     message: 'Customers are retrieved successfully',
     meta: result.meta,
-    data: result.result,
+    data: result.result
   });
 });
 
@@ -48,7 +48,7 @@ const updateCustomer = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Customer is updated successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -60,7 +60,7 @@ const deleteCustomer = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Customer is deleted successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -69,5 +69,5 @@ export const CustomerControllers = {
   getSingleCustomer,
   getAllCustomers,
   updateCustomer,
-  deleteCustomer,
+  deleteCustomer
 };

@@ -5,34 +5,31 @@ import mongoose from 'mongoose';
 import seedSuperAdmin from './app/DB/index';
 import config from './app/config/index';
 import { initializeChatSocket } from './app/modules/Chat/chat.socket';
+import seedSubscriptionPlans from './app/DB/subscription.seed';
 // let server: Server;
 const server = http.createServer(app);
-async function main() {
+async function main () {
   try {
-    // await mongoose.connect('mongodb://127.0.0.1:27017/servana');
-    // await mongoose.connect('mongodb://localhost:27017/servana');
     await mongoose.connect(config.database_url as string);
-    const port = config.port || 3000; // Default to 3000 if undefined
+    const port = config.port || 3000;
 
     await seedSuperAdmin();
+    await seedSubscriptionPlans();
 
-    // Initialize Socket.IO
     const io = new Server(server, {
       cors: {
         //   origin: "*", // Replace with frontend URL
         origin: [
           'http://localhost:5173',
           'http://localhost:3000',
-          'https://your-production-url.com',
-        ], // Ensure this is correct for Next.js frontend
-        methods: ['GET', 'POST'],
-      },
+          'https://your-production-url.com'
+        ],
+        methods: ['GET', 'POST']
+      }
     });
 
-    // Attach chat socket handlers
     initializeChatSocket(io);
 
-    // Start the server
     server.listen(port, () => {
       console.log(`🚀 Server is running on http://10.0.60.52:${port}`);
     });
@@ -42,20 +39,14 @@ async function main() {
   }
 }
 
-// Handle server shutdown gracefully
 main();
 
-process.on('unhandledRejection', (err) => {
+process.on('unhandledRejection', err => {
   console.log(`😈 unahandledRejection is detected , shutting down ...`, err);
-  // if (server) {
-  //   server.close(() => {
-  //     process.exit(1);
-  //   });
-  // }
   process.exit(1);
 });
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.error('Uncaught Exception:', err.message);
   // console.log(`😈 uncaughtException is detected , shutting down ...`);
   process.exit(1);

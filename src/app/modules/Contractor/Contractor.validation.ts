@@ -17,7 +17,7 @@ export const updateContractorValidationSchema = z.object({
       name: z.string().optional(),
       description: z.string().optional(),
       atcCodes: z.string().optional(),
-      isDeleted: z.boolean().optional(),
-    }),
-  }),
+      isDeleted: z.boolean().optional()
+    })
+  })
 });

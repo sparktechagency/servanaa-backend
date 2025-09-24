@@ -8,11 +8,9 @@ import mongoose from 'mongoose';
 import { Customer } from './Customer.model';
 import { TCustomer } from './Customer.interface';
 
-const createCustomerIntoDB = async (
-  payload: TCustomer,
-) => {
+const createCustomerIntoDB = async (payload: TCustomer) => {
   const result = await Customer.create(payload);
-  
+
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Customer');
   }
@@ -21,10 +19,7 @@ const createCustomerIntoDB = async (
 };
 
 const getAllCustomersFromDB = async (query: Record<string, unknown>) => {
-  const CustomerQuery = new QueryBuilder(
-    Customer.find(),
-    query,
-  )
+  const CustomerQuery = new QueryBuilder(Customer.find(), query)
     .search(CUSTOMER_SEARCHABLE_FIELDS)
     .filter()
     .sort()
@@ -35,7 +30,7 @@ const getAllCustomersFromDB = async (query: Record<string, unknown>) => {
   const meta = await CustomerQuery.countTotal();
   return {
     result,
-    meta,
+    meta
   };
 };
 
@@ -50,7 +45,7 @@ const updateCustomerIntoDB = async (id: string, payload: any) => {
     .collection('customers')
     .findOne(
       { _id: new mongoose.Types.ObjectId(id) },
-      { projection: { isDeleted: 1, name: 1 } },
+      { projection: { isDeleted: 1, name: 1 } }
     );
 
   if (!isDeletedService?.name) {
@@ -61,11 +56,10 @@ const updateCustomerIntoDB = async (id: string, payload: any) => {
     throw new Error('Cannot update a deleted Customer');
   }
 
-  const updatedData = await Customer.findByIdAndUpdate(
-    { _id: id },
-    payload,
-    { new: true, runValidators: true },
-  );
+  const updatedData = await Customer.findByIdAndUpdate({ _id: id }, payload, {
+    new: true,
+    runValidators: true
+  });
 
   if (!updatedData) {
     throw new Error('Customer not found after update');
@@ -78,7 +72,7 @@ const deleteCustomerFromDB = async (id: string) => {
   const deletedService = await Customer.findByIdAndUpdate(
     id,
     { isDeleted: true },
-    { new: true },
+    { new: true }
   );
 
   if (!deletedService) {
@@ -93,5 +87,5 @@ export const CustomerServices = {
   getAllCustomersFromDB,
   getSingleCustomerFromDB,
   updateCustomerIntoDB,
-  deleteCustomerFromDB,
+  deleteCustomerFromDB
 };
