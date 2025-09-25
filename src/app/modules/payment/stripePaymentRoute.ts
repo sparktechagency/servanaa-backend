@@ -30,6 +30,13 @@ router.post('/webhook', PaymentControllers.webhook);
 router.get('/check-account-status', PaymentControllers.checkAccountStatus);
 router.get('/check-bank-status', PaymentControllers.checkBankStatus);
 
+router.post(
+  '/withdrawal-process',
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
+//   validateRequest(processValidationSchema),
+  PaymentControllers.singleWithdrawalProcess,
+);
+
 export const PaymentRoutes = router;
 export const handleStripeWebhook = router;
 

@@ -7,6 +7,8 @@ import config from '../../config';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { User } from '../User/user.model';
+import mongoose from 'mongoose';
+import { Transaction } from '../Transaction/transaction.model';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const stripe = new Stripe(config.stripe_secret_key as string);
 
@@ -247,14 +249,16 @@ const checkAccountStatusIntoDB = async (id: any) => {
 };
 
 const checkBankStatusIntoDB = async (id: any) => {
-  const actor = await User.findById(id).populate('userId');
-  const stripeAccountId = actor?.stripeAccountId
+  const userData = await User.findById(id).populate('userId');
+  const stripeAccountId = userData?.stripeAccountId
   // Check if bank information is now complete
 
   const account = await stripe.accounts.retrieve(stripeAccountId as string);
   // const account = await stripe.accounts.retrieve(actor?.stripeAccountId as string);
 
   if (!account?.requirements?.currently_due?.includes("external_account")) {
+
+    
     // Bank info is complete, trigger transfer process
     // const transactions = await Transaction.findOne({ actorId:actor?._id });
     // const transactions = await Transaction.findOne({ actorId: actor?._id, paymentStatus: 'pending' });
@@ -283,6 +287,17 @@ const checkBankStatusIntoDB = async (id: any) => {
     return { message: "Bank information still incomplete" };
   }
 
+};
+
+
+const withdrawalProcessPaymentIntoDB = async (amount: any, stripeAccountId: string) => {
+  const transfer = await stripe.transfers.create({
+    amount: amount,
+    currency: 'usd',
+    destination: stripeAccountId,
+    description: 'Transfer to contractor',
+  });
+  return transfer;
 };
 
 const checkPaymentCompletefromDB = async (user: any, payload: any) => {
@@ -321,14 +336,133 @@ const webhookToService = async (data: any, headers: any) => {
   return 'Webhook received.';
 };
 
+const singleWithdrawalProcessIntoDB = async (
+  payload: any,
+  user: any,
+) => {
+  console.log('payload', payload)
+  console.log('user', user)
+   let userData = null;
+
+  if (user?.role === 'contractor') {
+    userData = await User.findOne({ email: user.userEmail }).populate('contractor');
+  }
+let newTransaction;
+  const transactionData = {
+    userId: userData?._id,
+    type: 'withdraw',
+    amount: payload?.amount,
+  };
+  // const session = await mongoose.startSession();
+  // try {
+    // session.startTransaction();
+    
+    console.log('transactionData', transactionData)
+      newTransaction = await Transaction.create(transactionData);
+         console.log('newTransaction360', newTransaction)
+
+    if (!newTransaction) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Transaction');
+    }
+
+    // Check if the actor has a Stripe account ID, create one if they don’t
+    if (!userData?.stripeAccountId) {
+        console.log('user 366', userData?.stripeAccountId)
+      const account = await stripe.accounts.create({
+        type: 'express',
+        email: userData?.email,
+      });
+    console.log('account.id', account.id)
+      // Assign the Stripe account ID to the actor and save it
+      if (userData) {
+            console.log('userData.id', userData)
+        userData.stripeAccountId = account.id;
+          console.log('userDatamusa', userData)
+        // await userData.save(); // Ensure save is part of the transaction
+        // await userData.save({ session }); // Ensure save is part of the transaction
+                  console.log('userData ahmad', userData)
+      }
+  
+      let accountLink = null;
+           console.log('userData.stripeAccountId', userData?.stripeAccountId)
+      // // Create an account link for Stripe onboarding if the actor has a Stripe account ID
+      // if (userData && userData.stripeAccountId) {
+          console.log('user 388', userData?.stripeAccountId)
+          accountLink = await stripe.accountLinks.create({
+          account: userData?.stripeAccountId as string,
+          refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+          return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
+          type: 'account_onboarding',
+        });
+      // }
+
+      // Commit transaction if everything went well
+      // await session.commitTransaction();
+      return { url: accountLink?.url };
+    }
+
+
+    ///
+    const stripeAccountId = userData?.stripeAccountId
+    const account = await stripe.accounts.retrieve(stripeAccountId as string);
+
+      console.log('user 401', userData?.stripeAccountId)
+    if (account?.requirements?.currently_due?.includes("external_account")) {
+      console.log('user  403', userData?.stripeAccountId)
+      // Bank info is not complete, trigger to generate onboarding link
+      let accountLink = null;
+
+      // Create an account link for Stripe onboarding if the actor has a Stripe account ID
+      if (userData && userData.stripeAccountId) {
+        accountLink = await stripe.accountLinks.create({
+          account: userData.stripeAccountId,
+          refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+          return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
+          type: 'account_onboarding',
+        });
+      }
+      // await session.commitTransaction();
+      return { url: accountLink?.url };
+    }
+
+
+  // const result = await withdrawalProcessPaymentIntoDB(newTransaction?.amount, user?.stripeAccountId as string);
+  const transfer = await stripe.transfers.create({
+    amount: newTransaction?.amount,
+    currency: 'usd',
+    destination: stripeAccountId,
+    description: 'Transfer to contractor',
+  });
+  // return transfer;
+
+  
+  if (transfer && newTransaction) {
+
+    newTransaction.paymentStatus = 'paid';
+    await newTransaction.save();
+  }
+
+  return transfer;
+
+  // } catch (err: any) {
+  //   // Rollback transaction on error
+  //   // await session.abortTransaction();
+  //   throw new Error(err.message); // Re-throw error to handle it outside if needed
+  // } finally {
+  //   // End the session
+  //   // await session.endSession();
+  // }
+};
+
 export const PaymentServices = {
   checkPaymentCompletefromDB,
   webhookToService,
-  // withdrawalProcessPaymentIntoDB,
+ withdrawalProcessPaymentIntoDB,
   createSingleStripePaymentIntoDB,
   confirmStripePaymentIntoDB,
   checkAccountStatusIntoDB,
   checkBankStatusIntoDB,
   createStripeCheckoutSessionIntoDB,
   verifyStripeSessionIntoDB,
+  singleWithdrawalProcessIntoDB
 };

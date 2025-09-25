@@ -25,7 +25,7 @@ export type TContractor = {
   stripeCustomerId: string;
   customerId: string;
   paymentMethodId: string;
-  stripeAccountId: string;
+  // stripeAccountId: string;
   certificates: string[];
   //  materials: string[];
   materials?: {

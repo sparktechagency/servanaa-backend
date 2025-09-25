@@ -41,7 +41,7 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
       ref: 'MySchedule',
       default: null
     },
-    stripeAccountId: { type: String, default: '' },
+    // stripeAccountId: { type: String, default: '' },
     subscriptionId: {
       type: Schema.Types.ObjectId,
       ref: 'Subscription',

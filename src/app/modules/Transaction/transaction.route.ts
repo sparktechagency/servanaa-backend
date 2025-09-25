@@ -43,35 +43,13 @@ router.patch(
 );
 
 
-router.post(
-  '/send-withdrawal-request',
-  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
-//   validateRequest(updateTransactionValidationSchema),
-  TransactionControllers.singleWithdrawalRequest,
-);
-router.post(
-  '/send-withdrawal-request-revenue',
-  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
-//   validateRequest(updateTransactionValidationSchema),
-  TransactionControllers.singleWithdrawalRequestRevenue,
-);
 
-
-
-router.post(
-  '/withdrawal-process',
-  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
-//   validateRequest(processValidationSchema),
-  TransactionControllers.singleWithdrawalProcess,
-);
-router.post(
-  '/send-withdrawal-process-revenue',
-  auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
-//   validateRequest(processValidationSchema),
-  TransactionControllers.singleWithdrawalProcessRevenue,
-);
-
-
+// router.post(
+//   '/withdrawal-process',
+//   auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
+// //   validateRequest(processValidationSchema),
+//   TransactionControllers.singleWithdrawalProcess,
+// );
 
 
 export const TransactionRoutes = router;

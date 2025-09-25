@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
-
 import { Transaction } from './transaction.model';
 import { TTransaction } from './transaction.interface';
 import Stripe from 'stripe';
@@ -11,6 +10,9 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import config from '../../config';
 import { Booking } from '../Booking/Booking.model';
 import { User } from '../User/user.model';
+import { PaymentServices } from '../payment/stripePaymentService';
+import { withdrawRequestSearchableFields } from './transaction.constant';
+import mongoose from 'mongoose';
 // import mongoose from 'mongoose';
 const stripe = new Stripe(config.stripe_secret_key as string);
 
@@ -39,8 +41,8 @@ if(payload.type === 'withdraw'){
     throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
   }
   payload.amount = payload.amount || bookingData?.price as number
-  payload.contractorId = payload.contractorId || bookingData?.contractorId as any
-  payload.customerId = payload.customerId || bookingData?.customerId as any
+  payload.userId = payload.userId || bookingData?.contractorId as any
+  payload.userId = payload.userId || bookingData?.customerId as any
   payload.paymentStatus = payload.paymentStatus || 'paid'
   const currentDate = getCurrentDateAtMidnight();
   payload.date = payload.date || currentDate ;
@@ -48,7 +50,7 @@ if(payload.type === 'withdraw'){
 //   checking if the actor has already participated in the competition
   const existingTransaction = await Transaction.findOne({
     bookingId: payload.bookingId,
-    customerId: payload.customerId,
+    customerId: payload.userId,
   });
 
 
@@ -110,343 +112,112 @@ const updateSingleTransactionIntoDB = async (
 
 };
 
-const singleWithdrawalRequestIntoDB = async (user: any, payload: any) => {
-//   const user = await User.findOne({ email: usr.userEmail }).populate('contractor');
 
-  let userData = null;
 
-  if (user?.role === 'contractor') {
-    userData = await User.findOne({ email: user.userEmail }).populate('contractor');
-  }
 
-//   const getCompetitionResult = await CompetitionResult.findOne({ competitionId: payload.competitionId, winnerId: actor?._id });
+// const singleWithdrawalProcessIntoDB = async (
+//   user: any,
+//   payload: any,
+// ) => {
+//    let userData = null;
 
-//   const id = getCompetitionResult?._id
+//   if (user?.role === 'contractor') {
+//     userData = await User.findOne({ email: user.userEmail }).populate('contractor');
+//   }
+// let newTransaction;
+//   const transactionData = {
+//     userId: userData?._id,
+//     type: 'withdraw',
+//     amount: payload?.amount,
+//   };
 
-//   await CompetitionResult.findByIdAndUpdate(id, { withdrawalStatus: "pending" }, {
-//     new: true,
-//     runValidators: true,
-//   });
+//   const session = await mongoose.startSession();
+//   try {
+//     session.startTransaction();
 
-//   if (!getCompetitionResult) {
-//     throw new AppError(
-//       httpStatus.BAD_REQUEST,
-//       'Competition Result not found'
-//     )
+//      newTransaction = await Transaction.create(transactionData);
+//     if (!newTransaction) {
+//       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Transaction');
+//     }
+
+//     // Check if the actor has a Stripe account ID, create one if they don’t
+//     if (!userData?.stripeAccountId) {
+//       const account = await stripe.accounts.create({
+//         type: 'express',
+//         email: userData?.email,
+//       });
+
+//       // Assign the Stripe account ID to the actor and save it
+//       if (userData) {
+//         userData.stripeAccountId = account.id;
+//         await userData.save(); // Ensure save is part of the transaction
+//         // await actor.save({ session }); // Ensure save is part of the transaction
+//       }
+
+//       let accountLink = null;
+
+//       // // Create an account link for Stripe onboarding if the actor has a Stripe account ID
+//       if (userData && userData.stripeAccountId) {
+//         accountLink = await stripe.accountLinks.create({
+//           account: userData.stripeAccountId,
+//           refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+//           return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
+//           type: 'account_onboarding',
+//         });
+//       }
+
+//       // Commit transaction if everything went well
+//       // await session.commitTransaction();
+//       return { url: accountLink?.url };
+//     }
+
+
+//     ///
+//     const stripeAccountId = userData?.stripeAccountId
+//     const account = await stripe.accounts.retrieve(stripeAccountId as string);
+
+
+//     if (account?.requirements?.currently_due?.includes("external_account")) {
+
+//       // Bank info is not complete, trigger to generate onboarding link
+//       let accountLink = null;
+
+//       // Create an account link for Stripe onboarding if the actor has a Stripe account ID
+//       if (userData && userData.stripeAccountId) {
+//         accountLink = await stripe.accountLinks.create({
+//           account: userData.stripeAccountId,
+//           refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+//           return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
+//           type: 'account_onboarding',
+//         });
+//       }
+//       // await session.commitTransaction();
+//       return { url: accountLink?.url };
+//     }
+
+
+//   const result = await PaymentServices.withdrawalProcessPaymentIntoDB(newTransaction?.amount, user?.stripeAccountId as string);
+
+//   if (result && newTransaction) {
+
+//     newTransaction.paymentStatus = 'paid';
+//     await newTransaction.save();
 //   }
 
-  const transactionData = {
-    userId: userData?._id,
-    // competitionId: payload.competitionId,
-    type: 'withdraw',
-    amount: payload?.amount,
-  };
+//   return result;
 
-  // const session = await mongoose.startSession();
-  try {
-    // session.startTransaction();
+//   } catch (err: any) {
+//     // Rollback transaction on error
+//     // await session.abortTransaction();
+//     throw new Error(err.message); // Re-throw error to handle it outside if needed
+//   } finally {
+//     // End the session
+//     // await session.endSession();
+//   }
+// };
 
-    const newTransaction = await Transaction.create(transactionData);
-    if (!newTransaction) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Transaction');
-    }
 
-    // Check if the actor has a Stripe account ID, create one if they don’t
-    if (!userData?.stripeAccountId) {
-      const account = await stripe.accounts.create({
-        type: 'express',
-        email: userData?.email,
-      });
 
-      // Assign the Stripe account ID to the actor and save it
-      if (userData) {
-        userData.stripeAccountId = account.id;
-        await userData.save(); // Ensure save is part of the transaction
-        // await actor.save({ session }); // Ensure save is part of the transaction
-      }
-
-      let accountLink = null;
-
-      // // Create an account link for Stripe onboarding if the actor has a Stripe account ID
-      if (userData && userData.stripeAccountId) {
-        accountLink = await stripe.accountLinks.create({
-          account: userData.stripeAccountId,
-          refresh_url: `https://localhost/session/bank-info-required?userId=${userData?._id}`,
-          return_url: `https://localhost/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
-          type: 'account_onboarding',
-        });
-      }
-
-      // Commit transaction if everything went well
-      // await session.commitTransaction();
-      return { url: accountLink?.url };
-    }
-
-
-    ///
-    const stripeAccountId = userData?.stripeAccountId
-    const account = await stripe.accounts.retrieve(stripeAccountId as string);
-
-
-    if (account?.requirements?.currently_due?.includes("external_account")) {
-
-      // Bank info is not complete, trigger to generate onboarding link
-      let accountLink = null;
-
-      // Create an account link for Stripe onboarding if the actor has a Stripe account ID
-      if (userData && userData.stripeAccountId) {
-        accountLink = await stripe.accountLinks.create({
-          account: userData.stripeAccountId,
-          refresh_url: `https://localhost/session/bank-info-required?userId=${userData?._id}`,
-          return_url: `https://localhost/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
-          type: 'account_onboarding',
-        });
-      }
-      // await session.commitTransaction();
-      return { url: accountLink?.url };
-    }
-  } catch (err: any) {
-    // Rollback transaction on error
-    // await session.abortTransaction();
-    throw new Error(err.message); // Re-throw error to handle it outside if needed
-  } finally {
-    // End the session
-    // await session.endSession();
-  }
-};
-
-const singleWithdrawalProcessIntoDB = async (
-  user: any,
-  payload: any,
-) => {
-  let actor = null;
-
-  if (user.role === 'actor') {
-    actor = await Actor.findOne({ email: user.userEmail });
-  }
-
-  const transactions = await Transaction.findOne({ competitionId: payload.competitionId, actorId: actor?._id, paymentStatus: 'pending', type: 'withdrawal' });
-
-  if (!transactions || transactions?.paymentStatus !== 'pending') {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'In valid transaction',
-    );
-  }
-
-  if (transactions?.adminPermission === 'pending') {
-    return { message: "Admin permission is pending" };
-  }
-
-
-  const account = await stripe.accounts.retrieve(actor?.stripeAccountId as string);
-
-  if (account?.requirements?.currently_due?.includes("external_account")) {
-
-    // Bank information is missing, generate a new onboarding link
-    const accountLink = await stripe.accountLinks.create({
-      account: actor?.stripeAccountId as string,
-      refresh_url: `https://app.performroom.com/perform-learn/session/bank-info-required?actorId=${actor?._id}`, // Replace with your URL
-      return_url: `https://app.performroom.com/perform-learn/session/bank-info-successfull?actorId=${actor?._id}`, // Include actorId here
-      type: 'account_onboarding',
-    });
-
-    // Send the onboarding link to the user so they can complete their bank information
-    return { url: accountLink.url };
-  }
-
-  // }
-
-
-
-  const result = await PaymentServices.withdrawalProcessPaymentIntoDB(transactions, actor?.stripeAccountId as string);
-
-  if (result) {
-
-    const competitionResults = await CompetitionResult.findOne({ competitionId: transactions?.competitionId, winnerId: transactions?.actorId });
-
-    if (!competitionResults) {
-      throw new Error('Competition Result not found');
-    }
-    competitionResults.withdrawalStatus = 'received';
-    await competitionResults.save();
-
-    transactions.paymentStatus = 'completed';
-    await transactions.save();
-  }
-
-  return result;
-};
-const singleWithdrawalRequestRevenueIntoDB = async (user: any, payload: any) => {
-
-
-  let actor = null;
-
-  if (user.role === 'actor') {
-    actor = await Actor.findOne({ email: user.userEmail }).populate('userId');
-  }
-
-
-  const getRevenueSharingActor = await RevenueSharingActor.findOne({ competitionId: payload.competitionId, profitRecipientId: actor?._id });
-
-  const id = getRevenueSharingActor?._id
-
-  await RevenueSharingActor.findByIdAndUpdate(id, { withdrawalStatus: "pending" }, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!getRevenueSharingActor) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'RevenueSharingActor Result not found'
-    )
-  }
-
-  const transactionData = {
-    actorId: actor?._id,
-    competitionId: payload.competitionId,
-    // competitionId: getCompetition?._id,
-    type: 'withdrawal',
-    amount: payload?.amount,
-  };
-
-  // const session = await mongoose.startSession();
-  try {
-    // session.startTransaction();
-
-    // Create a new transaction record in the database
-    const newTransaction = await Transaction.create(transactionData);
-    if (!newTransaction) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Transaction');
-    }
-
-    // Check if the actor has a Stripe account ID, create one if they don’t
-    if (!actor?.stripeAccountId) {
-      const account = await stripe.accounts.create({
-        type: 'express',
-        email: actor?.email,
-      });
-
-      // Assign the Stripe account ID to the actor and save it
-      if (actor) {
-        actor.stripeAccountId = account.id;
-        await actor.save(); // Ensure save is part of the transaction
-        // await actor.save({ session }); // Ensure save is part of the transaction
-      }
-
-      let accountLink = null;
-
-      // // Create an account link for Stripe onboarding if the actor has a Stripe account ID
-      if (actor && actor.stripeAccountId) {
-        accountLink = await stripe.accountLinks.create({
-          account: actor.stripeAccountId,
-          refresh_url: `https://app.performroom.com/perform-learn/session/bank-info-required?actorId=${actor?._id}`,
-          return_url: `https://app.performroom.com/perform-learn/session/bank-info-successfull?actorId=${actor?._id}`, // Include actorId here
-          type: 'account_onboarding',
-        });
-      }
-
-      // Commit transaction if everything went well
-      // await session.commitTransaction();
-      return { url: accountLink?.url };
-    }
-
-
-    ///
-    const stripeAccountId = actor?.stripeAccountId
-    const account = await stripe.accounts.retrieve(stripeAccountId as string);
-
-
-    if (account?.requirements?.currently_due?.includes("external_account")) {
-
-      // Bank info is not complete, trigger to generate onboarding link
-      let accountLink = null;
-
-      // Create an account link for Stripe onboarding if the actor has a Stripe account ID
-      if (actor && actor.stripeAccountId) {
-        accountLink = await stripe.accountLinks.create({
-          account: actor.stripeAccountId,
-          refresh_url: `https://app.performroom.com/perform-learn/session/bank-info-required?actorId=${actor?._id}`,
-          return_url: `https://app.performroom.com/perform-learn/session/bank-info-successfull?actorId=${actor?._id}`, // Include actorId here
-          type: 'account_onboarding',
-        });
-      }
-      // await session.commitTransaction();
-      return { url: accountLink?.url };
-    }
-  } catch (err: any) {
-    // Rollback transaction on error
-    // await session.abortTransaction();
-    throw new Error(err.message); // Re-throw error to handle it outside if needed
-  } finally {
-    // End the session
-    // await session.endSession();
-  }
-};
-const singleWithdrawalProcessRevenueIntoDB = async (
-  user: any,
-  payload: any,
-) => {
-  let actor = null;
-
-  if (user.role === 'actor') {
-    actor = await Actor.findOne({ email: user.userEmail });
-  }
-
-
-  const transactions = await Transaction.findOne({ competitionId: payload.competitionId, actorId: actor?._id, paymentStatus: 'pending', type: 'withdrawal' });
-
-  if (!transactions || transactions?.paymentStatus !== 'pending') {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'In valid transaction',
-    );
-  }
-
-  if (transactions?.adminPermission === 'pending') {
-    return { message: "Admin permission is pending" };
-  }
-
-
-  const account = await stripe.accounts.retrieve(actor?.stripeAccountId as string);
-
-  if (account?.requirements?.currently_due?.includes("external_account")) {
-
-    // Bank information is missing, generate a new onboarding link
-    const accountLink = await stripe.accountLinks.create({
-      account: actor?.stripeAccountId as string,
-      refresh_url: `https://app.performroom.com/perform-learn/session/bank-info-required?actorId=${actor?._id}`, // Replace with your URL
-      return_url: `https://app.performroom.com/perform-learn/session/bank-info-successfull?actorId=${actor?._id}`, // Include actorId here
-      type: 'account_onboarding',
-    });
-
-    // Send the onboarding link to the user so they can complete their bank information
-    return { url: accountLink.url };
-  }
-
-  // }
-
-
-
-  const result = await PaymentServices.withdrawalProcessPaymentIntoDB(transactions, actor?.stripeAccountId as string);
-
-  if (result) {
-
-    const revenueSharingActor = await RevenueSharingActor.findOne({ competitionId: transactions?.competitionId, profitRecipientId: transactions?.actorId });
-
-    if (!revenueSharingActor) {
-      throw new Error('revenueSharingActor Result not found');
-    }
-    revenueSharingActor.withdrawalStatus = 'received';
-    await revenueSharingActor.save();
-
-    transactions.paymentStatus = 'completed';
-    await transactions.save();
-  }
-
-  return result;
-};
 const getAllwithdrawalRequestsFromDB = async (query: Record<string, unknown>) => {
 
   const withdrawRequestQuery = new QueryBuilder(
@@ -468,6 +239,8 @@ const getAllwithdrawalRequestsFromDB = async (query: Record<string, unknown>) =>
     result,
   };
 };
+
+
 const getAllTransactionsFromDB = async (query: Record<string, unknown>) => {
 
   const TransactionQuery = new QueryBuilder(
@@ -496,10 +269,7 @@ export const TransactionServices = {
   createSingleTransactionIntoDB,
   getSingleTransactionFromDB,
   updateSingleTransactionIntoDB,
-  singleWithdrawalRequestIntoDB,
-  singleWithdrawalProcessIntoDB,
+//   singleWithdrawalProcessIntoDB,
   getAllwithdrawalRequestsFromDB,
   getAllTransactionsFromDB,
-  singleWithdrawalProcessRevenueIntoDB,
-  singleWithdrawalRequestRevenueIntoDB
 };
