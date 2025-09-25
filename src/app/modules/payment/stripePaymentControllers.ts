@@ -132,6 +132,21 @@ const checkPaymentComplete = catchAsync(async (req, res) => {
   });
 });
 
+const singleWithdrawalProcess = catchAsync(async (req, res) => {
+  const transactionData = req.body;
+  const result = await PaymentServices.singleWithdrawalProcessIntoDB(
+    transactionData,
+    req.user,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Withdrawal Process is created succesfully',
+    data: result,
+  });
+});
+
 export const PaymentControllers = {
   checkPaymentComplete,
   webhook,
@@ -140,7 +155,8 @@ export const PaymentControllers = {
   checkAccountStatus,
   checkBankStatus,
   createStripeCheckoutSession,
-  verifyStripeSession
+  verifyStripeSession,
+  singleWithdrawalProcess
 };
 
 

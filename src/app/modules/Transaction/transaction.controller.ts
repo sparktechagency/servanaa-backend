@@ -51,64 +51,22 @@ const updateSingleTransaction = catchAsync(async (req, res) => {
   });
 });
 
-const singleWithdrawalRequest = catchAsync(async (req, res) => {
-  const transactionData = req.body;
-  const result = await TransactionServices.singleWithdrawalRequestIntoDB(
-    transactionData,
-    req.user,
-  );
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Withdrawal Request is created succesfully',
-    data: result,
-  });
-});
+// const singleWithdrawalProcess = catchAsync(async (req, res) => {
+//   const transactionData = req.body;
+//   const result = await TransactionServices.singleWithdrawalProcessIntoDB(
+//     req.user,
+//     transactionData,
+//   );
 
-const singleWithdrawalProcess = catchAsync(async (req, res) => {
-  const { transaction: transactionData } = req.body;
-  const result = await TransactionServices.singleWithdrawalProcessIntoDB(
-    req.user,
-    transactionData,
-  );
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Withdrawal Process is created succesfully',
+//     data: result,
+//   });
+// });
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Withdrawal Process is created succesfully',
-    data: result,
-  });
-});
-const singleWithdrawalRequestRevenue = catchAsync(async (req, res) => {
-  const { transaction: transactionData } = req.body;
-  const result = await TransactionServices.singleWithdrawalRequestRevenueIntoDB(
-    req.user,
-    transactionData,
-  );
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Withdrawal Request is created succesfully',
-    data: result,
-  });
-});
-
-const singleWithdrawalProcessRevenue = catchAsync(async (req, res) => {
-  const { transaction: transactionData } = req.body;
-  const result = await TransactionServices.singleWithdrawalProcessRevenueIntoDB(
-    req.user,
-    transactionData,
-  );
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Withdrawal Process is created succesfully',
-    data: result,
-  });
-});
 
 const getAllwithdrawalRequests = catchAsync(async (req, res) => {
 
@@ -145,11 +103,9 @@ export const TransactionControllers = {
   createSingleTransaction,
   getSingleTransactionRequest,
   updateSingleTransaction,
-  singleWithdrawalRequest,
-  singleWithdrawalProcess,
+//   singleWithdrawalProcess,
   getAllwithdrawalRequests,
   getAllTransactions,
-  singleWithdrawalProcessRevenue,
-  singleWithdrawalRequestRevenue
+
 };
 

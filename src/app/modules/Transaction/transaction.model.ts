@@ -4,7 +4,7 @@ import { TransactionModel, TTransaction } from './transaction.interface';
 
 const transactionSchema: Schema = new Schema<TTransaction>(
    {
-    transactionId: { type: String, unique: true },
+    transactionId: { type: String },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     // contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     // customerId: { type: String },
@@ -17,10 +17,10 @@ const transactionSchema: Schema = new Schema<TTransaction>(
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'rejected'],
-      required: true,
+      default: 'pending',
     },
     amount: { type: Number, required: true },
-    date: { type: Date, required: true },
+    date: { type: Date, default: Date.now },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   {
