@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import router from './app/routes/index';
-import { PaymentControllers } from './app/modules/Payment/Payment.controller';
+
 import globalErrorHandler from './app/middlewares/globalErrorhandler';
 import { SubscriptionControllers } from './app/modules/Subscription/Subscription.controller';
 
@@ -12,12 +12,6 @@ app.post(
   '/api/v1/subscriptions/webhook',
   express.raw({ type: 'application/json' }),
   SubscriptionControllers.handleWebhook
-);
-
-app.post(
-  '/api/v1/payments/webhook',
-  express.raw({ type: 'application/json' }),
-  PaymentControllers.webhook
 );
 
 // Middleware

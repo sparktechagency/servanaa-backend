@@ -8,7 +8,8 @@ import {
   getContractorTableData,
   getDashboardData,
   getServiceTable,
-  getSubCategoryTable
+  getSubCategoryTable,
+  getTransactionHistoryTable
 } from './Dashboard.controller';
 
 const router = express.Router();
@@ -17,10 +18,11 @@ router.get('/', getDashboardData);
 
 router.get('/subscription-plans', getAllSubscriptionPlansTable);
 router.get('/contractor-manage', getContractorTableData);
-router.get('/customer-manage', getContractorTableData);
+// router.get('/customer-manage', getCustomerTableData);
 router.get('/category', getCategoryTable);
 router.get('/sub-category', getSubCategoryTable);
 router.get('/service', getServiceTable);
 router.get('/admin-notification', getAllAdminNotifications);
+router.get('/transaction-history', getTransactionHistoryTable);
 
 export const DashboardRoutes = router;

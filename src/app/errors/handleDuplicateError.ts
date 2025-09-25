@@ -1,28 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import { TErrorSources, TGenericErrorResponse } from '..\interface\error\index.ts';
 
-import { TErrorSources, TGenericErrorResponse } from "../interface/error";
+import { TErrorSources, TGenericErrorResponse } from '../interface/error';
 
 const handleDuplicateError = (err: any): TGenericErrorResponse => {
   // Extract value within double quotes using regex
-  const match = err.message.match(/"([^"]*)"/);
+  let path = '';
+  let value = '';
 
-  // The extracted value will be in the first capturing group
-  const extractedMessage = match && match[1];
+  if (err?.keyValue) {
+    // Use MongoDB native duplicate error structure
+    path = Object.keys(err.keyValue)[0];
+    value = err.keyValue[path];
+  }
 
   const errorSources: TErrorSources = [
     {
-      path: '',
-      message: `${extractedMessage} is already exists`,
-    },
+      path,
+      message: value
+        ? `A record with ${path} "${value}" already exists.`
+        : 'A record with this value already exists.'
+    }
   ];
 
   const statusCode = 400;
 
   return {
     statusCode,
-    message: 'Invalid ID',
-    errorSources,
+    message: 'Duplicate entry error',
+    errorSources
   };
 };
 

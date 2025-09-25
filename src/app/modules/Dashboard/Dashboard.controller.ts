@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
 // src/app/modules/Dashboard/Dashboard.controller.ts
@@ -158,25 +159,28 @@ export const getContractorTableData = catchAsync(async (req, res) => {
 
   // Find contractors with user info
   const contractors = await Contractor.find({})
-    .populate<{ userId: typeof User }>({
+    .populate({
       path: 'userId',
       select: 'fullName email contactNo img status'
     })
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .lean();
+
+  console.log('Contractor table data: ', contractors);
 
   const total = await Contractor.countDocuments();
 
   // Format table data
-  const table = contractors.map((contractor, idx) => ({
-    serial: `#${contractor._id.toString().substring(0, 5)}`, // or your real serial logic
-    photo: contractor.userId?.image,
-    name: contractor.userId?.fullName,
-    email: contractor.userId?.email,
-    contactNumber: contractor.userId?.contactNo,
-    location: contractor.location,
-    status: contractor.userId?.status,
-    message: 'Message', // UI label, backend can facilitate button
+  const table = contractors.map((contractor: any, idx: number) => ({
+    serial: `#${contractor._id.toString().substring(0, 5)}`,
+    photo: contractor.userId?.img ?? '', // <-- FIXED: img not image
+    name: contractor.userId?.fullName ?? '',
+    email: contractor.userId?.email ?? '',
+    contactNumber: contractor.userId?.contactNo ?? '',
+    location: contractor.location ?? '',
+    status: contractor.userId?.status ?? '',
+    message: 'Message',
     action: contractor.userId?.status === 'active' ? '✔' : '✗'
   }));
 
@@ -196,52 +200,66 @@ export const getContractorTableData = catchAsync(async (req, res) => {
   });
 });
 
-export const getCustomerTableData = catchAsync(async (req, res) => {
-  // Support pagination/search
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-  const search = (req.query.search as string) || '';
+// export const getCustomerTableData = catchAsync(async (req, res) => {
+//   // Support pagination/search
+//   const page = Number(req.query.page) || 1;
+//   const limit = Number(req.query.limit) || 10;
+//   const skip = (page - 1) * limit;
+//   const search = (req.query.search as string) || '';
 
-  // Find customers and their user profiles
-  const customers = await Customer.find({})
-    .populate({
-      path: 'userId',
-      select: 'fullName email contactNo img status'
-    })
-    .skip(skip)
-    .limit(limit);
+//   const testCustomer = await User.find({}).populate('customerId').lean();
 
-  const total = await Customer.countDocuments();
+//   console.log('Test customer: ', testCustomer);
 
-  // Format table rows
-  const table = customers.map((customer, idx) => ({
-    serial: `#${customer._id.toString().substring(0, 5)}`,
-    photo: customer.userId?.img,
-    name: customer.userId?.fullName,
-    email: customer.userId?.email,
-    contactNumber: customer.userId?.contactNo,
-    location: customer.location,
-    status: customer.userId?.status,
-    message: 'Message',
-    action: customer.userId?.status === 'active' ? '✔' : '✗'
-  }));
+//   // Find customers and their user profiles
+//   const customers = await Customer.find({})
+//     .populate({
+//       path: 'userId',
+//       select: 'fullName email contactNo img status'
+//     })
+//     .skip(skip)
+//     .limit(limit)
+//     .lean();
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Customer management table loaded',
-    data: {
-      table,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
-    }
-  });
-});
+//   console.log('Customers table data: ', customers);
+
+//   const total = await Customer.countDocuments();
+
+//   // Format table rows
+//   const table = customers.map((customer: any, idx: number) => {
+//     // Defensive check: only access if userId is an object (populated)
+//     const user =
+//       typeof customer.userId === 'object' && customer.userId !== null
+//         ? customer.userId
+//         : {};
+//     return {
+//       serial: `#${customer._id.toString().substring(0, 5)}`,
+//       photo: user.img ?? '',
+//       name: user.fullName ?? '',
+//       email: user.email ?? '',
+//       contactNumber: user.contactNo ?? '',
+//       location: customer.location ?? '',
+//       status: user.status ?? '',
+//       message: 'Message',
+//       action: user.status === 'active' ? '✔' : '✗'
+//     };
+//   });
+
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Customer management table loaded',
+//     data: {
+//       table,
+//       pagination: {
+//         page,
+//         limit,
+//         total,
+//         totalPages: Math.ceil(total / limit)
+//       }
+//     }
+//   });
+// });
 
 export const getCategoryTable = catchAsync(async (req, res) => {
   const categories = await Category.find({});
@@ -350,3 +368,100 @@ function timeAgo (date: Date) {
 
   return `${days} days ago`;
 }
+
+export const getTransactionHistoryTable = catchAsync(async (req, res) => {
+  // Support pagination
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // Properly populate contractor and user reference
+  const subscriptions = await Subscription.find({
+    status: {
+      $in: [
+        'active',
+        'paid',
+        'completed',
+        'failed',
+        'cancelled',
+        'expired',
+        'pending',
+        'processing'
+      ]
+    },
+    isDeleted: false
+  })
+    .populate({
+      path: 'contractorId',
+      populate: { path: 'userId', select: 'fullName img' }
+    })
+    .populate({
+      path: 'planType' // or use logic below to read from plan collection
+    })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean(); // use lean for plain objects to avoid TypeScript confusion
+
+  // Fetch all SubscriptionPlans for mapping plan prices if needed
+  const allPlans = await SubscriptionPlan.find({}).lean();
+
+  const tableData = subscriptions.map((sub: any, idx: number) => {
+    // Defensive checks
+    const contractor = sub.contractorId || {};
+    const user = contractor.userId || {};
+    const planType = sub.planType || '';
+    // Find plan price by planType
+    const planDetails = allPlans.find(p => p.type === planType);
+    const paidAmount = planDetails ? planDetails.price : 0;
+    // Format paymentStatus
+    let paymentStatus = 'Failed';
+    if (sub.status === 'active') paymentStatus = 'Paid';
+    else if (['pending', 'processing'].includes(sub.status))
+      paymentStatus = 'Accept';
+
+    return {
+      serial: `#${sub._id.toString().substring(0, 5)}`,
+      photo: user.img ?? '',
+      name: user.fullName ?? '',
+      contractorType: planType.charAt(0).toUpperCase() + planType.slice(1),
+      dateOfPayment: sub.updatedAt
+        ? moment(sub.updatedAt).format('MM/DD/YY')
+        : '',
+      paymentType: 'Online Payment',
+      paymentStatus,
+      paidAmount: `$${paidAmount.toFixed(2)}`
+    };
+  });
+
+  const total = await Subscription.countDocuments({
+    status: {
+      $in: [
+        'active',
+        'paid',
+        'completed',
+        'failed',
+        'cancelled',
+        'expired',
+        'pending',
+        'processing'
+      ]
+    },
+    isDeleted: false
+  });
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Transaction history loaded',
+    data: {
+      table: tableData,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    }
+  });
+});
