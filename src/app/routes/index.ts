@@ -25,6 +25,8 @@ import { ChatRoomRoutes } from '../modules/ChatRoom/ChatRoom.route';
 // import { TransactionRoutes } from '../modules/Transaction/transaction.route';
 import { ReportRoutes } from '../modules/Report/Report.route';
 import { SubscriptionRoutes } from '../modules/Subscription/Subscription.route';
+import { BankAccountRoutes } from '../modules/Bank/BankAccount.route';
+import { DashboardRoutes } from '../modules/Dashboard/Dashboard.route';
 
 const router = Router();
 
@@ -132,6 +134,18 @@ const moduleRoutes = [
   {
     path: '/reports',
     route: ReportRoutes
+  },
+  {
+    path: '/payments',
+    route: PaymentRoutes
+  },
+  {
+    path: '/bank-accounts',
+    route: BankAccountRoutes
+  },
+  {
+    path: '/dashboard',
+    route: DashboardRoutes
   }
 ];
 

@@ -8,6 +8,34 @@ export type TCustomer = {
   city?: string;
   language?: string;
   location?: string;
+
+  // Add Stripe integration field
+  stripeCustomerId?: string;
+
+  // Payment method storage
+  paymentMethods?: [
+    {
+      stripePaymentMethodId: string;
+      type: 'card' | 'bank_account';
+      last4: string;
+      brand?: string;
+      isDefault: boolean;
+    }
+  ];
+
+  // Billing information
+  billingAddress?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  };
+
+  // Customer stats
+  totalSpent?: number;
+  bookingCount?: number;
+
   isDeleted: boolean;
 };
 

@@ -4,3 +4,7 @@ export const CONTRACTOR_SEARCHABLE_FIELDS = [
   'materials',
   'subscriptionId'
 ];
+
+
+
+

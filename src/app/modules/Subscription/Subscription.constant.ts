@@ -12,7 +12,7 @@ export const SUBSCRIPTION_STATUS = [
   'failed'
 ] as const;
 
-export const PLAN_TYPES = ['gold', 'platinum', 'diamond'] as const;
+export const PLAN_TYPES = ['basic', 'premium'] as const;
 
 export const PLAN_TYPE = {
   basic: 'basic',

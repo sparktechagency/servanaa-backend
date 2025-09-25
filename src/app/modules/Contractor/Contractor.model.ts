@@ -11,24 +11,57 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     city: { type: String, default: '' },
     language: { type: String, default: '' },
     location: { type: String, default: '' },
-
     rateHourly: { type: Number, default: 0, required: true },
     skillsCategory: { type: String, default: '' },
     ratings: { type: Number, required: true, default: 0 },
-    skills: { type: Schema.Types.Mixed, required: true, default: [] }, // string or array of strings
+    skills: { type: Schema.Types.Mixed, required: true, default: [] },
+
     subscriptionStatus: {
       type: String,
       enum: ['active', 'inactive', 'cancelled', 'expired', 'failed'],
       required: true,
       default: 'inactive'
     },
-    stripeCustomerId: {
-      type: String
-    },
+
+    // Stripe integration
+    stripeCustomerId: { type: String },
     customerId: { type: String, default: '' },
     paymentMethodId: { type: String, default: '' },
+    stripeAccountId: { type: String, default: '' },
+
+    // Add balance management fields
+    balance: { type: Number, default: 0 },
+    totalEarnings: { type: Number, default: 0 },
+    pendingBalance: { type: Number, default: 0 },
+    minimumWithdrawal: { type: Number, default: 25 },
+
+    // Bank account information
+    bankAccount: {
+      accountNumber: { type: String },
+      routingNumber: { type: String },
+      accountHolderName: { type: String },
+      bankName: { type: String },
+      verified: { type: Boolean, default: false },
+      verifiedAt: { type: Date }
+    },
+
+    // Withdrawal history
+    withdrawalHistory: [
+      {
+        amount: { type: Number, required: true },
+        requestedAt: { type: Date, required: true },
+        processedAt: { type: Date },
+        status: {
+          type: String,
+          enum: ['pending', 'processing', 'completed', 'failed'],
+          required: true
+        },
+        stripePayoutId: { type: String },
+        failureReason: { type: String }
+      }
+    ],
+
     certificates: { type: [String], required: true, default: [] },
-    // materials: { type: [String], required: true, default: [] },
     materials: [
       {
         name: { type: String, default: '' },
@@ -41,7 +74,6 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
       ref: 'MySchedule',
       default: null
     },
-    stripeAccountId: { type: String, default: '' },
     subscriptionId: {
       type: Schema.Types.ObjectId,
       ref: 'Subscription',
@@ -58,6 +90,11 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
 contractorSchema.statics.isContractorExists = async function (id: string) {
   return await this.findOne({ _id: id, isDeleted: false });
 };
+
+// Add indexes for efficient queries
+contractorSchema.index({ userId: 1 });
+contractorSchema.index({ stripeAccountId: 1 });
+contractorSchema.index({ 'withdrawalHistory.status': 1 });
 
 export const Contractor = model<TContractor, ContractorModel>(
   'Contractor',

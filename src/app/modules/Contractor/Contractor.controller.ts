@@ -3,7 +3,6 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { ContractorServices } from './Contractor.service';
 
-
 const getSingleContractor = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await ContractorServices.getSingleContractorFromDB(id);
@@ -12,12 +11,12 @@ const getSingleContractor = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Contractor is retrieved successfully',
-    data: result,
+    data: result
   });
 });
 
 const getAllContractors = catchAsync(async (req, res) => {
-    // const subCategory = req.body;
+  // const subCategory = req.body;
   const result = await ContractorServices.getAllContractorsFromDB(req.query);
   // const result = await ContractorServices.getAllContractorsFromDB(subCategory, req.query);
 
@@ -26,12 +25,14 @@ const getAllContractors = catchAsync(async (req, res) => {
     success: true,
     message: 'Contractors are retrieved successfully',
     meta: result.meta,
-    data: result.result,
+    data: result.result
   });
 });
 const getAllAvailableContractors = catchAsync(async (req, res) => {
-    // const subCategory = req.body;
-  const result = await ContractorServices.getAllAvailableContractorsFromDB(req.query);
+  // const subCategory = req.body;
+  const result = await ContractorServices.getAllAvailableContractorsFromDB(
+    req.query
+  );
   // const result = await ContractorServices.getAllContractorsFromDB(subCategory, req.query);
 
   sendResponse(res, {
@@ -39,20 +40,23 @@ const getAllAvailableContractors = catchAsync(async (req, res) => {
     success: true,
     message: 'Contractors are retrieved successfully',
     // meta: result.meta,
-    data: result.result,
+    data: result.result
   });
 });
 
 const updateContractor = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { Contractor } = req.body;
-  const result = await ContractorServices.updateContractorIntoDB(id, Contractor);
+  const result = await ContractorServices.updateContractorIntoDB(
+    id,
+    Contractor
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Contractor is updated successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -64,7 +68,7 @@ const deleteContractor = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Contractor is deleted successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -75,7 +79,3 @@ export const ContractorControllers = {
   deleteContractor,
   getAllAvailableContractors
 };
-
-
-
-

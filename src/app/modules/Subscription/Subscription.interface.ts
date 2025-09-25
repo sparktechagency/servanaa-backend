@@ -21,8 +21,3 @@ export interface ISubscriptionPlan extends Document {
   features: string[];
   isActive: boolean;
 }
-
-
-
-
-

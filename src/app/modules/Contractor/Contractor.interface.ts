@@ -21,22 +21,45 @@ export type TContractor = {
     | 'expired'
     | 'failed';
 
+  // Stripe integration
   stripeCustomerId: string;
   customerId: string;
   paymentMethodId: string;
   stripeAccountId: string;
+
+  // Balance management for your payment system
+  balance: number; // Available balance for withdrawal
+  totalEarnings: number; // Total lifetime earnings
+  pendingBalance: number; // Funds from completed jobs waiting for transfer
+  minimumWithdrawal: number; // Minimum amount for withdrawal
+
+  // Bank account for withdrawals
+  bankAccount?: {
+    accountNumber: string;
+    routingNumber: string;
+    accountHolderName: string;
+    bankName?: string;
+    verified: boolean;
+    verifiedAt?: Date;
+  };
+
+  // Withdrawal history with proper _id typing
+  withdrawalHistory: {
+    _id?: Types.ObjectId; // Add _id property
+    amount: number;
+    requestedAt: Date;
+    processedAt?: Date;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    stripePayoutId?: string;
+    failureReason?: string;
+  }[];
+
   certificates: string[];
-  //  materials: string[];
   materials?: {
     name: string;
     unit?: { type: string };
     price: { type: number };
   }[];
-  //  mySchedule?: {
-  //  day: string; // The day of the week (e.g., "Monday")
-  //  startTime: { type: string},
-  //  endTime: { type: string},
-  //   }[];
   myScheduleId?: Types.ObjectId;
   subscriptionId?: Types.ObjectId;
   hasActiveSubscription: boolean;

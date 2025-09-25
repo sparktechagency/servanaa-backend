@@ -1,3 +1,4 @@
+// src/app/modules/Booking/Booking.utils.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Contractor } from '../Contractor/Contractor.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
@@ -27,11 +28,6 @@ export const addOneHour = (time: string) => {
     .toString()
     .padStart(2, '0')}`;
 };
-// export const getDayName = (dateStr: string):string => {
-//   const date = new Date(dateStr);  // Convert date string to Date object
-//   const options: Intl.DateTimeFormatOptions = { weekday: 'long' };  // We want the full name of the weekday
-//   return new Intl.DateTimeFormat('en-US', options).format(date);  // Format the date to get the weekday name
-// };
 
 export const getDayName = (dateStr: string): string => {
   // Check if it's already a weekday name
@@ -44,6 +40,7 @@ export const getDayName = (dateStr: string): string => {
     'Friday',
     'Saturday'
   ];
+
   if (weekdays.includes(dateStr)) {
     return dateStr; // Return as-is if it's already a weekday name
   }
@@ -93,37 +90,61 @@ export const getNextWeekDayDate = (dayName: string, startDate: Date): Date => {
   return nextDay;
 };
 
-// Common function to calculate endTime, price, and rateHourly for both booking types
-
+// Fix: Get contractor data through User -> Contractor relationship
 export const getBookingDetails = async (payload: TBooking) => {
   const { startTime, duration, contractorId } = payload;
+
   // Calculate end time
   const [startHour, startMinute] = startTime.split(':').map(Number);
   const startDate = new Date();
   startDate.setHours(startHour, startMinute, 0, 0);
 
-  const endDate = new Date(startDate.getTime() + duration * 60 * 60 * 1000); // Calculate end time based on duration
+  const endDate = new Date(startDate.getTime() + duration * 60 * 60 * 1000);
   const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate
     .getMinutes()
     .toString()
     .padStart(2, '0')}`;
-  payload.endTime = endTime; // Attach endTime to payload
+  payload.endTime = endTime;
 
-  // Get contractor rate and calculate price
-  const contractor = await Contractor.findById(contractorId);
-  if (!contractor) throw new Error('Contractor not found');
-  payload.rateHourly = contractor.rateHourly;
-  // Calculate material total price
-  const materialTotalPrice = payload.material.reduce(
-    (total, material) => total + material.price,
-    0
-  );
-  const price = materialTotalPrice + payload.rateHourly * duration; // Final price
-  payload.price = price;
+  // Fix: Get contractor rate through User -> Contractor relationship
+  try {
+    // First find the contractor profile using userId (which is the contractorId in booking)
+    const contractor = await Contractor.findOne({ _id: contractorId });
 
-  payload.timeSlots = generateTimeSlots(startTime, endTime);
+    if (!contractor) {
+      throw new Error(
+        `Contractor profile not found for user ID: ${contractorId}`
+      );
+    }
 
-  return payload; // Return updated payload with all the details
+    payload.rateHourly = contractor.rateHourly;
+
+    // Calculate material total price
+    const materialTotalPrice =
+      payload.material?.reduce(
+        (total, material) => total + material.price,
+        0
+      ) || 0;
+
+    const price = materialTotalPrice + payload.rateHourly * duration;
+    payload.price = price;
+
+    payload.timeSlots = generateTimeSlots(startTime, endTime);
+
+    console.log('Booking details calculated:', {
+      startTime,
+      endTime,
+      duration,
+      rateHourly: payload.rateHourly,
+      materialTotalPrice,
+      finalPrice: price
+    });
+
+    return payload;
+  } catch (error) {
+    console.error('Error in getBookingDetails:', error);
+    throw error;
+  }
 };
 
 export const createRecurringBookingIntoDB = async (
@@ -133,7 +154,7 @@ export const createRecurringBookingIntoDB = async (
     startTime,
     day: days,
     contractorId,
-    periodInDays,
+    periodInDays = 30, // Default to 30 days if not provided
     endTime
   } = updatedPayload;
 
@@ -142,12 +163,12 @@ export const createRecurringBookingIntoDB = async (
   // Normalize today to UTC midnight
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
+
   // Start from tomorrow
   const startDate = new Date(today);
-
   startDate.setDate(startDate.getDate() + 1);
 
-  // End at 30 days from tomorrow (not including today)
+  // End at specified period from tomorrow
   const endDate = new Date(startDate);
   endDate.setDate(startDate.getDate() + periodInDays);
 
@@ -162,11 +183,14 @@ export const createRecurringBookingIntoDB = async (
     Saturday: 6
   };
 
+  // Ensure days is always an array
+  const daysArray = Array.isArray(days) ? days : [days];
+
   // Loop from tomorrow to endDate (inclusive)
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     const currentWeekday = d.getDay();
 
-    for (const day of days) {
+    for (const day of daysArray) {
       const targetWeekday = dayNameToNumber[day];
       if (currentWeekday === targetWeekday) {
         const bookingDate = new Date(d);
@@ -181,31 +205,46 @@ export const createRecurringBookingIntoDB = async (
           recurring: true
         };
 
-        if (bookingDate.getDate() !== startDate.getDate()) {
+        // Don't create booking for the first day (today/tomorrow)
+        if (bookingDate.getTime() !== startDate.getTime()) {
           futureBookings.push(bookingPayload);
         }
       }
     }
   }
 
-  // Optional: Check for conflicts and create bookings
+  console.log(`Creating ${futureBookings.length} recurring bookings`);
+
+  // Check for conflicts and create bookings
+  const createdBookings = [];
   for (const booking of futureBookings) {
     const existingBooking = await Booking.findOne({
       contractorId,
       bookingDate: booking.bookingDate,
+      timeSlots: { $in: booking.timeSlots },
       status: { $ne: 'cancelled' }
     });
 
     if (existingBooking) {
-      throw new Error(
-        `Slot already booked on ${booking.bookingDate.toISOString()}`
+      console.warn(
+        `Slot already booked on ${booking.bookingDate.toISOString()}, skipping...`
       );
+      continue; // Skip this booking instead of throwing error
     }
 
-    await Booking.create(booking);
+    try {
+      const createdBooking = await Booking.create(booking);
+      createdBookings.push(createdBooking);
+    } catch (error) {
+      console.error(
+        `Error creating booking for ${booking.bookingDate}:`,
+        error
+      );
+      // Continue with next booking instead of failing completely
+    }
   }
 
-  return futureBookings;
+  return createdBookings;
 };
 
 export const createOneTimeBooking = async (updatedPayload: TBooking) => {
@@ -220,22 +259,32 @@ export const createOneTimeBooking = async (updatedPayload: TBooking) => {
     updatedPayload.bookingDate = bookingDate;
   }
 
-  console.log('Creating booking with payload:', {
+  console.log('Creating one-time booking with payload:', {
+    customerId: updatedPayload.customerId,
+    contractorId: updatedPayload.contractorId,
     bookingDate: updatedPayload.bookingDate,
     day: updatedPayload.day,
     startTime: updatedPayload.startTime,
-    endTime: updatedPayload.endTime
+    endTime: updatedPayload.endTime,
+    price: updatedPayload.price,
+    status: updatedPayload.status || 'pending'
   });
 
-  const booking = await Booking.create(updatedPayload);
-  return booking;
+  try {
+    const booking = await Booking.create(updatedPayload);
+    console.log('✅ One-time booking created successfully:', booking._id);
+    return booking;
+  } catch (error) {
+    console.error('❌ Error creating one-time booking:', error);
+    throw error;
+  }
 };
 
 export const checkAvailability = async (
   contractorId: any,
-  startTime: any,
+  startTime: string,
   days: any,
-  bookingType: any
+  bookingType: string
 ) => {
   console.log('checkAvailability called with:', {
     contractorId,
@@ -244,6 +293,11 @@ export const checkAvailability = async (
     bookingType
   });
 
+  // Add null check for startTime
+  if (!startTime) {
+    throw new Error('Start time is required for availability check');
+  }
+
   const requestedTimeSlots = generateTimeSlots(
     startTime,
     addOneHour(startTime)
@@ -251,13 +305,20 @@ export const checkAvailability = async (
 
   console.log('requestedTimeSlots', requestedTimeSlots);
 
+  // Fix: Find schedule using userId (contractorId references User, not Contractor)
   const schedule = await MySchedule.findOne({ contractorId });
-  if (!schedule) throw new Error('Contractor schedule not found');
+  if (!schedule) {
+    throw new Error('Contractor schedule not found');
+  }
 
-  console.log('schedule', schedule);
+  console.log(
+    'Found schedule with',
+    schedule.schedules?.length,
+    'day schedules'
+  );
 
-  if (bookingType === 'OneTime') {
-    let requestedDate: Date;
+  if (bookingType === 'oneTime') {
+    let requestedDate: Date | undefined;
     let dayName: string;
 
     // Handle different input formats for OneTime booking
@@ -273,22 +334,20 @@ export const checkAvailability = async (
       ];
 
       if (weekdays.includes(days)) {
-        // If it's already a weekday name, we need to find a way to get the actual date
-        // Since we don't have the actual date here, we'll assume it's valid for now
-        // This is not ideal - the proper fix would be to pass the actual date
         dayName = days;
         console.log('Using weekday name directly:', dayName);
-
-        // We can't validate the actual date without it, so we'll skip date-based validation
-        // and only check schedule availability
       } else {
         // Try to parse as date string (YYYY-MM-DD format)
-        requestedDate = new Date(days + 'T00:00:00.000Z');
-        if (isNaN(requestedDate.getTime())) {
-          throw new Error(`Invalid date format: ${days}`);
+        try {
+          requestedDate = new Date(days + 'T00:00:00.000Z');
+          if (isNaN(requestedDate.getTime())) {
+            throw new Error(`Invalid date format: ${days}`);
+          }
+          requestedDate.setUTCHours(0, 0, 0, 0);
+          dayName = getDayName(days);
+        } catch (error) {
+          throw new Error(`Cannot parse date: ${days}`);
         }
-        requestedDate.setUTCHours(0, 0, 0, 0);
-        dayName = getDayName(days);
       }
     } else {
       throw new Error('Invalid days format for OneTime booking');
@@ -296,7 +355,7 @@ export const checkAvailability = async (
 
     console.log('Checking availability for day:', dayName);
 
-    const daySchedule = schedule.schedules.find(s => s.days === dayName);
+    const daySchedule = schedule.schedules.find((s: any) => s.days === dayName);
     if (!daySchedule) {
       return {
         available: false,
@@ -304,19 +363,27 @@ export const checkAvailability = async (
       };
     }
 
-    console.log('daySchedule', daySchedule);
+    console.log('Found day schedule:', daySchedule);
+    console.log('Available time slots:', daySchedule.timeSlots);
 
     const unavailableSlots = requestedTimeSlots.filter(
-      (slot: any) => !daySchedule.timeSlots.includes(slot)
+      (slot: string) => !daySchedule.timeSlots.includes(slot)
     );
 
-    console.log('unavailableSlots', unavailableSlots);
+    console.log('Unavailable slots:', unavailableSlots);
 
     if (unavailableSlots.length > 0) {
-      return { available: false, message: 'Requested slots are unavailable.' };
+      return {
+        available: false,
+        message: `Requested slots ${unavailableSlots.join(
+          ', '
+        )} are unavailable. Available slots: ${daySchedule.timeSlots.join(
+          ', '
+        )}`
+      };
     }
 
-    // Only check for booking conflicts if we have a valid date
+    // Check for booking conflicts if we have a valid date
     if (requestedDate) {
       const existingBooking = await Booking.findOne({
         contractorId,
@@ -326,71 +393,78 @@ export const checkAvailability = async (
       });
 
       if (existingBooking) {
-        return { available: false, message: 'Time slot is already booked.' };
+        return {
+          available: false,
+          message: `Time slot ${requestedTimeSlots.join(
+            ', '
+          )} is already booked on ${requestedDate.toISOString().split('T')[0]}`
+        };
       }
     }
 
-    return { available: true };
+    return { available: true, message: 'Time slot is available' };
   }
 
-  // Weekly booking logic remains the same
-  if (bookingType === 'Weekly') {
-    for (const day of days) {
-      let daySchedule: any;
+  // Weekly booking logic
+  if (bookingType === 'weekly') {
+    const daysArray = Array.isArray(days) ? days : [days];
 
-      if (bookingType === 'OneTime') {
-        const requestedDay = getDayName(day);
-        daySchedule = schedule.schedules.find(s => s.days === requestedDay);
-      } else if (bookingType === 'Weekly') {
-        daySchedule = schedule.schedules.find(s => s.days === day);
+    for (const day of daysArray) {
+      const daySchedule = schedule.schedules.find((s: any) => s.days === day);
+
+      if (!daySchedule) {
+        return {
+          available: false,
+          message: `Contractor is not available on ${day}`
+        };
       }
 
-      if (!daySchedule)
-        throw new Error(`Contractor is not available on ${day}`);
-
       const unavailableSlots = requestedTimeSlots.filter(
-        (slot: any) => !daySchedule.timeSlots.includes(slot)
+        (slot: string) => !daySchedule.timeSlots.includes(slot)
       );
 
       if (unavailableSlots.length > 0) {
         return {
           available: false,
-          message: 'Requested slots are unavailable.'
+          message: `Requested slots ${unavailableSlots.join(
+            ', '
+          )} are unavailable on ${day}`
         };
       }
     }
 
+    // Check for existing bookings
     const existingBooking = await Booking.findOne({
       contractorId,
-      days: { $in: days },
+      day: { $in: daysArray },
       startTime: { $gte: startTime, $lte: addOneHour(startTime) },
       status: { $ne: 'cancelled' }
     });
 
     if (existingBooking) {
-      return { available: false, message: 'Time slot is already booked.' };
+      return {
+        available: false,
+        message: `Time slot is already booked for one of the requested days`
+      };
     }
 
-    return { available: true };
+    return {
+      available: true,
+      message: 'All requested time slots are available'
+    };
   }
+
+  throw new Error(
+    `Invalid booking type: ${bookingType}. Must be 'oneTime' or 'weekly'`
+  );
 };
 
-// Update src/app/modules/Booking/Booking.utils.ts
-// Update src/app/modules/Booking/Booking.utils.ts
+// Fix: Improve date validation
 export function checkOrderDate (days: any, bookingType?: string) {
-  console.log(
-    'Input days:',
-    days,
-    'Type:',
-    typeof days,
-    'BookingType:',
-    bookingType
-  );
+  console.log('checkOrderDate input:', { days, bookingType });
 
   try {
-    let orderDate: Date;
-
-    // If it's a weekday name and we have bookingDate, skip validation
+    // Handle weekday names for weekly bookings
     const weekdays = [
       'Monday',
       'Tuesday',
@@ -400,15 +474,34 @@ export function checkOrderDate (days: any, bookingType?: string) {
       'Saturday',
       'Sunday'
     ];
+
     if (typeof days === 'string' && weekdays.includes(days)) {
-      // This is a weekday name, not a date - return as is for weekly bookings
-      // For OneTime bookings, this should not happen, but we'll handle it gracefully
-      console.log('Received weekday name:', days);
-      return days; // Return the weekday name as-is
+      if (bookingType === 'weekly') {
+        return days; // Valid weekday name for weekly booking
+      } else {
+        // For oneTime, weekday name alone is not sufficient
+        console.log('Weekday name provided for oneTime booking:', days);
+        return days; // Let the calling function handle this
+      }
     }
 
+    // Handle arrays for weekly bookings
+    if (Array.isArray(days)) {
+      if (bookingType === 'weekly') {
+        // Validate each day in the array
+        for (const day of days) {
+          if (!weekdays.includes(day)) {
+            throw new Error(`Invalid weekday: ${day}`);
+          }
+        }
+        return days;
+      } else {
+        throw new Error('Arrays are only supported for weekly bookings');
+      }
+    }
+
+    // Handle date strings
     if (typeof days === 'string') {
-      // Check if it matches YYYY-MM-DD format
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(days)) {
         throw new Error(
@@ -416,39 +509,52 @@ export function checkOrderDate (days: any, bookingType?: string) {
         );
       }
 
-      orderDate = new Date(days + 'T00:00:00.000Z');
-    } else if (days instanceof Date) {
-      orderDate = new Date(days);
-    } else if (Array.isArray(days)) {
-      // For weekly bookings with multiple days
-      return days; // Return the array as-is
-    } else {
-      throw new Error(
-        `Invalid input type: ${typeof days}. Expected date string or Date object`
-      );
+      const orderDate = new Date(days + 'T00:00:00.000Z');
+
+      if (isNaN(orderDate.getTime())) {
+        throw new Error(`Could not parse date: "${days}"`);
+      }
+
+      // Check if the date is not in the past
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+
+      const orderDateUTC = new Date(orderDate);
+      orderDateUTC.setUTCHours(0, 0, 0, 0);
+
+      if (orderDateUTC < today) {
+        throw new Error(
+          `Booking date ${days} is in the past. Please select a future date.`
+        );
+      }
+
+      return orderDateUTC.toISOString().split('T')[0]; // Return YYYY-MM-DD format
     }
 
-    // Validate the parsed date
-    if (isNaN(orderDate.getTime())) {
-      throw new Error(`Could not parse date: "${days}"`);
+    // Handle Date objects
+    if (days instanceof Date) {
+      const orderDate = new Date(days);
+      if (isNaN(orderDate.getTime())) {
+        throw new Error('Invalid Date object provided');
+      }
+
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+
+      orderDate.setUTCHours(0, 0, 0, 0);
+
+      if (orderDate < today) {
+        throw new Error(
+          'Booking date is in the past. Please select a future date.'
+        );
+      }
+
+      return orderDate.toISOString().split('T')[0];
     }
 
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    const orderDateUTC = new Date(orderDate);
-    orderDateUTC.setUTCHours(0, 0, 0, 0);
-
-    // Check if the order date is in the past
-    if (orderDateUTC < today) {
-      throw new Error('Booking date must be today or in the future');
-    }
-
-    return orderDateUTC.toISOString();
+    throw new Error(`Unsupported input type: ${typeof days}`);
   } catch (error) {
     console.error('Date validation error:', error);
-    console.error('Original input:', days);
-
     if (error instanceof Error) {
       throw error;
     } else {

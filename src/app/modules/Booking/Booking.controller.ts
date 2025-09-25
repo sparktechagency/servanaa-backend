@@ -170,7 +170,6 @@ export const BookingControllers = {
   updateBooking,
   deleteBooking,
   updatePaymentStatus,
-
   getAllBookingsByUser,
   acceptBooking,
   rejectBooking,
