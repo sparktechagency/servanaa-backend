@@ -15,14 +15,14 @@ import {
 const router = express.Router();
 
 router.get('/', getDashboardData);
-
-router.get('/subscription-plans', getAllSubscriptionPlansTable);
-router.get('/contractor-manage', getContractorTableData);
-// router.get('/customer-manage', getCustomerTableData);
-router.get('/category', getCategoryTable);
-router.get('/sub-category', getSubCategoryTable);
-router.get('/service', getServiceTable);
 router.get('/admin-notification', getAllAdminNotifications);
+router.get('/subscription-plans', getAllSubscriptionPlansTable);
 router.get('/transaction-history', getTransactionHistoryTable);
+
+// router.get('/contractor-manage', getContractorTableData);
+// router.get('/customer-manage', getCustomerTableData);
+// router.get('/category', getCategoryTable);
+// router.get('/sub-category', getSubCategoryTable);
+// router.get('/service', getServiceTable);
 
 export const DashboardRoutes = router;

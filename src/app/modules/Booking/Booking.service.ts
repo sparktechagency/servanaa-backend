@@ -524,7 +524,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
 const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
   const booking = await Booking.findOne({
-    clientId: id,
+    customerId: id,
     paymentStatus: 'pending'
   });
 

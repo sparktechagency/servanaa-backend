@@ -27,6 +27,7 @@ import { ReportRoutes } from '../modules/Report/Report.route';
 import { PaymentRoutes } from '../modules/payment/stripePaymentRoute';
 import { SubscriptionRoutes } from '../modules/Subscription/Subscription.route';
 import { TransactionRoutes } from '../modules/Transaction/transaction.route';
+import { DashboardRoutes } from '../modules/Dashboard/Dashboard.route';
 
 const router = Router();
 
@@ -134,6 +135,10 @@ const moduleRoutes = [
   {
     path: '/subscriptions',
     route: SubscriptionRoutes,
+  },
+  {
+    path: '/dashboards',
+    route: DashboardRoutes,
   },
 ];
 

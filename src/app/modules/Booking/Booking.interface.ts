@@ -29,7 +29,6 @@ export type TBooking = {
   price: number;
   bookingType: 'oneTime' | 'weekly';
   periodInDays?: number;
-
   // Add missing required properties
   questions: TBookingQuestion[];
   material: TBookingMaterial[];
@@ -38,67 +37,10 @@ export type TBooking = {
   day: string | string[];
   duration: number;
   rateHourly: number;
-
-  // Optional properties
   files?: any[];
-  clientId?: string;
-
-  // Enhanced status with all required states
-  status:
-    | 'pending_payment'
-    | 'payment_failed'
-    | 'confirmed'
-    | 'contractor_accepted'
-    | 'in_progress'
-    | 'work_completed'
-    | 'payment_released'
-    | 'completed'
-    | 'cancelled'
-    | 'refunded'
-    | 'disputed'
-    | 'accepted'
-    | 'rejected'
-    | 'pending'
-    | 'ongoing';
-
-  // Enhanced payment status
-  paymentStatus:
-    | 'pending'
-    | 'paid'
-    | 'failed'
-    | 'refunded'
-    | 'transferred_to_contractor'
-    | 'disputed';
-
-  // Stripe payment fields
-  stripePaymentIntentId?: string;
-  stripeChargeId?: string;
-  stripeRefundId?: string;
-  stripeTransferId?: string;
-
-  // Payment amounts
+  status: 'pending' | 'ongoing' | 'completed' | 'rejected' ;
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   totalAmount: number;
-  platformFeeAmount: number;
-  contractorEarnings: number;
-  refundAmount?: number;
-
-  // Session tracking
-  sessionStartedAt?: Date;
-  sessionCompletedAt?: Date;
-  sessionStartedBy?: Types.ObjectId;
-  sessionCompletedBy?: Types.ObjectId;
-
-  // Payment tracking
-  paymentReceivedAt?: Date;
-  paymentTransferredAt?: Date;
-
-  // Metadata
-  paymentMetadata?: {
-    customerStripeId?: string;
-    contractorStripeAccountId?: string;
-    refundReason?: string;
-  };
-
   isDeleted: boolean;
 };
 

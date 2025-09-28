@@ -1,9 +1,5 @@
 import { z } from 'zod';
 
-// Main booking validation schema
-
-// src/app/modules/Booking/Booking.validation.ts
-
 // Material schema
 const materialSchema = z.object({
   name: z.string().min(1, 'Material name is required'),
@@ -82,11 +78,6 @@ export const createBookingValidationSchema = z.object({
 
     // Weekly booking specific
     periodInDays: z.number().positive('Period must be positive').optional(),
-
-    // Optional fields
-    files: z.array(z.any()).optional(),
-    clientId: z.string().optional(),
-    isDeleted: z.boolean().default(false).optional()
   })
 });
 
