@@ -257,7 +257,7 @@ export const checkAvailability = async (
   console.log('schedule', schedule);
 
   if (bookingType === 'OneTime') {
-    let requestedDate: Date;
+    let requestedDate: Date | undefined = undefined;
     let dayName: string;
 
     // Handle different input formats for OneTime booking

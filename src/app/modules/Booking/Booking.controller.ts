@@ -29,15 +29,7 @@ const getSingleBooking = catchAsync(async (req, res) => {
 });
 
 const getAllBookings = catchAsync(async (req, res) => {
-  console.log('=== DEBUGGING BOOKING CREATION ===');
-  console.log('Raw req.body:', JSON.stringify(req.body, null, 2));
-  console.log('bookingDate field:', req.body.bookingDate);
-  console.log('bookingDate type:', typeof req.body.bookingDate);
-  console.log('All keys in req.body:', Object.keys(req.body));
-  console.log('=====================================');
-
-  const booking = req.body;
-  const result = await BookingServices.createBookingIntoDB(booking, req.user);
+  const result = await BookingServices.getAllBookingsFromDB(req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -46,6 +38,24 @@ const getAllBookings = catchAsync(async (req, res) => {
     data: result
   });
 });
+// const getAllBookings = catchAsync(async (req, res) => {
+//   console.log('=== DEBUGGING BOOKING CREATION ===');
+//   console.log('Raw req.body:', JSON.stringify(req.body, null, 2));
+//   console.log('bookingDate field:', req.body.bookingDate);
+//   console.log('bookingDate type:', typeof req.body.bookingDate);
+//   console.log('All keys in req.body:', Object.keys(req.body));
+//   console.log('=====================================');
+
+//   const booking = req.body;
+//   const result = await BookingServices.createBookingIntoDB(booking, req.user);
+
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Bookings are retrieved successfully',
+//     data: result
+//   });
+// });
 
 const getAllBookingsByUser = catchAsync(async (req, res) => {
   const result = await BookingServices.getAllBookingsByUserFromDB(

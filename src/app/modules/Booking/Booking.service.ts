@@ -231,6 +231,8 @@ const checkAvailabilityIntoDB = async (
 };
 
 const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
+ console.log('getAllBookingsFromDB query:', query);
+
   const BookingQuery = new QueryBuilder(
     Booking.find()
       .populate({
