@@ -23,17 +23,17 @@ export default async function seedSubscriptionPlans () {
         'Unlimited region & cities',
         'Access single category'
       ],
-      serviceAreas: 5,
-      featuredListing: false,
-      instantBookingEligibility: false,
-      multipleStaffAccounts: false,
-      jobCategories: 2,
-      verifiedBadge: true,
-      insightsDashboard: 'basic',
-      support: 'standard',
-      customerReviewBooster: false,
-      customBranding: false,
-      customBrandingPrice: 19
+      // serviceAreas: 5,
+      // featuredListing: false,
+      // instantBookingEligibility: false,
+      // multipleStaffAccounts: false,
+      // jobCategories: 2,
+      // verifiedBadge: true,
+      // insightsDashboard: 'basic',
+      // support: 'standard',
+      // customerReviewBooster: false,
+      // customBranding: false,
+      // customBrandingPrice: 19
     },
     {
       name: 'Premium Plan',
@@ -62,19 +62,19 @@ export default async function seedSubscriptionPlans () {
       //   'Custom branding included (Business logo & name displayed)',
       //   'NEW CUSTOMERS GET FREE ACCESS FOR FIRST 6 MONTHS'
       // ],
-      serviceAreas: -1,
-      featuredListing: true,
-      instantBookingEligibility: true,
-      multipleStaffAccounts: true,
-      jobCategories: -1,
-      verifiedBadge: true,
-      premiumBadge: true,
-      insightsDashboard: 'full',
-      support: 'priority',
-      customerReviewBooster: true,
-      customBranding: true,
-      customBrandingPrice: 0,
-      newCustomerFreeMonths: 6
+      // serviceAreas: -1,
+      // featuredListing: true,
+      // instantBookingEligibility: true,
+      // multipleStaffAccounts: true,
+      // jobCategories: -1,
+      // verifiedBadge: true,
+      // premiumBadge: true,
+      // insightsDashboard: 'full',
+      // support: 'priority',
+      // customerReviewBooster: true,
+      // customBranding: true,
+      // customBrandingPrice: 0,
+      // newCustomerFreeMonths: 6
     }
   ];
 
