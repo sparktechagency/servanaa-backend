@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 
 export interface TSubscription {
   contractorId: Schema.Types.ObjectId;
-  planType: 'gold' | 'platinum' | 'diamond';
+  planType: 'basic' | 'premium';
   stripeCustomerId: string;
   stripeSubscriptionId: string;
   status:
@@ -53,7 +53,7 @@ const subscriptionSchema = new Schema<TSubscription>(
     },
     planType: {
       type: String,
-      enum: ['gold', 'platinum', 'diamond'],
+      enum: ['basic', 'premium'],
       required: true
     },
     stripeCustomerId: { type: String, required: true },
@@ -86,7 +86,7 @@ subscriptionSchema.index({ stripeSubscriptionId: 1 }, { unique: true });
 subscriptionSchema.index({ stripeCustomerId: 1 });
 
 subscriptionSchema.index(
-  { contractorId: 1 },
+  { contractorId: 1, status: 1 },
   {
     partialFilterExpression: {
       status: { $in: ['active', 'pending', 'processing'] },

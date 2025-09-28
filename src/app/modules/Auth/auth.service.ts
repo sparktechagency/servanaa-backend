@@ -18,13 +18,14 @@ const loginUser = async (payload: TLoginUser) => {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
   }
 
-
-   const otpVerified = user.otpVerified;
+  const otpVerified = user.otpVerified;
 
   if (!otpVerified) {
-    throw new AppError(httpStatus.FORBIDDEN, 'required otp verify your account!');
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'required otp verify your account!'
+    );
   }
-
 
   // checking if the user is already deleted
   const isDeleted = user.isDeleted;
@@ -40,9 +41,8 @@ const loginUser = async (payload: TLoginUser) => {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked !');
   }
 
-  if (!(await User.isPasswordMatched(payload?.password, user?.password))) 
+  if (!(await User.isPasswordMatched(payload?.password, user?.password)))
     throw new AppError(httpStatus.FORBIDDEN, 'Password do not matched');
-
 
   // If OTP is not verified, send OTP and return a specific message
   // if (!user.otpVerified) {
@@ -60,36 +60,34 @@ const loginUser = async (payload: TLoginUser) => {
   //   throw new AppError(httpStatus.FORBIDDEN, 'Admin Approval Pending !');
   // }
 
-
   //create token and sent to the  client
-  const jwtPayload:any = {
+  const jwtPayload: any = {
     userEmail: user.email,
-    role: user.role,
+    role: user.role
   };
 
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    config.jwt_access_expires_in as string,
+    config.jwt_access_expires_in as string
   );
 
   const refreshToken = createToken(
     jwtPayload,
     config.jwt_refresh_secret as string,
-    config.jwt_refresh_expires_in as string,
+    config.jwt_refresh_expires_in as string
   );
 
   return {
     accessToken,
-    refreshToken,
+    refreshToken
     // needsPasswordChange: user?.needsPasswordChange,
   };
 };
 
-
 const changePassword = async (
   userData: JwtPayload,
-  payload: { oldPassword: string; newPassword: string },
+  payload: { oldPassword: string; newPassword: string }
 ) => {
   // checking if the user is exist
   const user = await User.isUserExistsByCustomEmail(userData.userEmail);
@@ -105,19 +103,19 @@ const changePassword = async (
   //hash new password
   const newHashedPassword = await bcrypt.hash(
     payload.newPassword,
-    Number(config.bcrypt_salt_rounds),
+    Number(config.bcrypt_salt_rounds)
   );
 
   await User.findOneAndUpdate(
     {
       email: userData.userEmail,
-      role: userData.role,
+      role: userData.role
     },
     {
       password: newHashedPassword,
       needsPasswordChange: false,
-      passwordChangedAt: new Date(),
-    },
+      passwordChangedAt: new Date()
+    }
   );
 
   return null;
@@ -158,20 +156,19 @@ const refreshToken = async (token: string) => {
 
   const jwtPayload = {
     userEmail: user.email,
-    role: user.role,
+    role: user.role
   };
 
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    config.jwt_access_expires_in as string,
+    config.jwt_access_expires_in as string
   );
 
   return {
-    accessToken,
+    accessToken
   };
 };
-
 
 const forgetPassword = async (userEmail: string) => {
   // checking if the user is exist
@@ -194,23 +191,21 @@ const forgetPassword = async (userEmail: string) => {
   if (userStatus === 'blocked') {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked ! !');
   }
-  
+
   // const otp = await OtpServices.generateAndSendOTP(user.email);
   // If OTP is not verified, send OTP and return a specific message
   // if (!user.otpVerified) {
 
-    await OtpServices.generateAndSendOTP(user.email);
+  await OtpServices.generateAndSendOTP(user.email);
 
-    // Return a specific message for the controller
-    return {
-      message: 'OTP sent successfully!',
-      accessToken: null,
-      // refreshToken: null,
-    };
+  // Return a specific message for the controller
+  return {
+    message: 'OTP sent successfully!',
+    accessToken: null
+    // refreshToken: null,
+  };
 
   // }
-
-
 
   // const jwtPayload = {
   //   userEmail: user.email,
@@ -233,18 +228,16 @@ const forgetPassword = async (userEmail: string) => {
   //           // if (!otp) {
   //           //   throw new AppError(httpStatus.FORBIDDEN, 'Otp not created ! !');
   //           // }
-  
+
   //           // return {otp, resetToken};
   //         // }
   // return {resetToken};
 };
 
-
 const resetPassword = async (
   payload: { email: string; newPassword: string },
-  token: string,
+  token: string
 ) => {
-
   // checking if the user is exist
   const user = await User.isUserExistsByCustomEmail(payload?.email);
 
@@ -254,7 +247,7 @@ const resetPassword = async (
   // checking if the user is already deleted
   const isDeleted = user?.isDeleted;
 
-  if ( isDeleted) {
+  if (isDeleted) {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !');
   }
 
@@ -267,7 +260,7 @@ const resetPassword = async (
 
   const decoded = jwt.verify(
     token,
-    config.jwt_access_secret as string,
+    config.jwt_access_secret as string
   ) as JwtPayload;
 
   //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
@@ -279,19 +272,19 @@ const resetPassword = async (
   //hash new password
   const newHashedPassword = await bcrypt.hash(
     payload.newPassword,
-    Number(config.bcrypt_salt_rounds),
+    Number(config.bcrypt_salt_rounds)
   );
 
   await User.findOneAndUpdate(
     {
       email: decoded.userEmail,
-      role: decoded.role,
+      role: decoded.role
     },
     {
       password: newHashedPassword,
       needsPasswordChange: false,
-      passwordChangedAt: new Date(),
-    },
+      passwordChangedAt: new Date()
+    }
   );
 };
 export const AuthServices = {
@@ -299,5 +292,5 @@ export const AuthServices = {
   changePassword,
   refreshToken,
   forgetPassword,
-  resetPassword,
+  resetPassword
 };

@@ -16,6 +16,8 @@ import config from '../../config';
 const stripe = new Stripe(config.stripe_secret_key!);
 const processedEvents = new Map<string, boolean>();
 
+const PENDING_EXPIRY_MINUTES = 10;
+
 export class SubscriptionService {
   static async initializeDefaultPlans () {
     // Check if plans already exist
@@ -109,66 +111,6 @@ export class SubscriptionService {
 
     return { message: 'Plans created successfully', plans: createdPlans };
   }
-
-  // Main webhook event handler with idempotency
-
-  // static async initializeDefaultPlans () {
-  //   // Check if plans already exist
-  //   const existingPlans = await SubscriptionPlan.find();
-  //   if (existingPlans.length > 0) {
-  //     return { message: 'Plans already exist', plans: existingPlans };
-  //   }
-
-  //   const plans = [
-  //     {
-  //       name: 'Test Gold Plan (3 min)',
-  //       type: 'gold' as const,
-  //       duration: 1, // This will be interpreted as minutes for testing
-  //       price: 1, // $0.01 for testing
-  //       features: ['Basic support', '10 bookings/month', 'Basic analytics']
-  //     },
-  //     {
-  //       name: 'Test Platinum Plan (5 min)',
-  //       type: 'platinum' as const,
-  //       duration: 2, // 5 minutes for testing
-  //       price: 2, // $0.02 for testing
-  //       features: [
-  //         'Priority support',
-  //         '50 bookings/month',
-  //         'Advanced analytics',
-  //         'SMS notifications'
-  //       ]
-  //     }
-  //   ];
-
-  //   const createdPlans = [];
-
-  //   for (const planData of plans) {
-  //     const stripePrice = await stripe.prices.create({
-  //       unit_amount: planData.price * 100, // Convert to cents
-  //       currency: 'usd',
-  //       recurring: {
-  //         interval: 'day', // Use 'minute' instead of 'month'
-  //         interval_count: planData.duration,
-  //         trial_period_days: 0
-  //       },
-  //       product_data: {
-  //         name: planData.name
-  //       }
-  //     });
-
-  //     // Create plan in database
-  //     const plan = await SubscriptionPlan.create({
-  //       ...planData,
-  //       stripePriceId: stripePrice.id,
-  //       isActive: true
-  //     });
-
-  //     createdPlans.push(plan);
-  //   }
-
-  //   return { message: 'Test plans created successfully', plans: createdPlans };
-  // }
 
   static async handleWebhookEvent (event: Stripe.Event) {
     if (processedEvents.has(event.id)) {
@@ -300,7 +242,7 @@ export class SubscriptionService {
 
       // Get new plan
       const newPlan = await SubscriptionPlan.findOne({
-        type: newPlanType,
+        type: { $in: ['basic', 'premium'] },
         isActive: true
       }).session(session);
 
@@ -412,103 +354,127 @@ export class SubscriptionService {
     return result;
   }
 
+  // Helper to clean up stale pending subscriptions before a new session is started
+  static async cleanUpStalePendingSubscriptions (contractorId: string) {
+    const now = new Date();
+    const expiryDate = new Date(now.getTime() - PENDING_EXPIRY_MINUTES * 60000);
+
+    // Only mark as failed those pending subscriptions older than expiry date
+    await Subscription.updateMany(
+      {
+        contractorId: new mongoose.Types.ObjectId(contractorId),
+        status: 'pending',
+        isDeleted: false,
+        createdAt: { $lt: expiryDate } // <-- ONLY if older than expiry!
+      },
+      {
+        $set: { status: 'failed', isDeleted: true }
+      }
+    );
+  }
+
+  // Helper to delete cancelled subscriptions before a new one is started
+  static async deleteCancelledSubscriptions (contractorId: string) {
+    // Hard delete. To soft-delete for audit/history, use updateMany and set isDeleted: true
+    await Subscription.deleteMany({
+      contractorId: new mongoose.Types.ObjectId(contractorId),
+      status: 'cancelled'
+    });
+  }
+
+  // Main function for starting a contractor Stripe subscription session
   static async createCheckoutSession (contractorId: string, planType: string) {
     const session = await mongoose.startSession();
-
     try {
       session.startTransaction();
 
-      const contractor = await Contractor.findById(contractorId)
-        .populate('userId')
-        .session(session);
+      // PART 1: PRE-CLEANUP
+      await this.cleanUpStalePendingSubscriptions(contractorId);
 
-      if (!contractor) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
-      }
+      // Force-fail/soft-delete any remaining pending subscriptions (prevents duplicates)
 
+      // Use the fixed cleanup function instead:
+      await this.cleanUpStalePendingSubscriptions(contractorId);
+      // PART 2: DELETE CANCELLED SUBS (or soft-delete as audit if desired)
+      await this.deleteCancelledSubscriptions(contractorId);
+
+      // PART 3: Proceed with normal session creation logic
+      // 1. Get the plan
       const plan = await SubscriptionPlan.findOne({
         type: planType,
         isActive: true
       }).session(session);
-
-      if (!plan) {
+      if (!plan)
         throw new AppError(httpStatus.NOT_FOUND, 'Subscription plan not found');
-      }
 
-      const existingSubscription = await Subscription.findOne({
-        contractorId,
-        status: { $in: ['active', 'pending', 'processing'] },
-        isDeleted: false
-      }).session(session);
+      let stripeCustomerId = null;
 
-      if (existingSubscription) {
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          'You already have an active or pending subscription'
-        );
-      }
-
-      let stripeCustomer;
-      const existingCancelledSubscription = await Subscription.findOne({
-        contractorId,
-        isDeleted: false
-      })
-        .sort({ createdAt: -1 })
+      // Find the contractor's user (assume you have that link)
+      const contractor = await Contractor.findById(contractorId)
+        .populate('userId')
         .session(session);
+      if (!contractor)
+        throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
 
-      if (existingCancelledSubscription?.stripeCustomerId) {
-        try {
-          stripeCustomer = await stripe.customers.retrieve(
-            existingCancelledSubscription.stripeCustomerId
-          );
-        } catch (error) {
-          console.error('Error retrieving existing customer:', error);
-          stripeCustomer = null;
-        }
-      }
+      // Check if already has one
+      if (contractor.stripeCustomerId) {
+        stripeCustomerId = contractor.stripeCustomerId;
+      } else {
+        // Or, if you store it on user:
+        // if (contractor.userId.stripeCustomerId) { ... }
 
-      if (!stripeCustomer) {
+        // Otherwise, create in Stripe:
         const userDoc = contractor.userId as any;
-        stripeCustomer = await stripe.customers.create({
+        const stripeCustomer = await stripe.customers.create({
           email: userDoc.email,
           name: userDoc.fullName,
-          metadata: { contractorId: contractorId }
+          metadata: { contractorId }
         });
-      }
+        stripeCustomerId = stripeCustomer.id;
 
-      const pendingSubscription = await Subscription.create(
+        // Optionally save it back to Contractor for reuse
+        contractor.stripeCustomerId = stripeCustomerId;
+        await contractor.save({ session });
+      }
+      // 2. Check Stripe customer, create if needed (not shown here)
+      // 3. Create the new pending subscription record
+      const subscription = await Subscription.create(
         [
           {
             contractorId: new mongoose.Types.ObjectId(contractorId),
             planType: plan.type,
-            stripeCustomerId: stripeCustomer.id,
+            stripeCustomerId,
             stripeSubscriptionId: `pending_${Date.now()}_${contractorId}`,
             status: 'pending',
             startDate: new Date(),
             endDate: new Date(
               Date.now() + plan.duration * 30 * 24 * 60 * 60 * 1000
-            ),
+            ), // assuming duration in months
             isDeleted: false
           }
         ],
         { session }
       );
+      const newPendingSubscription = subscription[0];
 
+      // 4. Create the Stripe checkout session with proper metadata
       const checkoutSession = await stripe.checkout.sessions.create({
-        customer: stripeCustomer.id,
+        // Stripe session args...
+        // include: customer, line_items, mode, success_url, cancel_url, etc.
+        customer: stripeCustomerId,
         payment_method_types: ['card'],
+        mode: 'subscription',
         line_items: [
           {
             price: plan.stripePriceId,
             quantity: 1
           }
         ],
-        mode: 'subscription',
         subscription_data: {
           metadata: {
             contractorId,
             planType,
-            pendingSubscriptionId: pendingSubscription[0]._id.toString()
+            pendingSubscriptionId: newPendingSubscription._id.toString()
           }
         },
         success_url: `${config.frontend_url}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -516,17 +482,14 @@ export class SubscriptionService {
         metadata: {
           contractorId,
           planType,
-          pendingSubscriptionId: pendingSubscription[0]._id.toString()
+          pendingSubscriptionId: newPendingSubscription._id.toString()
         }
       });
 
       await session.commitTransaction();
-
       return { sessionUrl: checkoutSession.url };
     } catch (error) {
-      if (session.inTransaction()) {
-        await session.abortTransaction();
-      }
+      if (session.inTransaction()) await session.abortTransaction();
       throw error;
     } finally {
       await session.endSession();
@@ -609,82 +572,88 @@ export class SubscriptionService {
 
   // Webhook Handlers
   // FIXED: Proper transaction management and contractor sync
+
   static async handleSubscriptionCreated (
     stripeSubscription: Stripe.Subscription
   ) {
     const session = await mongoose.startSession();
-
     try {
       session.startTransaction();
 
-      // Get contractor from metadata
+      // Extract contractor and pendingSubscriptionId from Stripe metadata
       let contractorId = stripeSubscription.metadata?.contractorId;
       const pendingSubscriptionId =
         stripeSubscription.metadata?.pendingSubscriptionId;
 
       if (!contractorId) {
-        // Fallback: find by customer ID
-        const existingSubscription = await Subscription.findOne({
+        // Fallback: Find by stripe customer if metadata missing
+        const priorSub = await Subscription.findOne({
           stripeCustomerId: stripeSubscription.customer as string
         }).session(session);
-
-        if (existingSubscription) {
-          contractorId = existingSubscription.contractorId.toString();
-        }
+        if (priorSub) contractorId = priorSub.contractorId.toString();
       }
-
-      if (!contractorId) {
+      if (!contractorId)
         throw new AppError(
           httpStatus.NOT_FOUND,
           'Contractor not found for subscription'
         );
-      }
 
-      // Get plan information
+      // Look up plan info from Stripe price
       const priceId = stripeSubscription.items.data[0].price.id;
       const plan = await SubscriptionPlan.findOne({
         stripePriceId: priceId
       }).session(session);
-
-      if (!plan) {
+      if (!plan)
         throw new AppError(httpStatus.NOT_FOUND, 'Subscription plan not found');
-      }
 
-      // Calculate dates properly
-      const startDate = new Date(
-        stripeSubscription.current_period_start * 1000
-      );
-      const endDate = new Date(stripeSubscription.current_period_end * 1000);
+      // Safely convert Stripe timestamps (UNIX seconds) to JS Dates
+      const startDate = stripeSubscription.current_period_start
+        ? new Date(stripeSubscription.current_period_start * 1000)
+        : new Date();
+      const endDate = stripeSubscription.current_period_end
+        ? new Date(stripeSubscription.current_period_end * 1000)
+        : null;
 
-      // Get payment method
+      if (isNaN(startDate.getTime()))
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          'Invalid startDate from Stripe'
+        );
+      if (endDate && isNaN(endDate.getTime()))
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          'Invalid endDate from Stripe'
+        );
+
+      // Payment method, if present
       let paymentMethodId = '';
       if (stripeSubscription.default_payment_method) {
         paymentMethodId = stripeSubscription.default_payment_method as string;
       }
 
+      // Prepare subscription data for update/creation
       const subscriptionData = {
         contractorId: new mongoose.Types.ObjectId(contractorId),
         planType: plan.type,
         stripeCustomerId: stripeSubscription.customer as string,
         stripeSubscriptionId: stripeSubscription.id,
-        status: this.mapStripeStatus(stripeSubscription.status),
+        status: SubscriptionService.mapStripeStatus(stripeSubscription.status),
         startDate,
         endDate,
         paymentMethodId,
         isDeleted: false
       };
 
-      // Update or create subscription
       let subscription;
       if (pendingSubscriptionId) {
-        // Update the pending subscription
+        // Update or activate the pending subscription
         subscription = await Subscription.findByIdAndUpdate(
           pendingSubscriptionId,
           subscriptionData,
           { new: true, session }
         );
       } else {
-        // Create new subscription
+        // Upsert by Stripe subscriptionId if no pending ID
         subscription = await Subscription.findOneAndUpdate(
           { stripeSubscriptionId: stripeSubscription.id },
           subscriptionData,
@@ -692,11 +661,13 @@ export class SubscriptionService {
         );
       }
 
-      // CRITICAL: Update contractor fields in same transaction
+      // Update contractor data to stay in sync
       const contractorUpdate = {
         subscriptionId: subscription?._id,
         hasActiveSubscription: stripeSubscription.status === 'active',
-        subscriptionStatus: this.mapStripeStatus(stripeSubscription.status),
+        subscriptionStatus: SubscriptionService.mapStripeStatus(
+          stripeSubscription.status
+        ),
         paymentMethodId,
         stripeCustomerId: stripeSubscription.customer as string
       };
@@ -706,25 +677,21 @@ export class SubscriptionService {
         contractorUpdate,
         { new: true, session }
       );
-
-      if (!updatedContractor) {
+      if (!updatedContractor)
         throw new AppError(
           httpStatus.NOT_FOUND,
           'Contractor not found for update'
         );
-      }
 
       await session.commitTransaction();
-
       console.log(
-        `✅ Subscription and contractor updated successfully: ${contractorId}`
+        '✅ Subscription and contractor updated successfully:',
+        contractorId
       );
       return subscription;
     } catch (error) {
       console.error('❌ Error in handleSubscriptionCreated:', error);
-      if (session.inTransaction()) {
-        await session.abortTransaction();
-      }
+      if (session.inTransaction()) await session.abortTransaction();
       throw error;
     } finally {
       await session.endSession();
@@ -991,6 +958,48 @@ export class SubscriptionService {
         return 'active';
       default:
         return 'inactive';
+    }
+  }
+
+  static async updateSubscriptionStatusFromStripe (
+    stripeSubscription: Stripe.Subscription
+  ) {
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+
+      const stripeSubId = stripeSubscription.id;
+      const statusMapped = SubscriptionService.mapStripeStatus(
+        stripeSubscription.status
+      );
+
+      // Parse dates safely as before
+      const startDate = stripeSubscription.current_period_start
+        ? new Date(stripeSubscription.current_period_start * 1000)
+        : new Date();
+      const endDate = stripeSubscription.current_period_end
+        ? new Date(stripeSubscription.current_period_end * 1000)
+        : null;
+
+      // Update or create the subscription record
+      const updated = await Subscription.findOneAndUpdate(
+        { stripeSubscriptionId: stripeSubId },
+        {
+          startDate,
+          endDate,
+          status: statusMapped
+          // ...other fields you want to sync (e.g. paymentMethodId, stripeCustomerId)
+        },
+        { new: true, upsert: true, session }
+      );
+
+      await session.commitTransaction();
+      return updated;
+    } catch (error) {
+      if (session.inTransaction()) await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
     }
   }
 

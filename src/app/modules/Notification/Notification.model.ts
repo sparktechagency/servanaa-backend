@@ -11,12 +11,22 @@ const NotificationSchema = new Schema<TNotification, NotificationModel>(
     },
     type: {
       type: String,
-      enum: Object.values(TypeValues)
-      // enum: ['active', 'blocked'],
-      // default: 'active',
+      enum: TypeValues,
+      required: true
     },
     message: { type: String, required: true },
-    isRead: { type: [String], default: [] }
+    isRead: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Users who have read this notification
+    bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' },
+    amount: { type: Number },
+    metadata: {
+      paymentIntentId: { type: String },
+      stripeChargeId: { type: String },
+      refundAmount: { type: Number },
+      payoutId: { type: String },
+      contractorId: { type: String },
+      withdrawalId: { type: String }
+    },
+    isDeleted: { type: Boolean, default: false }
   },
   { timestamps: true }
 );
@@ -24,6 +34,11 @@ const NotificationSchema = new Schema<TNotification, NotificationModel>(
 NotificationSchema.statics.isNotificationExists = async function (id: string) {
   return await this.findOne({ _id: id, isDeleted: false });
 };
+
+// Indexes for efficient queries
+NotificationSchema.index({ userId: 1, type: 1 });
+NotificationSchema.index({ userId: 1, isRead: 1 });
+NotificationSchema.index({ bookingId: 1 });
 
 export const Notification = model<TNotification, NotificationModel>(
   'Notification',

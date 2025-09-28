@@ -16,6 +16,10 @@ CustomerSchema.statics.isCustomerExists = async function (id: string) {
   return await this.findOne({ _id: id, isDeleted: false });
 };
 
+// Add indexes for efficient queries
+CustomerSchema.index({ stripeCustomerId: 1 });
+CustomerSchema.index({ userId: 1 });
+
 export const Customer = model<TCustomer, CustomerModel>(
   'Customer',
   CustomerSchema

@@ -174,7 +174,7 @@ const getAllAvailableContractorsFromDB = async (
   } = query;
 
   const contractors = await Contractor.find({
-    skills: skills,
+    skills: { $in: [skills] },
     skillsCategory: skillsCategory
   }).populate('myScheduleId');
 
@@ -308,11 +308,11 @@ const updateContractorIntoDB = async (id: string, payload: any) => {
     .collection('contractors')
     .findOne(
       { _id: new mongoose.Types.ObjectId(id) },
-      { projection: { isDeleted: 1, name: 1 } }
+      { projection: { isDeleted: 1 } }
     );
 
-  if (!isDeletedService?.name) {
-    throw new Error('Contractor not found');
+  if (!isDeletedService) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
   }
 
   if (isDeletedService.isDeleted) {

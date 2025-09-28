@@ -5,10 +5,12 @@ export const createToken = (
   jwtPayload: Record<string, unknown>,
   // jwtPayload: { userEmail: string; role: string },
   secret: string,
-  expiresIn: any,
+  expiresIn: any
 ) => {
-  return jwt.sign(jwtPayload, secret, 
-    { expiresIn: expiresIn },
+  return jwt.sign(
+    jwtPayload,
+    secret,
+    { expiresIn: expiresIn }
     // expiresIn,
   );
 };
