@@ -454,14 +454,8 @@ const getSingleBookingFromDB = async (id: string) => {
 };
 
 const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
- 
-
-
   const booking = await Booking.findById(id);
   if (!booking) throw new Error('Booking not found');
-
-
-
 
   if (files && files.length > 0) {
     // const fileUrls = files.map((file: any) => file.location); // Extract S3 URLs

@@ -58,7 +58,8 @@ export type TBooking = {
     | 'disputed'
     | 'accepted'
     | 'rejected'
-    | 'pending';
+    | 'pending'
+    | 'ongoing';
 
   // Enhanced payment status
   paymentStatus:
