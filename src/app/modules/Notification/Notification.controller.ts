@@ -5,13 +5,15 @@ import { NotificationServices } from './Notification.service';
 
 const createNotification = catchAsync(async (req, res) => {
   const notification = req.body;
-  const result = await NotificationServices.createNotificationIntoDB(notification);
+  const result = await NotificationServices.createNotificationIntoDB(
+    notification
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Notification is created successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -23,32 +25,38 @@ const getSingleNotification = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Notification is retrieved successfully',
-    data: result,
+    data: result
   });
 });
 
 const getAllNotifications = catchAsync(async (req, res) => {
-  const result = await NotificationServices.getAllNotificationsFromDB(req.query, req.user);
+  const result = await NotificationServices.getAllNotificationsFromDB(
+    req.query,
+    req.user
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Notifications are retrieved successfully',
     meta: result.meta,
-    data: result.result,
+    data: result.result
   });
 });
 
 const updateNotification = catchAsync(async (req, res) => {
   const { id } = req.params;
   const notification = req.body;
-  const result = await NotificationServices.updateNotificationIntoDB(id, notification);
+  const result = await NotificationServices.updateNotificationIntoDB(
+    id,
+    notification
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Notification is updated successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -60,7 +68,7 @@ const deleteNotification = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Notification is deleted successfully',
-    data: result,
+    data: result
   });
 });
 
@@ -69,5 +77,5 @@ export const NotificationControllers = {
   getSingleNotification,
   getAllNotifications,
   updateNotification,
-  deleteNotification,
+  deleteNotification
 };

@@ -15,20 +15,20 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     balance: { type: Number, default: 0 },
     skillsCategory: { type: String, default: '' },
     ratings: { type: Number, required: true, default: 0 },
-    skills: { type: Schema.Types.Mixed, required: true, default: [] }, // string or array of strings
+    skills: { type: Schema.Types.Mixed, required: true, default: [] },
+
     subscriptionStatus: {
       type: String,
       enum: ['active', 'inactive', 'cancelled', 'expired', 'failed'],
       required: true,
       default: 'inactive'
     },
-    stripeCustomerId: {
-      type: String
-    },
+
+    // Stripe integration
+    stripeCustomerId: { type: String },
     customerId: { type: String, default: '' },
     paymentMethodId: { type: String, default: '' },
     certificates: { type: [String], required: true, default: [] },
-    // materials: { type: [String], required: true, default: [] },
     materials: [
       {
         name: { type: String, default: '' },
@@ -58,6 +58,11 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
 contractorSchema.statics.isContractorExists = async function (id: string) {
   return await this.findOne({ _id: id, isDeleted: false });
 };
+
+// Add indexes for efficient queries
+contractorSchema.index({ userId: 1 });
+contractorSchema.index({ stripeAccountId: 1 });
+contractorSchema.index({ 'withdrawalHistory.status': 1 });
 
 export const Contractor = model<TContractor, ContractorModel>(
   'Contractor',

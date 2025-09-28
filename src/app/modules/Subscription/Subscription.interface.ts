@@ -2,7 +2,7 @@ import { Document, Types } from 'mongoose';
 
 export interface ISubscription extends Document {
   contractorId: Types.ObjectId;
-  planType: 'gold' | 'platinum' | 'diamond';
+  planType: 'basic' | 'premium';
   stripeCustomerId: string;
   stripeSubscriptionId: string;
   status: 'active' | 'inactive' | 'cancelled' | 'expired' | 'failed';
@@ -14,15 +14,10 @@ export interface ISubscription extends Document {
 
 export interface ISubscriptionPlan extends Document {
   name: string;
-  type: 'gold' | 'platinum' | 'diamond';
+  type: 'basic' | 'premium';
   duration: number;
   price: number;
   stripePriceId: string;
   features: string[];
   isActive: boolean;
 }
-
-
-
-
-

@@ -29,16 +29,46 @@ const createBookingIntoDB = async (payload: TBooking, usr: any) => {
   console.log('=== SERVICE LEVEL DEBUG ===');
   console.log('Received payload:', JSON.stringify(payload, null, 2));
   console.log('bookingDate in payload:', payload.bookingDate);
+  console.log('User:', usr);
   console.log('==========================');
+
+  // Validate required fields
+  if (!payload.contractorId) {
+    throw new Error('Contractor ID is required');
+  }
+
+  if (!payload.customerId) {
+    throw new Error('Customer ID is required');
+  }
+
+  if (!payload.startTime) {
+    throw new Error('Start time is required');
+  }
+
+  if (!payload.duration) {
+    throw new Error('Duration is required');
+  }
+
+  if (!payload.bookingType) {
+    throw new Error('Booking type is required');
+  }
+
+  // Validate booking type
+  if (!['oneTime', 'weekly'].includes(payload.bookingType)) {
+    throw new Error('Invalid booking type. Must be "oneTime" or "weekly"');
+  }
 
   const { bookingType, contractorId, day: days, bookingDate } = payload;
 
-  if (bookingType === 'OneTime') {
-    // If bookingDate is missing, try to construct it from the day field
+  // Handle oneTime booking
+  if (bookingType === 'oneTime') {
+    console.log('Processing oneTime booking...');
+
+    // Determine the actual booking date
     let actualBookingDate = bookingDate;
 
     if (!actualBookingDate) {
-      // If bookingDate is missing, but we have day as a date string, use that
+      // If bookingDate is missing, try to construct it from the day field
       if (typeof days === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(days)) {
         actualBookingDate = new Date(days + 'T00:00:00.000Z');
         console.log(
@@ -46,9 +76,8 @@ const createBookingIntoDB = async (payload: TBooking, usr: any) => {
           actualBookingDate
         );
       } else {
-        // If we only have weekday name, we can't proceed without actual date
         throw new Error(
-          'For OneTime bookings, either bookingDate or day in YYYY-MM-DD format is required'
+          'For oneTime bookings, either bookingDate or day in YYYY-MM-DD format is required'
         );
       }
     }
@@ -61,29 +90,66 @@ const createBookingIntoDB = async (payload: TBooking, usr: any) => {
 
     // Use bookingDate for validation
     const dateString = bookingDateObj.toISOString().split('T')[0]; // Get YYYY-MM-DD format
-    checkOrderDate(dateString, bookingType);
+    console.log('Date string for validation:', dateString);
 
-    const updatedPayload = await getBookingDetails(payload);
-    const result = await checkAvailability(
+    // Check if the order date is valid
+    try {
+      checkOrderDate(dateString, bookingType);
+    } catch (error) {
+      console.error('Date validation failed:', error);
+      throw error;
+    }
+
+    // Get booking details with proper calculations
+    let updatedPayload: TBooking;
+    try {
+      updatedPayload = await getBookingDetails(payload);
+      console.log('Updated payload after getBookingDetails:', updatedPayload);
+    } catch (error) {
+      console.error('Error getting booking details:', error);
+      throw error;
+    }
+
+    // Check availability
+    const availabilityResult = await checkAvailability(
       contractorId,
       updatedPayload.startTime,
       dateString,
       bookingType
     );
 
-    if (!result?.available) {
-      throw new Error('Booking not available');
+    console.log('Availability check result:', availabilityResult);
+
+    if (!availabilityResult?.available) {
+      throw new Error(availabilityResult?.message || 'Booking not available');
     }
 
-    // Set the proper values for OneTime booking
+    // Set the proper values for oneTime booking
     const requestedDate = new Date(actualBookingDate);
     requestedDate.setUTCHours(0, 0, 0, 0);
     const dayName = getDayName(dateString);
 
+    // Update the payload with correct date and day
     updatedPayload.bookingDate = requestedDate;
     updatedPayload.day = dayName;
 
-    const booking = await createOneTimeBooking(updatedPayload);
+    console.log('Final payload before creating booking:', {
+      bookingDate: updatedPayload.bookingDate,
+      day: updatedPayload.day,
+      startTime: updatedPayload.startTime,
+      endTime: updatedPayload.endTime,
+      price: updatedPayload.price
+    });
+
+    // Create the booking
+    let booking: any;
+    try {
+      booking = await createOneTimeBooking(updatedPayload);
+      console.log('Booking created successfully:', booking._id);
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      throw error;
+    }
 
     if (!booking) {
       throw new Error('Failed to create booking');
@@ -97,62 +163,18 @@ const createBookingIntoDB = async (payload: TBooking, usr: any) => {
     // Create notifications
     const notifications = [];
 
+    // Notification for contractor
     notifications.push({
       userId: booking.contractorId.toString(),
       type: NOTIFICATION_TYPES.BOOKING_REQUEST,
       title: 'New Booking Request',
-      message: `New ${bookingType} booking request received`,
+      message: `New ${bookingType} booking request received for ${dayName}`,
       bookingId: booking._id.toString(),
       isRead: []
     });
 
-    const admins = await User.find({ role: 'superAdmin' });
-    for (const admin of admins) {
-      notifications.push({
-        userId: admin._id.toString(),
-        type: NOTIFICATION_TYPES.BOOKING_REQUEST,
-        title: 'New Booking Request',
-        message: `New booking request from customer requires attention`,
-        bookingId: booking._id.toString(),
-        isRead: []
-      });
-    }
-
-    for (const notification of notifications) {
-      await NotificationServices.createNotificationIntoDB(notification);
-    }
-
-    return booking;
-  } else if (bookingType === 'Weekly') {
-    // Weekly booking logic remains the same
-    checkOrderDate(days, bookingType);
-    const updatedPayload = await getBookingDetails(payload);
-    const result = await checkAvailability(
-      contractorId,
-      updatedPayload.startTime,
-      days,
-      bookingType
-    );
-
-    if (!result?.available) {
-      throw new Error('Booking not available');
-    }
-
-    const booking = await createRecurringBookingIntoDB(updatedPayload);
-
-    // Create notifications for weekly booking
-    if (booking && booking.length > 0) {
-      const notifications = [];
-
-      notifications.push({
-        userId: booking[0].contractorId.toString(),
-        type: NOTIFICATION_TYPES.BOOKING_REQUEST,
-        title: 'New Booking Request',
-        message: `New ${bookingType} booking request received`,
-        bookingId: booking[0]._id ? booking[0]._id.toString() : '',
-        isRead: []
-      });
-
+    // Notifications for admins
+    try {
       const admins = await User.find({ role: 'superAdmin' });
       for (const admin of admins) {
         notifications.push({
@@ -160,20 +182,139 @@ const createBookingIntoDB = async (payload: TBooking, usr: any) => {
           type: NOTIFICATION_TYPES.BOOKING_REQUEST,
           title: 'New Booking Request',
           message: `New booking request from customer requires attention`,
-          bookingId: booking[0]._id ? booking[0]._id.toString() : '',
+          bookingId: booking._id.toString(),
           isRead: []
         });
       }
+    } catch (error) {
+      console.error('Error fetching admins for notifications:', error);
+      // Don't throw error here, just log it as notifications are not critical
+    }
 
-      for (const notification of notifications) {
+    // Create all notifications
+    for (const notification of notifications) {
+      try {
         await NotificationServices.createNotificationIntoDB(notification);
+      } catch (error) {
+        console.error('Error creating notification:', error);
+        // Continue with other notifications even if one fails
       }
     }
 
+    console.log('OneTime booking process completed successfully');
     return booking;
   }
 
-  throw new Error('Invalid booking type');
+  // Handle weekly booking
+  else if (bookingType === 'weekly') {
+    console.log('Processing weekly booking...');
+
+    // Validate days for weekly booking
+    if (!days || (typeof days === 'string' && !Array.isArray(days))) {
+      throw new Error('Days are required for weekly bookings');
+    }
+
+    const daysArray = Array.isArray(days) ? days : [days];
+
+    // Validate each day
+    for (const day of daysArray) {
+      try {
+        checkOrderDate(day, bookingType);
+      } catch (error) {
+        console.error(`Date validation failed for day ${day}:`, error);
+        throw error;
+      }
+    }
+
+    // Get booking details
+    let updatedPayload: TBooking;
+    try {
+      updatedPayload = await getBookingDetails(payload);
+      console.log('Updated payload for weekly booking:', updatedPayload);
+    } catch (error) {
+      console.error('Error getting booking details for weekly:', error);
+      throw error;
+    }
+
+    // Check availability for all days
+    for (const day of daysArray) {
+      const availabilityResult = await checkAvailability(
+        contractorId,
+        updatedPayload.startTime,
+        day,
+        bookingType
+      );
+
+      console.log(`Availability check result for ${day}:`, availabilityResult);
+
+      if (!availabilityResult?.available) {
+        throw new Error(
+          availabilityResult?.message || `Booking not available for ${day}`
+        );
+      }
+    }
+
+    // Create recurring bookings
+    let bookings: any[];
+    try {
+      bookings = await createRecurringBookingIntoDB(updatedPayload);
+      console.log(`Created ${bookings.length} recurring bookings`);
+    } catch (error) {
+      console.error('Error creating recurring bookings:', error);
+      throw error;
+    }
+
+    // Create notifications for weekly booking
+    if (bookings && bookings.length > 0) {
+      const notifications = [];
+
+      // Notification for contractor
+      notifications.push({
+        userId: bookings[0].contractorId.toString(),
+        type: NOTIFICATION_TYPES.BOOKING_REQUEST,
+        title: 'New Weekly Booking Request',
+        message: `New ${bookingType} booking request received for ${daysArray.join(
+          ', '
+        )}`,
+        bookingId: bookings[0]._id ? bookings[0]._id.toString() : '',
+        isRead: []
+      });
+
+      // Notifications for admins
+      try {
+        const admins = await User.find({ role: 'superAdmin' });
+        for (const admin of admins) {
+          notifications.push({
+            userId: admin._id.toString(),
+            type: NOTIFICATION_TYPES.BOOKING_REQUEST,
+            title: 'New Weekly Booking Request',
+            message: `New weekly booking request from customer requires attention`,
+            bookingId: bookings[0]._id ? bookings[0]._id.toString() : '',
+            isRead: []
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching admins for weekly notifications:', error);
+      }
+
+      // Create all notifications
+      for (const notification of notifications) {
+        try {
+          await NotificationServices.createNotificationIntoDB(notification);
+        } catch (error) {
+          console.error('Error creating weekly notification:', error);
+        }
+      }
+    }
+
+    console.log('Weekly booking process completed successfully');
+    return bookings;
+  }
+
+  // Invalid booking type
+  throw new Error(
+    `Invalid booking type: ${bookingType}. Must be "oneTime" or "weekly"`
+  );
 };
 
 const checkAvailabilityIntoDB = async (
@@ -195,17 +336,22 @@ const checkAvailabilityIntoDB = async (
     let daySchedule: any;
 
     // Convert specific date to day name if one-time booking
-    if (bookingType === 'OneTime') {
+    // Fix: Change 'OneTime' to 'oneTime'
+    if (bookingType === 'oneTime') {
       const requestedDay = getDayName(day); // Convert to day name
-      daySchedule = schedule.schedules.find(s => s.days === requestedDay);
-    } else if (bookingType === 'Weekly') {
-      daySchedule = schedule.schedules.find(s => s.days === day);
+      daySchedule = schedule.schedules.find(
+        (s: any) => s.days === requestedDay
+      );
+    }
+    // Fix: Change 'Weekly' to 'weekly'
+    else if (bookingType === 'weekly') {
+      daySchedule = schedule.schedules.find((s: any) => s.days === day);
     }
 
     if (!daySchedule) throw new Error(`Contractor is not available on ${day}`);
 
     const unavailableSlots = requestedTimeSlots.filter(
-      slot => !daySchedule.timeSlots.includes(slot)
+      (slot: string) => !daySchedule.timeSlots.includes(slot)
     );
 
     console.log('unavailableSlotsmm', unavailableSlots);
@@ -218,7 +364,7 @@ const checkAvailabilityIntoDB = async (
   // Check for overlapping bookings for future recurring or one-time slots
   const existingBooking = await Booking.findOne({
     contractorId,
-    days: { $in: days }, // This checks if the requested day matches any day in the booking collection
+    day: { $in: days }, // This checks if the requested day matches any day in the booking collection
     startTime: { $gte: startTime, $lte: addOneHour(startTime) }, // Compare time range
     status: { $ne: 'cancelled' }
   });
@@ -231,6 +377,8 @@ const checkAvailabilityIntoDB = async (
 };
 
 const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
+ console.log('getAllBookingsFromDB query:', query);
+
   const BookingQuery = new QueryBuilder(
     Booking.find()
       .populate({
@@ -259,6 +407,7 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
     meta
   };
 };
+
 const getAllBookingsByUserFromDB = async (
   query: Record<string, unknown>,
   user: any
@@ -305,14 +454,8 @@ const getSingleBookingFromDB = async (id: string) => {
 };
 
 const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
- 
-
-
   const booking = await Booking.findById(id);
   if (!booking) throw new Error('Booking not found');
-
-
-
 
   if (files && files.length > 0) {
     // const fileUrls = files.map((file: any) => file.location); // Extract S3 URLs
@@ -378,6 +521,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
   return updatedData;
 };
+
 const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
   const booking = await Booking.findOne({
     clientId: id,
@@ -397,6 +541,7 @@ const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
 
   return updatedData;
 };
+
 const deleteBookingFromDB = async (id: string) => {
   const deletedService = await Booking.findByIdAndDelete(id, { new: true });
 

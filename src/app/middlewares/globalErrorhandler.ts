@@ -18,8 +18,8 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   let errorSources: TErrorSources = [
     {
       path: '',
-      message: 'Something went wrong',
-    },
+      message: 'Something went wrong'
+    }
   ];
 
   if (err instanceof ZodError) {
@@ -48,16 +48,16 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     errorSources = [
       {
         path: '',
-        message: err?.message,
-      },
+        message: err?.message
+      }
     ];
   } else if (err instanceof Error) {
     message = err.message;
     errorSources = [
       {
         path: '',
-        message: err?.message,
-      },
+        message: err?.message
+      }
     ];
     // eslint-disable-next-line no-undef
   }
@@ -68,19 +68,8 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     message,
     errorSources,
     err,
-    stack: config.NODE_ENV === 'development' ? err?.stack : null,
+    stack: config.NODE_ENV === 'development' ? err?.stack : null
   });
 };
 
 export default globalErrorHandler;
-
-//pattern
-/*
-success
-message
-errorSources:[
-  path:'',
-  message:''
-]
-stack
-*/

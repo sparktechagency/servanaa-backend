@@ -10,6 +10,9 @@ export type TContractor = {
   balance?: number;
   dob?: string;
   gender?: string;
+  totalEarnings: number;
+  pendingBalance: number;
+  minimumWithdrawal: number;
   city?: string;
   language?: string;
   location: string;
@@ -22,22 +25,17 @@ export type TContractor = {
     | 'expired'
     | 'failed';
 
+  // Stripe integration
   stripeCustomerId: string;
   customerId: string;
   paymentMethodId: string;
   // stripeAccountId: string;
   certificates: string[];
-  //  materials: string[];
   materials?: {
     name: string;
     unit?: { type: string };
     price: { type: number };
   }[];
-  //  mySchedule?: {
-  //  day: string; // The day of the week (e.g., "Monday")
-  //  startTime: { type: string},
-  //  endTime: { type: string},
-  //   }[];
   myScheduleId?: Types.ObjectId;
   subscriptionId?: Types.ObjectId;
   hasActiveSubscription: boolean;

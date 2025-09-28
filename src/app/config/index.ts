@@ -36,5 +36,13 @@ export default {
     s3ForcePathStyle: true,
     sslEnabled: true,
     signatureVersion: 'v4'
-  }
+  },
+  // Add missing payment configuration properties
+  platform_fee_percentage: Number(process.env.PLATFORM_FEE_PERCENTAGE) || 10,
+  minimum_withdrawal_amount:
+    Number(process.env.MINIMUM_WITHDRAWAL_AMOUNT) || 25,
+  stripe_publishable_key: process.env.STRIPE_PUBLISHABLE_KEY
+  
 };
+
+

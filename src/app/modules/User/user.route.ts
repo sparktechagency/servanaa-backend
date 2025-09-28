@@ -8,32 +8,26 @@ import validateRequest from '../../middlewares/validateRequest';
 import { statusSchema } from './user.validation';
 
 const router = express.Router();
-router.post(
-  '/create-customer', 
-   UserControllers.createCustomer,
-);
+router.post('/create-customer', UserControllers.createCustomer);
 
-router.post(
-  '/create-contractor', 
-    UserControllers.createContractor,
-);
+router.post('/create-contractor', UserControllers.createContractor);
 
 router.get(
   '/me',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
-  UserControllers.getMe,
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  UserControllers.getMe
 );
 
 router.post(
   '/change-status/:id',
   auth(USER_ROLE.superAdmin),
   validateRequest(statusSchema),
-  UserControllers.changeStatus,
+  UserControllers.changeStatus
 );
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   uploadFileS3(true).single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     if (req.body.data) {
@@ -46,28 +40,21 @@ router.patch(
     next();
   },
   // validateRequest(UserValidation.updateUserValidationSchema),
-  UserControllers.updateUser,
+  UserControllers.updateUser
 );
 // router.post(
 //   '/add-mobile-number',
-//   auth(USER_ROLE.superAdmin,  USER_ROLE.client,  USER_ROLE.provider), 
+//   auth(USER_ROLE.superAdmin,  USER_ROLE.client,  USER_ROLE.provider),
 //   validateRequest(UserValidation.checkUserDataValidationSchema),
 //     UserControllers.addMobileNumber,
-// ); 
+// );
 
-
-
-
-router.delete(
-  '/:id',
-  auth(USER_ROLE.superAdmin),
-  UserControllers.deleteUser,
-);
+router.delete('/:id', auth(USER_ROLE.superAdmin), UserControllers.deleteUser);
 
 router.get(
   '/',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
-  UserControllers.getAllUsers,
+  UserControllers.getAllUsers
 );
 
 // router.get(
@@ -82,11 +69,6 @@ router.get(
 //   UserControllers.getAllClients,
 // );
 
-router.get(
-  '/:id',
-  auth(USER_ROLE.superAdmin),
-  UserControllers.getSingleUser,
-);
-
+router.get('/:id', auth(USER_ROLE.superAdmin), UserControllers.getSingleUser);
 
 export const UserRoutes = router;

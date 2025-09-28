@@ -5,40 +5,38 @@ import { AuthControllers } from './auth.controller';
 import { USER_ROLE } from '../User/user.constant';
 import auth from '../../middlewares/auth';
 
-
 const router = express.Router();
-
 
 router.post(
   '/login',
   validateRequest(AuthValidation.loginValidationSchema),
-  AuthControllers.loginUser,
+  AuthControllers.loginUser
 );
 
 router.post(
   '/change-password',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   validateRequest(AuthValidation.changePasswordValidationSchema),
-  AuthControllers.changePassword,
+  AuthControllers.changePassword
 );
 
 router.post(
   '/refresh-token',
   validateRequest(AuthValidation.refreshTokenValidationSchema),
-  AuthControllers.refreshToken,
+  AuthControllers.refreshToken
 );
 
 router.post(
   '/forget-password',
   validateRequest(AuthValidation.forgetPasswordValidationSchema),
-  AuthControllers.forgetPassword,
+  AuthControllers.forgetPassword
 );
 
 router.post(
   '/reset-password',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   // validateRequest(AuthValidation.resetPasswordValidationSchema),
-  AuthControllers.resetPassword,
+  AuthControllers.resetPassword
 );
 
 export const AuthRoutes = router;
