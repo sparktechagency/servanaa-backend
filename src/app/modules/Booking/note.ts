@@ -405,7 +405,7 @@
 //   // if (result) {
 
 //   //   const notificationPayload = {
-//   //     clientId: result.clientId,
+//   //     customerId: result.customerId,
 //   //     title: 'booking_request',
 //   //     bookingId: result._id,
 //   //     message: 'A new booking request has been made',
@@ -515,7 +515,7 @@
 
 //   //   if (notificationType) {
 //   //     await Notification.create({
-//   //       clientId: booking.clientId,   // or booking.userId, depends on your schema
+//   //       customerId: booking.customerId,   // or booking.userId, depends on your schema
 //   //       title: notificationType,
 //   //       bookingId: booking._id,
 //   //       message: notificationMessage,
@@ -533,7 +533,7 @@
 //   return updatedData;
 // };
 // const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
-// const booking = await Booking.findOne({clientId:id, paymentStatus:"pending"});
+// const booking = await Booking.findOne({customerId:id, paymentStatus:"pending"});
 
 //   if (!booking) throw new Error("Booking not found");
 //   if (booking.isDeleted) throw new Error("Cannot update a deleted Booking");

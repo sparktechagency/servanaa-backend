@@ -28,6 +28,16 @@ const bookingSchema = new Schema<TBooking>(
       },
       required: [true, 'Booking type is required']
     },
+    status: {
+      type: String,
+      enum: ['pending', 'ongoing', 'completed', 'rejected'],
+      default: 'pending',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed', 'refunded'],
+      default: 'pending',
+    },
 
     // Add missing required fields
     questions: [
@@ -56,7 +66,7 @@ const bookingSchema = new Schema<TBooking>(
         price: {
           type: Number,
           required: [true, 'Material price is required'],
-          min: [0, 'Material price cannot be negative']
+          min: [  0, 'Material price cannot be negative']
         }
       }
     ],
@@ -92,7 +102,6 @@ const bookingSchema = new Schema<TBooking>(
       }
     ],
 
-    // Pricing fields - Update to match interface
     price: {
       type: Number,
       required: [true, 'Price is required'],
@@ -104,111 +113,14 @@ const bookingSchema = new Schema<TBooking>(
       min: [0, 'Hourly rate cannot be negative']
     },
 
-    // Add totalAmount as required field
     totalAmount: {
       type: Number,
       required: [false, 'Total amount is required'],
       min: [0, 'Total amount cannot be negative']
     },
-    platformFeeAmount: {
-      type: Number,
-      required: [false, 'Platform fee amount is required'],
-      min: [0, 'Platform fee cannot be negative']
-    },
-    contractorEarnings: {
-      type: Number,
-      required: [false, 'Contractor earnings is required'],
-      min: [0, 'Contractor earnings cannot be negative']
-    },
-
-    // Optional pricing fields
-    refundAmount: {
-      type: Number,
-      min: [0, 'Refund amount cannot be negative']
-    },
-
-    // Booking status
-    status: {
-      type: String,
-      enum: {
-        values: [
-          'pending_payment',
-          'payment_failed',
-          'confirmed',
-          'contractor_accepted',
-          'in_progress',
-          'work_completed',
-          'payment_released',
-          'completed',
-          'cancelled',
-          'refunded',
-          'disputed',
-          'accepted',
-          'rejected',
-          'pending'
-        ],
-        message: '{VALUE} is not a valid status'
-      },
-      default: 'pending'
-    },
-
-    // Payment status
-    paymentStatus: {
-      type: String,
-      enum: {
-        values: [
-          'pending',
-          'paid',
-          'failed',
-          'refunded',
-          'transferred_to_contractor',
-          'disputed'
-        ],
-        message: '{VALUE} is not a valid payment status'
-      },
-      default: 'pending'
-    },
-
-    // Stripe payment fields
-    stripePaymentIntentId: String,
-    stripeChargeId: String,
-    stripeRefundId: String,
-    stripeTransferId: String,
-
-    // Session tracking
-    sessionStartedAt: Date,
-    sessionCompletedAt: Date,
-    sessionStartedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    sessionCompletedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User'
-    },
-
-    // Payment tracking
-    paymentReceivedAt: Date,
-    paymentTransferredAt: Date,
-
-    // Metadata
-    paymentMetadata: {
-      customerStripeId: String,
-      contractorStripeAccountId: String,
-      refundReason: String
-    },
-
-    // Weekly booking specific
-    periodInDays: {
-      type: Number,
-      min: [1, 'Period must be at least 1 day']
-    },
 
     // Files
     files: [Schema.Types.Mixed],
-    clientId: String,
-
-    // Soft delete
     isDeleted: {
       type: Boolean,
       default: false

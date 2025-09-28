@@ -37,7 +37,7 @@ const getAllReviewsFromDB = async (query: Record<string, unknown>) => {
   const ReviewQuery = new QueryBuilder(
     Review.find({
       $or: [
-        { clientId: query.clientId },
+        { customerId: query.customerId },
         { providerId: query.providerId }
       ],
       isDeleted: false
