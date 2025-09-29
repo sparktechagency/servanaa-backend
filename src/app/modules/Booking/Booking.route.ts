@@ -48,7 +48,7 @@ router.patch(
     }
     next();
   },
-  validateRequest(updateBookingValidationSchema),
+  // validateRequest(updateBookingValidationSchema),
   BookingControllers.updateBooking
 );
 
