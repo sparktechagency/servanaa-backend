@@ -70,6 +70,7 @@ const createSingleStripePaymentIntoDB = async (
   //     description: 'Competition Entry Fee',
   // });
 }
+
 const createStripeCheckoutSessionIntoDB = async (
   user: any,
   paymentData: any,
@@ -167,7 +168,7 @@ const confirmStripePaymentIntoDB = async (paymentIntentId: string) => {
 };
 
 const checkAccountStatusIntoDB = async (id: any) => {
-  const actor = await User.findById(id).populate('userId');
+  const actor = await User.findById(id).populate('contractor');
   const stripeAccountId = actor?.stripeAccountId
   // const stripeAccountId = actor?.stripeAccountId
   // Check if bank information is now complete
@@ -248,8 +249,8 @@ const checkAccountStatusIntoDB = async (id: any) => {
 
 };
 
-const checkBankStatusIntoDB = async (id: any) => {
-  const userData = await User.findById(id).populate('userId');
+const checkBankStatusAndTransferIntoDB = async (id: any) => {
+  const userData = await User.findById(id).populate('contractor');
   const stripeAccountId = userData?.stripeAccountId
   // Check if bank information is now complete
 
@@ -257,37 +258,63 @@ const checkBankStatusIntoDB = async (id: any) => {
   // const account = await stripe.accounts.retrieve(actor?.stripeAccountId as string);
 
   if (!account?.requirements?.currently_due?.includes("external_account")) {
-
-    
     // Bank info is complete, trigger transfer process
-    // const transactions = await Transaction.findOne({ actorId:actor?._id });
-    // const transactions = await Transaction.findOne({ actorId: actor?._id, paymentStatus: 'pending' });
+    // const transactionData = await Transaction.findOne({ userId:userData?._id });
+    const transactionData = await Transaction.findOne({ userId: userData?._id, paymentStatus: 'pending' });
     // const competetionResult = await CompetitionResult.findOne({ _id: transactions?.competitionId });
-    // if (transactions?.adminPermission == 'approved') {
 
-    //   const result = await withdrawalProcessPaymentIntoDB(transactions, stripeAccountId as string);
-    //   if (result) {
-    //     transactions.paymentStatus = 'completed';
-    //     await transactions.save();
-
-
-    //     if (competetionResult) {
-    //       competetionResult.withdrawalStatus = 'received';
-    //       await competetionResult.save();
-    //     }
-    //   }
-    //   return result;
-
-
-
-    // } else {
-    //   return { message: "Admin permission is pending" };
-    // }
+      const result = await withdrawalProcessPaymentIntoDB(transactionData?.amount, stripeAccountId as string);
+      if (result && transactionData) {
+        transactionData.paymentStatus = 'paid';
+        await transactionData.save();
+      }
+      return result;
   } else {
-    return { message: "Bank information still incomplete" };
-  }
+        let accountLink = null;
 
-};
+    // Create an account link for Stripe onboarding if the actor has a Stripe account ID
+    if (userData && userData?.stripeAccountId) {
+      accountLink = await stripe.accountLinks.create({
+        account: userData.stripeAccountId,
+        refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+          return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`,
+        type: 'account_onboarding',
+      });
+    } else {
+
+      const account = await stripe.accounts.create({
+        type: 'express',
+        email: userData?.email,
+      });
+
+      // Assign the Stripe account ID to the actor and save it
+      if (userData && account.id) {
+        userData.stripeAccountId = account.id;
+        await userData.save(); // Ensure save is part of the transaction
+      }
+      accountLink = await stripe.accountLinks.create({
+        account: userData?.stripeAccountId as any,
+       refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+          return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`,
+        type: 'account_onboarding',
+      });
+      // let accountLink = null;
+
+      // // Create an account link for Stripe onboarding if the actor has a Stripe account ID
+      // if (actor && actor.stripeAccountId) {
+
+      // }
+
+      // Commit transaction if everything went well
+      // return { url: accountLink?.url };
+
+
+    }
+    return { url: accountLink?.url };
+    // return { message: "Bank information still incomplete" };
+  }
+}
+
 
 
 const withdrawalProcessPaymentIntoDB = async (amount: any, stripeAccountId: string) => {
@@ -461,7 +488,7 @@ export const PaymentServices = {
   createSingleStripePaymentIntoDB,
   confirmStripePaymentIntoDB,
   checkAccountStatusIntoDB,
-  checkBankStatusIntoDB,
+  checkBankStatusAndTransferIntoDB,
   createStripeCheckoutSessionIntoDB,
   verifyStripeSessionIntoDB,
   singleWithdrawalProcessIntoDB

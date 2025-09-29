@@ -20,6 +20,7 @@ router.get(
   // auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   PaymentControllers.verifyStripeSession,
 );
+
 router.post(
   '/check-payment-complete',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
@@ -28,7 +29,7 @@ router.post(
 router.post('/confirm-payment', PaymentControllers.confirmStripePayment);
 router.post('/webhook', PaymentControllers.webhook);
 router.get('/check-account-status', PaymentControllers.checkAccountStatus);
-router.get('/check-bank-status', PaymentControllers.checkBankStatus);
+router.get('/check-bank-and-transfer', PaymentControllers.checkBankStatusAndTransfer);
 
 router.post(
   '/withdrawal-process',

@@ -106,11 +106,11 @@ const checkAccountStatus = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const checkBankStatus = catchAsync(async (req, res) => {
+const checkBankStatusAndTransfer = catchAsync(async (req, res) => {
   const { actorId } = req.query;
 
   const result =
-    await PaymentServices.checkBankStatusIntoDB(actorId);
+    await PaymentServices.checkBankStatusAndTransferIntoDB(actorId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -153,7 +153,7 @@ export const PaymentControllers = {
   createStripePayment,
   confirmStripePayment,
   checkAccountStatus,
-  checkBankStatus,
+  checkBankStatusAndTransfer,
   createStripeCheckoutSession,
   verifyStripeSession,
   singleWithdrawalProcess
