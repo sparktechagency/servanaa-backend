@@ -5,7 +5,7 @@ import { BookingServices } from './Booking.service';
 
 const createBooking = catchAsync(async (req, res) => {
   const booking = req.body;
-  console.log('Booking: ', booking);
+  // console.log('Booking: ', booking);
   const result = await BookingServices.createBookingIntoDB(booking, req.user);
 
   sendResponse(res, {
@@ -118,60 +118,60 @@ const deleteBooking = catchAsync(async (req, res) => {
 
 // =====================accept booking ==================
 
-const acceptBooking = catchAsync(async (req, res) => {
-  const { id } = req.params;
+// const acceptBooking = catchAsync(async (req, res) => {
+//   const { id } = req.params;
 
-  console.log('req.user', id);
-  const result = await BookingServices.acceptBookingIntoDB(id, req.user);
+//   console.log('req.user', id);
+//   const result = await BookingServices.acceptBookingIntoDB(id, req.user);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Booking accepted successfully',
-    data: result
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Booking accepted successfully',
+//     data: result
+//   });
+// });
 
-const rejectBooking = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { reason } = req.body;
-  const result = await BookingServices.rejectBookingIntoDB(
-    id,
-    reason,
-    req.user
-  );
+// const rejectBooking = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+//   const { reason } = req.body;
+//   const result = await BookingServices.rejectBookingIntoDB(
+//     id,
+//     reason,
+//     req.user
+//   );
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Booking rejected successfully',
-    data: result
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Booking rejected successfully',
+//     data: result
+//   });
+// });
 
-const markWorkCompleted = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await BookingServices.markWorkCompletedIntoDB(id, req.user);
+// const markWorkCompleted = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+//   const result = await BookingServices.markWorkCompletedIntoDB(id, req.user);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Your booking request has been accepted.',
-    data: result
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Your booking request has been accepted.',
+//     data: result
+//   });
+// });
 
-const transferPayment = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await BookingServices.transferPaymentIntoDB(id, req.user);
+// const transferPayment = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+//   const result = await BookingServices.transferPaymentIntoDB(id, req.user);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Payment transferred successfully',
-    data: result
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Payment transferred successfully',
+//     data: result
+//   });
+// });
 
 export const BookingControllers = {
   createBooking,
@@ -181,8 +181,8 @@ export const BookingControllers = {
   deleteBooking,
   updatePaymentStatus,
   getAllBookingsByUser,
-  acceptBooking,
-  rejectBooking,
-  markWorkCompleted,
-  transferPayment
+  // acceptBooking,
+  // rejectBooking,
+  // markWorkCompleted,
+  // transferPayment
 };

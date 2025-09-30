@@ -12,7 +12,7 @@ router.post(
 );
 router.get(
   '/create-checkout-session',
-  // auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   PaymentControllers.createStripeCheckoutSession,
 );
 router.get(
