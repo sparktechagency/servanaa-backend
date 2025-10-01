@@ -667,16 +667,16 @@ import { NOTIFICATION_TYPES } from '../Notification/Notification.constant';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
 
-const createBookingIntoDB = async (payload: TBooking, user:any) => {
+const createBookingIntoDB = async (payload: TBooking, user: any) => {
 
   const { bookingType, contractorId, day: days } = payload;
 
 
   const usr = await User.findOne({ email: user.userEmail });
-    if (!usr) {
-      throw new Error('User not found or user ID is missing');
-    }
-    payload.customerId = usr._id;
+  if (!usr) {
+    throw new Error('User not found or user ID is missing');
+  }
+  payload.customerId = usr._id;
 
   // Step 1: Get booking details (end time, price, rateHourly, etc.)
 
@@ -704,10 +704,76 @@ const createBookingIntoDB = async (payload: TBooking, user:any) => {
 
     updatedPayload.bookingDate = requestedDate;
     updatedPayload.day = dayName;
-    const booking = await createOneTimeBooking(updatedPayload); // Create one-time booking
-    return booking;
-  } else if (bookingType === 'weekly') {
-    const booking = await createRecurringBookingIntoDB(updatedPayload); // Create recurring bookings
+
+    console.log('Final payload before creating booking:', {
+      bookingDate: updatedPayload.bookingDate,
+      day: updatedPayload.day,
+      startTime: updatedPayload.startTime,
+      endTime: updatedPayload.endTime,
+      price: updatedPayload.price
+    });
+
+    // Create the booking
+    let booking: any;
+    try {
+      booking = await createOneTimeBooking(updatedPayload);
+      console.log('Booking created successfully:', booking._id);
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      throw error;
+    }
+
+    if (!booking) {
+      throw new Error('Failed to create booking');
+    }
+
+    const customerData = await Customer.findById(booking.customerId);
+    if (!customerData) throw new Error('No customer found');
+    customerData.balance = (customerData.balance || 0) + (booking.price || 0);
+    await customerData.save();
+
+    // Create notifications
+    const notifications = [];
+
+    // Notification for contractor
+    notifications.push({
+      userId: booking.contractorId.toString(),
+      type: NOTIFICATION_TYPES.BOOKING_REQUEST,
+      title: 'New Booking Request',
+      message: `New ${bookingType} booking request received for ${dayName}`,
+      bookingId: booking._id.toString(),
+      isRead: []
+    });
+
+    // Notifications for admins
+    try {
+      const admins = await User.find({ role: 'superAdmin' });
+      for (const admin of admins) {
+        notifications.push({
+          userId: admin._id.toString(),
+          type: NOTIFICATION_TYPES.BOOKING_REQUEST,
+          title: 'New Booking Request',
+          message: `New booking request from customer requires attention`,
+          bookingId: booking._id.toString(),
+          isRead: []
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching admins for notifications:', error);
+      // Don't throw error here, just log it as notifications are not critical
+    }
+
+    // Create all notifications
+    for (const notification of notifications) {
+      try {
+        await NotificationServices.createNotificationIntoDB(notification);
+      } catch (error) {
+        console.error('Error creating notification:', error);
+        // Continue with other notifications even if one fails
+      }
+    }
+
+    console.log('OneTime booking process completed successfully');
     return booking;
   }
 };
@@ -765,7 +831,20 @@ const checkAvailabilityIntoDB = async (
 };
 
 const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
-  const BookingQuery = new QueryBuilder(Booking.find(), query)
+  console.log('getAllBookingsFromDB query:', query);
+
+  const BookingQuery = new QueryBuilder(
+    Booking.find()
+      .populate({
+        path: 'contractorId', // Populate contractorId
+        populate: {
+          path: 'contractor', // Populate contractor field inside contractorId
+          select: 'ratings rateHourly' // Specify the fields you want from contractor
+        }
+      })
+      .populate('subCategoryId', 'name'),
+    query
+  )
     .search(BOOKING_SEARCHABLE_FIELDS)
     .filter()
     .sort()
@@ -827,29 +906,23 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     new: true,
     runValidators: true
   });
-  console.log('updatedData', updatedData);
-
   if (!updatedData) {
     throw new Error('Booking cannot update');
   }
-
   if (updatedData?.status === 'completed') {
     console.log('completed');
+    // Notify contractor of payment transfer
 
     const contractorData = await Contractor.findById(updatedData.contractorId);
-
-    const userData = await User.findById(updatedData.customerId).populate('customer');
-    const customerData = await Customer.findById(userData?.customer);
-    console.log('customerData', customerData);
+    const customerData = await Customer.findById(updatedData.customerId);
     if (!customerData) throw new Error('No customer found');
     if (!contractorData) throw new Error('No contractor found');
 
-    customerData.balance =
-      (customerData?.balance ?? 0) - (updatedData.price || 0);
-      await customerData.save();
-    contractorData.balance =
-      (contractorData.balance || 0) + (updatedData.price || 0);
+    contractorData.balance = (contractorData.balance || 0) + (updatedData.price || 0);
+    customerData.balance = (customerData?.balance ?? 0) - (updatedData.price || 0);
     await contractorData.save();
+    await customerData.save();
+
 
     await NotificationServices.createNotificationIntoDB({
       userId: updatedData.customerId,
@@ -862,6 +935,15 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   }
 
   if (updatedData?.status === 'ongoing') {
+    // console.log('completed');
+    // Notify contractor of payment transfer
+
+    // const contractorData = await Contractor.findById(updatedData.contractorId);
+    // if(!contractorData) throw new Error('No contractor found');
+    // contractorData.balance = (contractorData.balance || 0) + (updatedData.price || 0);
+    // await contractorData.save();
+
+
     await NotificationServices.createNotificationIntoDB({
       userId: updatedData.customerId,
       type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,

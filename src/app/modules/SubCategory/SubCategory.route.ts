@@ -26,6 +26,7 @@ router.post(
   SubCategoryControllers.createSubCategory
 );
 
+router.get('/by-category/:categoryId', SubCategoryControllers.getAllSubCategorysByCategoryId);
 router.get('/:id', SubCategoryControllers.getSingleSubCategory);
 
 router.patch(
@@ -48,5 +49,6 @@ router.patch(
 router.delete('/:id', SubCategoryControllers.deleteSubCategory);
 
 router.get('/', SubCategoryControllers.getAllSubCategorys);
+
 
 export const SubCategoryRoutes = router;

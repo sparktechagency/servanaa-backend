@@ -15,10 +15,14 @@ import { User } from '../modules/User/user.model';
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization;
+    let token = req.headers.authorization;
 
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
+    }
+
+    if (token.startsWith("Bearer ")) {
+      token = token.split(" ")[1];
     }
 
     const decoded = jwt.verify(
@@ -28,13 +32,17 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
     const { role, userEmail, iat } = decoded;
 
-        // console.log(decoded, 'decoded');
+    console.log(role, 'role');
+    console.log(userEmail, 'userEmail');
+    console.log(iat, 'iat');
 
-  //  console.log('userEmail', userEmail)
+    // console.log(decoded, 'decoded');
+
+    //  console.log('userEmail', userEmail)
     // checking if the user is exist
     const user = await User.isUserExistsByCustomEmail(userEmail);
 
-  //  console.log('user', user)
+    //  console.log('user', user)
 
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');

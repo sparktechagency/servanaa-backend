@@ -256,7 +256,7 @@ const getAllAvailableContractorsFromDB = async (
 
 const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
   const ContractorQuery = new QueryBuilder(
-    Contractor.find().populate('userId'), // userId is a User reference
+    Contractor.find().populate('userId'),
     query
   )
     .search(CONTRACTOR_SEARCHABLE_FIELDS)
