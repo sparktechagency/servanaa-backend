@@ -100,8 +100,8 @@ const getAllNotificationsFromDB = async (
   query: Record<string, any>,
   user: any
 ) => {
-  const { userEmail } = user;
-  const usr = await User.findOne({ email: userEmail });
+  const { userId } = query;
+  const usr = await User.findById(userId);
   if (!usr) throw new Error('User not found');
 
   const filter: any = { isDeleted: false };
@@ -126,6 +126,7 @@ const getAllNotificationsFromDB = async (
 
   const result = notifications.map(n => n.toObject());
   const unreadCount = result.filter(
+    //@ts-ignore
     n => !n.isRead.includes(usr._id.toString())
   ).length;
 

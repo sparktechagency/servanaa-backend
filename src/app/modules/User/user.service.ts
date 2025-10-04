@@ -321,7 +321,7 @@ const updateUserIntoDB = async (
     if (payload.skillsCategory)
       roleDataToUpdate.skillsCategory = payload.skillsCategory;
     if (payload.ratings) roleDataToUpdate.ratings = payload.ratings;
-    if (payload.category) roleDataToUpdate.ratings = payload.category;
+    if (payload.category) roleDataToUpdate.category = payload.category;
     if (payload.subCategory) roleDataToUpdate.subCategory = payload.subCategory;
 
     const existingContractor = await Contractor.findOne({
