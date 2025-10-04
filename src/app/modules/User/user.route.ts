@@ -42,12 +42,7 @@ router.patch(
   // validateRequest(UserValidation.updateUserValidationSchema),
   UserControllers.updateUser
 );
-// router.post(
-//   '/add-mobile-number',
-//   auth(USER_ROLE.superAdmin,  USER_ROLE.client,  USER_ROLE.provider),
-//   validateRequest(UserValidation.checkUserDataValidationSchema),
-//     UserControllers.addMobileNumber,
-// );
+
 
 router.delete('/:id', auth(USER_ROLE.superAdmin), UserControllers.deleteUser);
 
@@ -57,17 +52,6 @@ router.get(
   UserControllers.getAllUsers
 );
 
-// router.get(
-//   '/get-providers',
-//   auth(USER_ROLE.superAdmin, USER_ROLE.client),
-//   UserControllers.getAllProviders,
-// );
-
-// router.get(
-//   '/clients',
-//   auth(USER_ROLE.superAdmin),
-//   UserControllers.getAllClients,
-// );
 
 router.get('/:id', auth(USER_ROLE.superAdmin), UserControllers.getSingleUser);
 

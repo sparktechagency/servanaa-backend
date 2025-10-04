@@ -18,5 +18,9 @@ router.patch(
 router.delete('/:id', ContractorControllers.deleteContractor);
 
 router.get('/', ContractorControllers.getAllContractors);
+// ===============
+router.post('/materials', ContractorControllers.createMaterials);
+router.patch('/materials', ContractorControllers.updateMaterials);
+router.delete('/materials/:id', ContractorControllers.deleteMaterials);
 
 export const ContractorRoutes = router;

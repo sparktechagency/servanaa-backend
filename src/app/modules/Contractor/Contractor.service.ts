@@ -256,7 +256,18 @@ const getAllAvailableContractorsFromDB = async (
 
 const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
   const ContractorQuery = new QueryBuilder(
-    Contractor.find().populate('userId'),
+    Contractor.find()
+      .select("-certificates -createdAt -updatedAt -hasActiveSubscription -subscriptionId -isDeleted")
+      .populate('userId')
+      .populate('myScheduleId')
+      .populate({
+        path: "category",
+        select: "name img"
+      })
+      .populate({
+        path: "subCategory",
+        select: "name img categoryId"
+      }),
     query
   )
     .search(CONTRACTOR_SEARCHABLE_FIELDS)
@@ -344,7 +355,21 @@ const deleteContractorFromDB = async (id: string) => {
   return deletedService;
 };
 
+// ==================================================
+
+const createMaterials = async (id: string, payload: any) => {
+};
+
+const updateMaterials = async (id: string, payload: any) => {
+};
+
+const deleteMaterials = async (id: string) => {
+};
+
 export const ContractorServices = {
+  createMaterials,
+  updateMaterials,
+  deleteMaterials,
   getAllContractorsFromDB,
   getSingleContractorFromDB,
   updateContractorIntoDB,

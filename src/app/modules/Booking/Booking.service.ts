@@ -875,7 +875,11 @@ const getAllBookingsByUserFromDB = async (
   }
 
   const BookingQuery = new QueryBuilder(
-    Booking.find(b).populate('customerId').populate('contractorId'),
+    Booking.find(b).populate('customerId').populate('contractorId').populate({
+      path: "subCategoryId",
+      select: "name img categoryId"
+    }),
+
     query
   )
     .search(BOOKING_SEARCHABLE_FIELDS)
