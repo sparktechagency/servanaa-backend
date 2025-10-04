@@ -17,7 +17,7 @@ router.post(
 
 router.get(
   '/all-bookings-by-user',
-  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin,  USER_ROLE.customer, USER_ROLE.contractor),
   BookingControllers.getAllBookingsByUser
 );
 

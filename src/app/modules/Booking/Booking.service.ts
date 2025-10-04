@@ -862,24 +862,45 @@ const getAllBookingsByUserFromDB = async (
   query: Record<string, unknown>,
   user: any
 ) => {
-  const usr = await User.findOne({ email: user.userEmail }).select('_id role');
-  // console.log('usr', usr)
-  const b: any = {};
 
-  if (user.role === 'customer') {
-    b.customerId = usr?._id;
-  }
+  // console.log('ahmad Musa');
+  console.log( 'ahmad Musa req iser', user);
+
+  const usr = await User.findOne({ email: user.userEmail });
+  // console.log('usr', usr)
+  // const b: any = {};
+
+
+    console.log( 'ahmad Musa', usr);
+
+  // if (user.role === 'customer') {
+  //   // b.customerId = usr?._id;
+   
+  //   const BookingQuery = new QueryBuilder(
+  //   Booking.find({customerId:usr?._id}).populate('customerId'),
+  //   query
+  // )
+  //   .search(BOOKING_SEARCHABLE_FIELDS)
+  //   .filter()
+  //   .sort()
+  //   .paginate()
+  //   .fields();
+  // const result = await BookingQuery.modelQuery;
+  // const meta = await BookingQuery.countTotal();
+  // return {
+  //   result,
+  //   meta
+  // };
+
+  // }
 
   if (user.role === 'contractor') {
-    b.contractorId = usr?._id;
-  }
+    // b.contractorId = usr?._id;
+      const conData = await Contractor.findOne({ userId: usr?._id });
+  console.log( 'ahmad Musa contractor', usr?._id);
 
-  const BookingQuery = new QueryBuilder(
-    Booking.find(b).populate('customerId').populate('contractorId').populate({
-      path: "subCategoryId",
-      select: "name img categoryId"
-    }),
-
+const BookingQuery = new QueryBuilder(
+    Booking.find({contractorId:conData?._id}),
     query
   )
     .search(BOOKING_SEARCHABLE_FIELDS)
@@ -893,6 +914,10 @@ const getAllBookingsByUserFromDB = async (
     result,
     meta
   };
+
+  }
+
+  
 };
 
 const getSingleBookingFromDB = async (id: string) => {
@@ -939,6 +964,10 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     if (!contractorData) throw new Error('No contractor found');
     if (!customerData) throw new Error('No customer found');
 
+    
+    customerData.balance =
+      (customerData?.balance ?? 0) - (updatedData.price || 0);
+      await customerData.save();
     contractorData.balance =
       (contractorData.balance || 0) + (updatedBooking.price || 0);
     customerData.balance =
