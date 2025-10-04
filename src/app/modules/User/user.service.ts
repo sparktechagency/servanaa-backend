@@ -55,7 +55,8 @@ export const createCustomerIntoDB = async (payload: any) => {
     const userResult = await User.create([payload], { session });
     const newUser = userResult[0];
     if (!newUser) throw new Error('Failed to create user');
-
+    customer.userId = newUser._id;
+    await customer.save({ session });
     // Commit transaction
     await session.commitTransaction();
 
