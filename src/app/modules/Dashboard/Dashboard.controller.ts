@@ -132,10 +132,10 @@ export const getAllSubscriptionPlansTable = catchAsync(async (req, res) => {
       plan.duration === 1
         ? 'Monthly'
         : plan.duration === 6
-        ? '06 Month'
-        : plan.duration === 12
-        ? 'Yearly'
-        : `${plan.duration} Month(s)`,
+          ? '06 Month'
+          : plan.duration === 12
+            ? 'Yearly'
+            : `${plan.duration} Month(s)`,
     contractorFeePerMonth: '$50', // If static, else fetch from plan field
     action: 'Edit' // This would be a frontend action based on plan._id
   }));
@@ -285,6 +285,7 @@ export const getSubCategoryTable = catchAsync(async (req, res) => {
   const data = subcategories.map((sub, idx) => ({
     serial: idx + 1,
     name: sub.name,
+    // @ts-ignore
     category: sub.categoryId?.name ?? '',
     image: sub.img,
     action: 'edit'
@@ -298,7 +299,9 @@ export const getSubCategoryTable = catchAsync(async (req, res) => {
 });
 
 export const getServiceTable = catchAsync(async (req, res) => {
+  // @ts-ignore
   const services = await Service.find({}).populate('subCategoryId', 'name');
+  // @ts-ignore
   const data = services.map((srv, idx) => ({
     serial: idx + 1,
     name: srv.name,
@@ -334,6 +337,7 @@ export const getAllAdminNotifications = catchAsync(async (req, res) => {
   // Map to UI fields
   const data = notifications.map(n => ({
     message: n.message,
+    // @ts-ignore
     timeAgo: timeAgo(n.createdAt)
   }));
 
@@ -353,7 +357,7 @@ export const getAllAdminNotifications = catchAsync(async (req, res) => {
   });
 });
 
-function timeAgo (date: Date) {
+function timeAgo(date: Date) {
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 

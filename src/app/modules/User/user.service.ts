@@ -173,6 +173,7 @@ export const createContractorIntoDB = async (payload: any) => {
     await session.endSession();
   }
 };
+
 const getMe = async (userEmail: string) => {
   // const result = await User.findOne({ email: userEmail });
   const user = await User.findOne({ email: userEmail }).select('-password');
@@ -243,85 +244,8 @@ const changeStatus = async (id: string, payload: { status: string }) => {
   return result;
 };
 
-// // Helper to merge arrays without duplicates
-// function mergeArrayField<T = any>(existing: T[] = [], incoming: T[] = []): T[] {
-//   return [...new Set([...existing, ...incoming])];
-// }
-
-// const updateUserIntoDB = async (id: string, payload?: any, file?: any,user?: any) => {
-//   // 1. Extract common user fields for User collection update
-//   const userDataToUpdate = extractFields(payload || {}, userFields);
-
-//   // 2. If file uploaded (image), add img field for user
-//   if (file && file.location) {
-//     userDataToUpdate.img = file.location;
-//   }
-
-//   // 3. Update User collection document and get updated user data
-//   const updatedUser = await User.findByIdAndUpdate(
-//     id,
-//     userDataToUpdate,
-//     { new: true, runValidators: true }
-//   ).select('-password'); // exclude password in result
-
-//   if (!updatedUser) {
-//     throw new Error('User not found');
-//   }
-
-//   // 4. Extract role-specific fields depending on user's role
-//   let roleDataToUpdate = null;
-//   let updatedRoleData = null;
-
-//   if (user?.role === 'customer') {
-//     roleDataToUpdate = extractFields(payload || {}, customerFields);
-//     updatedRoleData = await Customer.findOneAndUpdate(
-//       { userId: id },
-//       roleDataToUpdate,
-//       { new: true, runValidators: true }
-//     );
-//   } else if (user?.role === 'contractor') {
-//     roleDataToUpdate = extractFields(payload || {}, contractorFields);
-
-//     const existingContractor = await Contractor.findOne({ userId: id });
-//     if (!existingContractor) {
-//       throw new Error('Contractor not found');
-//     }
-
-//     // Merge/append array fields instead of replacing
-//     if (payload?.skills) {
-// if (payload?.skills) {
-//   const existingSkills = Array.isArray(existingContractor?.skills) ? existingContractor?.skills : [existingContractor?.skills];
-//   roleDataToUpdate.skills = mergeArrayField(existingSkills, payload?.skills);
-// }    }
-
-//     if (payload?.certificates) {
-//       roleDataToUpdate.certificates = mergeArrayField(existingContractor.certificates, payload.certificates);
-//     }
-
-//     if (payload?.mySchedule) {
-//       roleDataToUpdate.mySchedule = [
-//         ...(existingContractor.mySchedule || []),
-//         ...payload.mySchedule,
-//       ];
-//     }
-
-//     updatedRoleData = await Contractor.findOneAndUpdate(
-//       { userId: id },
-//       roleDataToUpdate,
-//       { new: true, runValidators: true }
-//     );
-//   }
-
-//   // 5. Return combined updated data for frontend or caller
-//   return {
-//     user: updatedUser,
-//     roleData: updatedRoleData,
-//   };
-// };
-///////////////////////
-
 // Helper function to pick only the fields you want to update
-function extractFields (payload: Record<string, any>, allowedFields: string[]) {
+function extractFields(payload: Record<string, any>, allowedFields: string[]) {
   const extracted: Record<string, any> = {};
   for (const key of allowedFields) {
     if (payload[key] !== undefined) {
@@ -332,11 +256,11 @@ function extractFields (payload: Record<string, any>, allowedFields: string[]) {
   return extracted;
 }
 
-function mergeArrayField<T = any> (existing: T[] = [], incoming: T[] = []): T[] {
+function mergeArrayField<T = any>(existing: T[] = [], incoming: T[] = []): T[] {
   return [...new Set([...existing, ...incoming])];
 }
 
-function removeArrayItems<T> (
+function removeArrayItems<T>(
   existing: T[] = [],
   toRemove: T[] = [],
   key?: keyof T
@@ -363,6 +287,7 @@ const updateUserIntoDB = async (
       'Subscription status cannot be updated directly. Please use subscription management endpoints.'
     );
   }
+
 
   const userDataToUpdate = extractFields(payload || {}, userFields);
 
@@ -396,6 +321,8 @@ const updateUserIntoDB = async (
     if (payload.skillsCategory)
       roleDataToUpdate.skillsCategory = payload.skillsCategory;
     if (payload.ratings) roleDataToUpdate.ratings = payload.ratings;
+    if (payload.category) roleDataToUpdate.category = payload.category;
+    if (payload.subCategory) roleDataToUpdate.subCategory = payload.subCategory;
 
     const existingContractor = await Contractor.findOne({
       _id: updatedUser.contractor

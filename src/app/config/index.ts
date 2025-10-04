@@ -42,7 +42,7 @@ export default {
   minimum_withdrawal_amount:
     Number(process.env.MINIMUM_WITHDRAWAL_AMOUNT) || 25,
   stripe_publishable_key: process.env.STRIPE_PUBLISHABLE_KEY
-  
+
 };
 
 

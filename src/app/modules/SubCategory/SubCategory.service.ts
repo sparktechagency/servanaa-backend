@@ -94,10 +94,28 @@ const deleteSubCategoryFromDB = async (id: string) => {
   return deletedService;
 };
 
+const getAllSubCategorysByCategoryIdFromDB = async (categoryId: string, query: Record<string, unknown>) => {
+  const SubCategoryQuery = new QueryBuilder(
+    SubCategory.find().populate('categoryId', 'name'),
+    query
+  )
+    .search(SUBCATEGORY_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate()
+  const result = await SubCategory.find({ categoryId, isDeleted: false });
+  // const meta = await SubCategory.countDocuments({ categoryId, isDeleted: false });
+
+  return result
+  // meta
+
+}
+
 export const SubCategoryServices = {
   createSubCategoryIntoDB,
   getAllSubCategorysFromDB,
   getSingleSubCategoryFromDB,
   updateSubCategoryIntoDB,
-  deleteSubCategoryFromDB
+  deleteSubCategoryFromDB,
+  getAllSubCategorysByCategoryIdFromDB
 };

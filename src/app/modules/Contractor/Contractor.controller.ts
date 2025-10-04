@@ -72,7 +72,48 @@ const deleteContractor = catchAsync(async (req, res) => {
   });
 });
 
+const createMaterials = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+  const { material } = req.body;
+  const result = await ContractorServices.createMaterials(
+    userEmail,
+    material
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Material create successfully',
+    data: result
+  });
+});
+const updateMaterials = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+  const { material } = req.body;
+  const result = await ContractorServices.updateMaterials(userEmail, material);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Material is updated successfully',
+    data: result
+  });
+});
+const deleteMaterials = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await ContractorServices.deleteMaterials(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Material is deleted successfully',
+    data: result
+  });
+});
 export const ContractorControllers = {
+  createMaterials,
+  updateMaterials,
+  deleteMaterials,
   getSingleContractor,
   getAllContractors,
   updateContractor,

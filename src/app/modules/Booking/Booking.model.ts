@@ -66,7 +66,7 @@ const bookingSchema = new Schema<TBooking>(
         price: {
           type: Number,
           required: [true, 'Material price is required'],
-          min: [  0, 'Material price cannot be negative']
+          min: [0, 'Material price cannot be negative']
         }
       }
     ],

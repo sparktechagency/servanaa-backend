@@ -14,18 +14,18 @@ const createReviewIntoDB = async (
   payload: TReview,
   user: any
 ) => {
-  
-  const usr =  await User.findOne({email:user.userEmail}).select(' fullName img _id role');
+
+  const usr = await User.findOne({ email: user.userEmail }).select(' fullName img _id role');
   console.log('usr', usr)
 
   if (!usr) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  payload.customerId = usr?._id; 
+  payload.customerId = usr?._id;
 
   const result = await Review.create(payload);
-  
+
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Review');
   }
@@ -86,28 +86,33 @@ const getSingleReviewFromDB = async (id: string) => {
   return result;
 };
 const getAverageReviewFromDB = async (id: string) => {
-   const contractorId = id;
-   const user = await User.findById(contractorId).populate({
+  const contractorId = id;
+  const user = await User.findById(contractorId).populate({
     path: 'contractor',
     populate: {
       path: 'myScheduleId'
-    }});
+    }
+  });
 
-      // Fetch only latest 3 reviews
+  // Fetch only latest 3 reviews
   const threeReviews = await Review.find({ contractorId })
+    .populate({
+      path: 'customerId',
+      select: "img fullName"
+    })
     .sort({ createdAt: -1 })
     .limit(3);
 
-   const reviews = await Review.find({ contractorId });
-   const totalRatings = reviews.length;
-   const totalStars = reviews.reduce((sum, r) => sum + r.stars, 0);
-   const averageRating = totalRatings > 0 ? (totalStars / totalRatings).toFixed(1) : "No ratings yet";
+  const reviews = await Review.find({ contractorId });
+  const totalRatings = reviews.length;
+  const totalStars = reviews.reduce((sum, r) => sum + r.stars, 0);
+  const averageRating = totalRatings > 0 ? (totalStars / totalRatings).toFixed(1) : "No ratings yet";
 
 
-   const completedOrder = await Booking.find({ contractorId, status: 'completed' });
-   const totalCompletedOrder = completedOrder.length;
+  const completedOrder = await Booking.find({ contractorId, status: 'completed' });
+  const totalCompletedOrder = completedOrder.length;
 
-     return {user, averageRating, totalCompletedOrder, reviews: threeReviews};
+  return { user, averageRating, totalCompletedOrder, reviews: threeReviews };
 };
 
 const updateReviewIntoDB = async (id: string, payload: any) => {

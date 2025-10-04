@@ -63,6 +63,7 @@ app.use('/api/v1', router);
 
 app.get('/', (req: Request, res: Response) => {
   // res.sendFile(path.join(__dirname, 'index.html'));
+  console.log('Welcome To Property API!');
   res.send('Welcome To Property API!');
 });
 

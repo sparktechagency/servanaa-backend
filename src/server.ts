@@ -8,7 +8,7 @@ import { initializeChatSocket } from './app/modules/Chat/chat.socket';
 import seedSubscriptionPlans from './app/DB/subscription.seed';
 // let server: Server;
 const server = http.createServer(app);
-async function main () {
+async function main() {
   try {
     await mongoose.connect(config.database_url as string);
     const port = config.port || 3000;
@@ -31,7 +31,7 @@ async function main () {
     initializeChatSocket(io);
 
     server.listen(port, () => {
-      console.log(`🚀 Server is running on http://10.0.60.52:${port}`);
+      console.log(`🚀 Server is running on http://10.10.20.11:${port}`);
     });
   } catch (err) {
     console.error('❌ Server startup error:', err);
