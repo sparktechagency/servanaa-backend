@@ -58,10 +58,15 @@ const getAllBookings = catchAsync(async (req, res) => {
 // });
 
 const getAllBookingsByUser = catchAsync(async (req, res) => {
+
   const result = await BookingServices.getAllBookingsByUserFromDB(
     req.query,
     req.user
   );
+
+  if(!result){
+    throw new Error('No bookings found for this user');
+  }
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
