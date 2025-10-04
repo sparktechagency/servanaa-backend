@@ -676,7 +676,19 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   if (!usr) {
     throw new Error('User not found or user ID is missing');
   }
-  payload.customerId = usr._id;
+
+  const cus = await Customer.findOne({ userId: usr._id });
+  
+
+  console.log('cus', cus);
+
+  if(!cus){
+    throw new Error('No customer profile found for this user');
+  }
+
+  payload.customerId = cus?._id;
+
+  // userid
 
   // Step 1: Get booking details (end time, price, rateHourly, etc.)
 
@@ -966,7 +978,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
     
     customerData.balance =
-      (customerData?.balance ?? 0) - (updatedData.price || 0);
+      (customerData?.balance ?? 0) - (updatedBooking.price || 0);
       await customerData.save();
     contractorData.balance =
       (contractorData.balance || 0) + (updatedBooking.price || 0);
