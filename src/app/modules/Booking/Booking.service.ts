@@ -966,7 +966,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
     
     customerData.balance =
-      (customerData?.balance ?? 0) - (updatedData.price || 0);
+      (customerData?.balance ?? 0) - (updatedBooking.price || 0);
       await customerData.save();
     contractorData.balance =
       (contractorData.balance || 0) + (updatedBooking.price || 0);
