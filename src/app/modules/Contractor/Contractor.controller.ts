@@ -74,7 +74,7 @@ const deleteContractor = catchAsync(async (req, res) => {
 
 const createMaterials = catchAsync(async (req, res) => {
   const { userEmail } = req.user;
-  const { material } = req.body;
+  const material = req.body;
   const result = await ContractorServices.createMaterials(
     userEmail,
     material
@@ -89,7 +89,7 @@ const createMaterials = catchAsync(async (req, res) => {
 });
 const updateMaterials = catchAsync(async (req, res) => {
   const { userEmail } = req.user;
-  const { material } = req.body;
+  const material = req.body;
   const result = await ContractorServices.updateMaterials(userEmail, material);
 
   sendResponse(res, {

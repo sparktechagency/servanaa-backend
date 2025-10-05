@@ -25,7 +25,6 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     skillsCategory: { type: String, default: '' },
     ratings: { type: Number, required: true, default: 0 },
     skills: { type: Schema.Types.Mixed, required: true, default: [] },
-
     subscriptionStatus: {
       type: String,
       enum: ['active', 'inactive', 'cancelled', 'expired', 'failed'],

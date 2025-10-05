@@ -2,6 +2,8 @@ import express from 'express';
 import { ContractorControllers } from './Contractor.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { updateContractorValidationSchema } from './Contractor.validation';
+import { USER_ROLE } from '../User/user.constant';
+import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
@@ -19,8 +21,14 @@ router.delete('/:id', ContractorControllers.deleteContractor);
 
 router.get('/', ContractorControllers.getAllContractors);
 // ===============
-router.post('/materials', ContractorControllers.createMaterials);
-router.patch('/materials', ContractorControllers.updateMaterials);
-router.delete('/materials/:id', ContractorControllers.deleteMaterials);
+router.post('/materials',
+  auth(USER_ROLE.contractor),
+  ContractorControllers.createMaterials);
+router.put('/materials',
+  auth(USER_ROLE.contractor),
+  ContractorControllers.updateMaterials);
+router.delete('/materials/:id',
+  auth(USER_ROLE.contractor),
+  ContractorControllers.deleteMaterials);
 
 export const ContractorRoutes = router;
