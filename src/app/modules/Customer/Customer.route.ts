@@ -5,8 +5,16 @@ import {
   createCustomerValidationSchema,
   updateCustomerValidationSchema
 } from './Customer.validation';
+import { USER_ROLE } from '../User/user.constant';
+import auth from '../../middlewares/auth';
 
 const router = express.Router();
+
+router.get(
+  '/notifications',
+  auth(USER_ROLE.customer),
+  CustomerControllers.getMyNotifications
+);
 
 router.post(
   '/create-Customer',

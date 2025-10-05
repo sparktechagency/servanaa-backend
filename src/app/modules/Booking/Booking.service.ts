@@ -27,7 +27,6 @@
 
 // const createBookingIntoDB = async (payload: TBooking, usr: any) => {
 
-
 //   const user = await User.findOne({ email: usr.userEmail });
 //     if (!user) {
 //       throw new Error('User not found or user ID is missing');
@@ -435,8 +434,6 @@
 
 //   if (booking.isDeleted) throw new Error('Cannot update a deleted Booking');
 
-
-
 //   const updatedData = await Booking.findByIdAndUpdate({ _id: id }, payload, {
 //     new: true,
 //     runValidators: true
@@ -458,7 +455,6 @@
 //       await contractorData.save();
 //       await customerData.save();
 
-
 //       await NotificationServices.createNotificationIntoDB({
 //         userId: updatedData.customerId,
 //         type: NOTIFICATION_TYPES.WORK_COMPLETED,
@@ -478,7 +474,6 @@
 //       // contractorData.balance = (contractorData.balance || 0) + (updatedData.price || 0);
 //       // await contractorData.save();
 
-
 //       await NotificationServices.createNotificationIntoDB({
 //         userId: updatedData.customerId,
 //         type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,
@@ -488,7 +483,6 @@
 //         isRead: []
 //       });
 //   }
-
 
 //   return updatedData;
 // };
@@ -649,7 +643,7 @@ import httpStatus from 'http-status';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { BOOKING_SEARCHABLE_FIELDS } from './Booking.constant';
-import { DaySchedule, TBooking } from './Booking.interface';
+import { TBooking } from './Booking.interface';
 import { Booking } from './Booking.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import {
@@ -666,17 +660,23 @@ import { NotificationServices } from '../Notification/Notification.service';
 import { NOTIFICATION_TYPES } from '../Notification/Notification.constant';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
+import { object } from 'zod';
 
 const createBookingIntoDB = async (payload: TBooking, user: any) => {
-
   const { bookingType, contractorId, day: days } = payload;
 
+  const usr = await User.findOne({ email: user.userEmail }).populate(
+    'customer'
+  );
 
-  const usr = await User.findOne({ email: user.userEmail });
   if (!usr) {
     throw new Error('User not found or user ID is missing');
   }
-  payload.customerId = usr._id;
+
+  if (!usr.customer?._id) {
+    throw new Error('Customer profile not found');
+  }
+  payload.customerId = usr.customer._id;
 
   // Step 1: Get booking details (end time, price, rateHourly, etc.)
 
@@ -862,20 +862,18 @@ const getAllBookingsByUserFromDB = async (
   query: Record<string, unknown>,
   user: any
 ) => {
-
   // console.log('ahmad Musa');
-  console.log( 'ahmad Musa req iser', user);
+  console.log('ahmad Musa req iser', user);
 
   const usr = await User.findOne({ email: user.userEmail });
   // console.log('usr', usr)
   // const b: any = {};
 
-
-    console.log( 'ahmad Musa', usr);
+  console.log('ahmad Musa', usr);
 
   // if (user.role === 'customer') {
   //   // b.customerId = usr?._id;
-   
+
   //   const BookingQuery = new QueryBuilder(
   //   Booking.find({customerId:usr?._id}).populate('customerId'),
   //   query
@@ -896,28 +894,25 @@ const getAllBookingsByUserFromDB = async (
 
   if (user.role === 'contractor') {
     // b.contractorId = usr?._id;
-      const conData = await Contractor.findOne({ userId: usr?._id });
-  console.log( 'ahmad Musa contractor', usr?._id);
+    const conData = await Contractor.findOne({ userId: usr?._id });
+    console.log('ahmad Musa contractor', usr?._id);
 
-const BookingQuery = new QueryBuilder(
-    Booking.find({contractorId:conData?._id}),
-    query
-  )
-    .search(BOOKING_SEARCHABLE_FIELDS)
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
-  const result = await BookingQuery.modelQuery;
-  const meta = await BookingQuery.countTotal();
-  return {
-    result,
-    meta
-  };
-
+    const BookingQuery = new QueryBuilder(
+      Booking.find({ contractorId: conData?._id }),
+      query
+    )
+      .search(BOOKING_SEARCHABLE_FIELDS)
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+    const result = await BookingQuery.modelQuery;
+    const meta = await BookingQuery.countTotal();
+    return {
+      result,
+      meta
+    };
   }
-
-  
 };
 
 const getSingleBookingFromDB = async (id: string) => {
@@ -926,14 +921,16 @@ const getSingleBookingFromDB = async (id: string) => {
 };
 
 const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
+  console.log('Booking ID CHeck: ', id);
   const booking = await Booking.findById(id);
   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
   if (booking.isDeleted)
-    throw new AppError(httpStatus.BAD_REQUEST, 'Cannot update a deleted booking');
-  console.log('payload', id);
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Cannot update a deleted booking'
+    );
 
   const updateData: any = { ...payload };
-
 
   if (files && Array.isArray(files) && files.length > 0) {
     // Example: AWS S3 or local upload — assume files have `location` or `path`
@@ -943,7 +940,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
       mimetype: file.mimetype,
       size: file.size
     }));
-
 
     updateData.files = [...(booking.files || []), ...uploadedFiles];
   }
@@ -956,18 +952,29 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   if (!updatedBooking)
     throw new AppError(httpStatus.BAD_REQUEST, 'Booking could not be updated');
 
+  // Prepare notification details==== changes
+  const contractorId = updatedBooking.contractorId?.toString();
+  const customerId = updatedBooking.customerId?.toString();
+  const bookingId = updatedBooking._id.toString();
+  const adminUsers = await User.find({ role: 'superAdmin' });
+
+  // Determine notification details based on booking status or update
+  const notificationType = '';
+  const title = '';
+  const message = '';
 
   if (updatedBooking.status === 'completed') {
-    const contractorData = await Contractor.findById(updatedBooking.contractorId);
+    const contractorData = await Contractor.findById(
+      updatedBooking.contractorId
+    );
     const customerData = await Customer.findById(updatedBooking.customerId);
 
     if (!contractorData) throw new Error('No contractor found');
     if (!customerData) throw new Error('No customer found');
 
-    
     customerData.balance =
-      (customerData?.balance ?? 0) - (updatedData.price || 0);
-      await customerData.save();
+      (customerData?.balance ?? 0) - (updateData.price || 0);
+    await customerData.save();
     contractorData.balance =
       (contractorData.balance || 0) + (updatedBooking.price || 0);
     customerData.balance =
@@ -986,9 +993,40 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     });
   }
 
+  if (updatedBooking.status === 'rejected') {
+    await NotificationServices.createNotificationIntoDB({
+      userId: updatedBooking.customerId,
+      type: NOTIFICATION_TYPES.BOOKING_REJECTED,
+      title: 'Booking Cancelled',
+      message: 'The booking has been cancelled or rejected.',
+      bookingId: updatedBooking._id,
+      isRead: []
+    });
+  }
+
+  if (payload && Object.keys(payload).length > 0) {
+    await NotificationServices.createNotificationIntoDB({
+      userId: updatedBooking.customerId,
+      type: NOTIFICATION_TYPES.SESSION_COMPLETED,
+      title: 'Booking Updated',
+      message: 'Your booking has been updated.',
+      bookingId: updatedBooking._id,
+      isRead: []
+    });
+  }
+
   if (updatedBooking.status === 'ongoing') {
     await NotificationServices.createNotificationIntoDB({
       userId: updatedBooking.customerId,
+      type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,
+      title: 'Work Accepted',
+      message: 'Your work has started',
+      bookingId: updatedBooking._id,
+      isRead: []
+    });
+
+    await NotificationServices.createNotificationIntoDB({
+      userId: updatedBooking.contractorId,
       type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,
       title: 'Work Accepted',
       message: 'Your work has started',
@@ -1029,6 +1067,7 @@ const deleteBookingFromDB = async (id: string) => {
 
   return deletedService;
 };
+
 // =============================added by rakib==========================
 
 // Accept booking (Contractor only)
@@ -1184,7 +1223,7 @@ export const BookingServices = {
   deleteBookingFromDB,
   updatePaymentStatusIntoDB,
   checkAvailabilityIntoDB,
-  getAllBookingsByUserFromDB,
+  getAllBookingsByUserFromDB
   // acceptBookingIntoDB,
   // rejectBookingIntoDB,
   // markWorkCompletedIntoDB,

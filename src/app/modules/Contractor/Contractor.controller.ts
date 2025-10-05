@@ -75,10 +75,7 @@ const deleteContractor = catchAsync(async (req, res) => {
 const createMaterials = catchAsync(async (req, res) => {
   const { userEmail } = req.user;
   const { material } = req.body;
-  const result = await ContractorServices.createMaterials(
-    userEmail,
-    material
-  );
+  const result = await ContractorServices.createMaterials(userEmail, material);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -110,6 +107,20 @@ const deleteMaterials = catchAsync(async (req, res) => {
     data: result
   });
 });
+
+const getMyNotifications = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+  const result = await ContractorServices.getContractorNotificationsFromDB(
+    userEmail
+  );
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Notifications retrieved successfully',
+    data: result
+  });
+});
+
 export const ContractorControllers = {
   createMaterials,
   updateMaterials,
@@ -118,5 +129,6 @@ export const ContractorControllers = {
   getAllContractors,
   updateContractor,
   deleteContractor,
-  getAllAvailableContractors
+  getAllAvailableContractors,
+  getMyNotifications
 };

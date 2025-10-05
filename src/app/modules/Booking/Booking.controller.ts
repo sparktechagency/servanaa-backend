@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
@@ -58,13 +59,12 @@ const getAllBookings = catchAsync(async (req, res) => {
 // });
 
 const getAllBookingsByUser = catchAsync(async (req, res) => {
-
   const result = await BookingServices.getAllBookingsByUserFromDB(
     req.query,
     req.user
   );
 
-  if(!result){
+  if (!result) {
     throw new Error('No bookings found for this user');
   }
 
@@ -82,7 +82,6 @@ const updateBooking = catchAsync(async (req, res) => {
 
   const { id } = req.params;
   const booking = req.body;
-  console.log('test', booking);
 
   const result = await BookingServices.updateBookingIntoDB(
     id,
@@ -186,7 +185,7 @@ export const BookingControllers = {
   updateBooking,
   deleteBooking,
   updatePaymentStatus,
-  getAllBookingsByUser,
+  getAllBookingsByUser
   // acceptBooking,
   // rejectBooking,
   // markWorkCompleted,

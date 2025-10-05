@@ -755,18 +755,18 @@ export const checkAvailability = async (
     startTime,
     addOneHour(startTime)
   );
-    console.log('requestedTimeSlots:', requestedTimeSlots);
+  console.log('requestedTimeSlots:', requestedTimeSlots);
 
   const schedule = await MySchedule.findOne({ contractorId });
   if (!schedule) throw new Error('Contractor schedule not found');
-     console.log('schedule:', schedule);
+  console.log('schedule:', schedule);
   if (bookingType === 'oneTime') {
-          console.log('inside OneTime:');
+    console.log('inside OneTime:');
     const requestedDate = new Date(days as string); // ex: "2025-07-14"
     requestedDate.setUTCHours(0, 0, 0, 0); // normalize to 00:00 UTC
     const dayName = getDayName(days as string); // "Monday"
     const daySchedule = schedule.schedules.find(s => s.days === dayName);
-      console.log('daySchedule:', daySchedule);
+    console.log('daySchedule:', daySchedule);
     if (!daySchedule) {
       return {
         available: false,
@@ -777,7 +777,7 @@ export const checkAvailability = async (
     const unavailableSlots = requestedTimeSlots.filter(
       (slot: any) => !daySchedule.timeSlots.includes(slot)
     );
-      console.log('unavailableSlots:', unavailableSlots);
+    console.log('unavailableSlots:', unavailableSlots);
 
     if (unavailableSlots.length > 0) {
       return { available: false, message: 'Requested slots are unavailable.' };
@@ -790,17 +790,17 @@ export const checkAvailability = async (
       timeSlots: { $in: requestedTimeSlots }, // any overlap
       status: { $ne: 'cancelled' }
     });
-  console.log('Existing booking found:', existingBooking);
+    console.log('Existing booking found:', existingBooking);
     if (existingBooking) {
       return { available: false, message: 'Time slot is already booked.' };
     }
-      // console.log('available:', available);
-    const a =  { available: true }
+    // console.log('available:', available);
+    const a = { available: true };
     return a;
   }
 
   if (bookingType === 'weekly') {
-     console.log('inside: weekly');
+    console.log('inside: weekly');
 
     for (const day of days) {
       let daySchedule: any;
@@ -843,4 +843,3 @@ export const checkAvailability = async (
     return { available: true };
   }
 };
-

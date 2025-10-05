@@ -1,7 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { BookingControllers } from './Booking.controller';
-import validateRequest from '../../middlewares/validateRequest';
-import { updateBookingValidationSchema } from './Booking.validation';
 // import { bookingValidationSchema, updateBookingValidationSchema } from './Booking.validation';
 import auth from '../../middlewares/auth';
 import { USER_ROLE } from '../User/user.constant';
@@ -17,7 +15,7 @@ router.post(
 
 router.get(
   '/all-bookings-by-user',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.customer, USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   BookingControllers.getAllBookingsByUser
 );
 
@@ -59,8 +57,6 @@ router.get(
   //  auth(USER_ROLE.superAdmin , USER_ROLE.customer, USER_ROLE.contractor),
   BookingControllers.getAllBookings
 );
-
-//  =======================Added by Rakib==================
 
 // router.patch(
 //   '/accept/:id',

@@ -7,6 +7,8 @@ import mongoose from 'mongoose';
 // import { TCustomer } from './Customer.interface';
 import { Customer } from './Customer.model';
 import { TCustomer } from './Customer.interface';
+import { User } from '../User/user.model';
+import { Notification } from '../Notification/Notification.model';
 
 const createCustomerIntoDB = async (payload: TCustomer) => {
   const result = await Customer.create(payload);
@@ -82,10 +84,30 @@ const deleteCustomerFromDB = async (id: string) => {
   return deletedService;
 };
 
+const getCustomerNotificationsFromDB = async (userEmail: string) => {
+  const user = await User.findOne({ email: userEmail }).populate('customer');
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  if (!user?.customer) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
+  }
+
+  const notifications = await Notification.find({
+    userId: user.customer._id,
+    isDeleted: false
+  }).sort({ createdAt: -1 });
+
+  return notifications;
+};
+
 export const CustomerServices = {
   createCustomerIntoDB,
   getAllCustomersFromDB,
   getSingleCustomerFromDB,
   updateCustomerIntoDB,
-  deleteCustomerFromDB
+  deleteCustomerFromDB,
+  getCustomerNotificationsFromDB
 };

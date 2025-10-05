@@ -245,7 +245,7 @@ const changeStatus = async (id: string, payload: { status: string }) => {
 };
 
 // Helper function to pick only the fields you want to update
-function extractFields(payload: Record<string, any>, allowedFields: string[]) {
+function extractFields (payload: Record<string, any>, allowedFields: string[]) {
   const extracted: Record<string, any> = {};
   for (const key of allowedFields) {
     if (payload[key] !== undefined) {
@@ -256,11 +256,11 @@ function extractFields(payload: Record<string, any>, allowedFields: string[]) {
   return extracted;
 }
 
-function mergeArrayField<T = any>(existing: T[] = [], incoming: T[] = []): T[] {
+function mergeArrayField<T = any> (existing: T[] = [], incoming: T[] = []): T[] {
   return [...new Set([...existing, ...incoming])];
 }
 
-function removeArrayItems<T>(
+function removeArrayItems<T> (
   existing: T[] = [],
   toRemove: T[] = [],
   key?: keyof T
@@ -287,7 +287,6 @@ const updateUserIntoDB = async (
       'Subscription status cannot be updated directly. Please use subscription management endpoints.'
     );
   }
-
 
   const userDataToUpdate = extractFields(payload || {}, userFields);
 

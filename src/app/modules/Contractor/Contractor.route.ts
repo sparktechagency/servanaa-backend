@@ -2,8 +2,16 @@ import express from 'express';
 import { ContractorControllers } from './Contractor.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { updateContractorValidationSchema } from './Contractor.validation';
+import auth from '../../middlewares/auth';
+import { USER_ROLE } from '../User/user.constant';
 
 const router = express.Router();
+
+router.get(
+  '/notifications',
+  auth(USER_ROLE.contractor),
+  ContractorControllers.getMyNotifications
+);
 
 router.get('/available', ContractorControllers.getAllAvailableContractors);
 

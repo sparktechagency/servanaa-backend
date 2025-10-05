@@ -64,10 +64,25 @@ const deleteCustomer = catchAsync(async (req, res) => {
   });
 });
 
+const getMyNotifications = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+  const result = await CustomerServices.getCustomerNotificationsFromDB(
+    userEmail
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Notifications retrieved successfully',
+    data: result
+  });
+});
+
 export const CustomerControllers = {
   createCustomer,
   getSingleCustomer,
   getAllCustomers,
   updateCustomer,
-  deleteCustomer
+  deleteCustomer,
+  getMyNotifications
 };

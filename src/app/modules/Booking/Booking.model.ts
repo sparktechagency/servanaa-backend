@@ -31,12 +31,12 @@ const bookingSchema = new Schema<TBooking>(
     status: {
       type: String,
       enum: ['pending', 'ongoing', 'completed', 'rejected'],
-      default: 'pending',
+      default: 'pending'
     },
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed', 'refunded'],
-      default: 'pending',
+      default: 'pending'
     },
 
     // Add missing required fields

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
@@ -9,6 +11,8 @@ import { Contractor } from './Contractor.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import { Booking } from '../Booking/Booking.model';
 import { Review } from '../Review/Review.model';
+import { Notification } from '../Notification/Notification.model';
+import { User } from '../User/user.model';
 // import { ObjectId } from 'mongoose';
 
 // Helper function to generate time slots
@@ -257,16 +261,18 @@ const getAllAvailableContractorsFromDB = async (
 const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
   const ContractorQuery = new QueryBuilder(
     Contractor.find()
-      .select("-certificates -createdAt -updatedAt -hasActiveSubscription -subscriptionId -isDeleted")
+      .select(
+        '-certificates -createdAt -updatedAt -hasActiveSubscription -subscriptionId -isDeleted'
+      )
       .populate('userId')
       .populate('myScheduleId')
       .populate({
-        path: "category",
-        select: "name img"
+        path: 'category',
+        select: 'name img'
       })
       .populate({
-        path: "subCategory",
-        select: "name img categoryId"
+        path: 'subCategory',
+        select: 'name img categoryId'
       }),
     query
   )
@@ -357,13 +363,33 @@ const deleteContractorFromDB = async (id: string) => {
 
 // ==================================================
 
-const createMaterials = async (id: string, payload: any) => {
-};
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+const createMaterials = async (id: string, payload: any) => {};
 
-const updateMaterials = async (id: string, payload: any) => {
-};
+const updateMaterials = async (id: string, payload: any) => {};
 
-const deleteMaterials = async (id: string) => {
+const deleteMaterials = async (id: string) => {};
+
+/*
+ *getContractorNotifications
+ */
+const getContractorNotificationsFromDB = async (userEmail: string) => {
+  const user = await User.findOne({ email: userEmail }).populate('contractor');
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  if (!user?.contractor) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
+  }
+
+  const notifications = await Notification.find({
+    userId: user.contractor._id,
+    isDeleted: false
+  }).sort({ createdAt: -1 });
+
+  return notifications;
 };
 
 export const ContractorServices = {
@@ -374,5 +400,6 @@ export const ContractorServices = {
   getSingleContractorFromDB,
   updateContractorIntoDB,
   deleteContractorFromDB,
-  getAllAvailableContractorsFromDB
+  getAllAvailableContractorsFromDB,
+  getContractorNotificationsFromDB
 };
