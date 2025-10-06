@@ -9,17 +9,6 @@ export type TNotification = {
   isRead: Types.ObjectId[]; // Array of user IDs who have read this notification
   bookingId?: Types.ObjectId; // Reference to related booking
   amount?: number; // For payment-related notifications
-  metadata?: {
-    paymentIntentId?: string;
-    stripeChargeId?: string;
-    refundAmount?: number;
-    payoutId?: string;
-    contractorId?: string;
-    withdrawalId?: string;
-    disputeId?: string; // Add dispute ID
-    disputeReason?: string; // Add dispute reason
-    chargeId?: string; // Add charge ID for disputes
-  };
   isDeleted: boolean;
 };
 

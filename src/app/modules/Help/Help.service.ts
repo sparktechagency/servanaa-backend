@@ -27,6 +27,21 @@ const createHelpIntoDB = async (
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Help');
   }
 
+  usr.messageId = result._id;
+  // const us = await usr.save();
+
+  
+  const updatedUser = await User.findByIdAndUpdate(
+    { _id: usr?._id },
+    usr,
+    { new: true, runValidators: true },
+  );
+
+
+ if(!updatedUser){
+  throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update user with help message');
+ }
+
   return result;
 };
 

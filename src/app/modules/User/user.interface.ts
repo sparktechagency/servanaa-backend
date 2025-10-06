@@ -11,6 +11,7 @@ export type TUser = {
   password: string;
   customerId?: string;
   contactNo: string;
+  messageId?: Types.ObjectId;
   otpVerified: boolean;
   img?: string;
   role: 'customer' | 'superAdmin' | 'contractor';

@@ -18,14 +18,6 @@ const NotificationSchema = new Schema<TNotification, NotificationModel>(
     isRead: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Users who have read this notification
     bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' },
     amount: { type: Number },
-    metadata: {
-      paymentIntentId: { type: String },
-      stripeChargeId: { type: String },
-      refundAmount: { type: Number },
-      payoutId: { type: String },
-      contractorId: { type: String },
-      withdrawalId: { type: String }
-    },
     isDeleted: { type: Boolean, default: false }
   },
   { timestamps: true }

@@ -30,6 +30,7 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     passwordChangedAt: { type: Date, required: true, default: Date.now },
     contractor: { type: Schema.Types.ObjectId, ref: 'Contractor' },
+    messageId: { type: Schema.Types.ObjectId, ref: 'Help' },
     customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
     isDeleted: { type: Boolean, default: false }
   },
