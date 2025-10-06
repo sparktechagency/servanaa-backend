@@ -10,6 +10,7 @@ import {
   changeSubscriptionPlanSchema,
   revenueAnalyticsSchema
 } from './Subscription.validation';
+import { requireActiveSubscription } from '../../middlewares/requireActiveSubscription';
 
 const router = express.Router();
 
@@ -60,6 +61,7 @@ router.post(
 router.get(
   '/my-subscription',
   auth(USER_ROLE.contractor),
+  requireActiveSubscription,
   SubscriptionControllers.getMySubscription
 );
 

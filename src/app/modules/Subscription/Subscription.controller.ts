@@ -7,15 +7,12 @@ import { SubscriptionService } from './Subscription.service';
 import sendResponse from '../../utils/sendResponse';
 import Stripe from 'stripe';
 import config from '../../config';
-import { Booking } from '../Booking/Booking.model';
 import { User } from '../User/user.model';
 
 const stripe = new Stripe(config.stripe_secret_key!);
 
 // create subscription
-const initializeDefaultPlans = catchAsync(async (req, res) => {
-  console.log('🚀 Starting subscription plans initialization...');
-
+const initializeDefaultPlans = catchAsync(async (req: any, res: any) => {
   try {
     const result = await SubscriptionService.initializeDefaultPlans();
 
@@ -36,10 +33,8 @@ const initializeDefaultPlans = catchAsync(async (req, res) => {
     });
   }
 });
-//----------------
 
-// Subscription Plan Controllers
-const createSubscriptionPlan = catchAsync(async (req, res) => {
+const createSubscriptionPlan = catchAsync(async (req: any, res: any) => {
   const result = await SubscriptionService.createSubscriptionPlan(req.body);
 
   sendResponse(res, {
@@ -50,7 +45,7 @@ const createSubscriptionPlan = catchAsync(async (req, res) => {
   });
 });
 
-const changeSubscriptionPlan = catchAsync(async (req, res) => {
+const changeSubscriptionPlan = catchAsync(async (req: any, res: any) => {
   const { userEmail } = req.user;
   const { planType, prorate = true } = req.body;
 
@@ -78,7 +73,7 @@ const changeSubscriptionPlan = catchAsync(async (req, res) => {
   });
 });
 
-const getAllSubscriptionPlans = catchAsync(async (req, res) => {
+const getAllSubscriptionPlans = catchAsync(async (req: any, res: any) => {
   const result = await SubscriptionService.getAllSubscriptionPlans(req.query);
 
   sendResponse(res, {
@@ -90,7 +85,7 @@ const getAllSubscriptionPlans = catchAsync(async (req, res) => {
   });
 });
 
-const getSingleSubscriptionPlan = catchAsync(async (req, res) => {
+const getSingleSubscriptionPlan = catchAsync(async (req: any, res: any) => {
   const { id } = req.params;
   const result = await SubscriptionService.getSingleSubscriptionPlan(id);
 
@@ -102,7 +97,7 @@ const getSingleSubscriptionPlan = catchAsync(async (req, res) => {
   });
 });
 
-const updateSubscriptionPlan = catchAsync(async (req, res) => {
+const updateSubscriptionPlan = catchAsync(async (req: any, res: any) => {
   const { id } = req.params;
   const result = await SubscriptionService.updateSubscriptionPlan(id, req.body);
 
@@ -114,7 +109,7 @@ const updateSubscriptionPlan = catchAsync(async (req, res) => {
   });
 });
 
-const deleteSubscriptionPlan = catchAsync(async (req, res) => {
+const deleteSubscriptionPlan = catchAsync(async (req: any, res: any) => {
   const { id } = req.params;
   const result = await SubscriptionService.deleteSubscriptionPlan(id);
 
@@ -127,7 +122,7 @@ const deleteSubscriptionPlan = catchAsync(async (req, res) => {
 });
 
 // Contractor Subscription Controllers
-const createCheckoutSession = catchAsync(async (req, res) => {
+const createCheckoutSession = catchAsync(async (req: any, res: any) => {
   const { userEmail } = req.user;
   const { planType } = req.body;
 
@@ -158,7 +153,7 @@ const createCheckoutSession = catchAsync(async (req, res) => {
   });
 });
 
-const getMySubscription = catchAsync(async (req, res) => {
+const getMySubscription = catchAsync(async (req: any, res: any) => {
   const { userEmail } = req.user;
 
   const userDoc = await User.findOne({ email: userEmail }).populate(
@@ -179,6 +174,13 @@ const getMySubscription = catchAsync(async (req, res) => {
     contractorId
   );
 
+  if (!result) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'No subscription found for this contractor'
+    );
+  }
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -187,7 +189,7 @@ const getMySubscription = catchAsync(async (req, res) => {
   });
 });
 
-const cancelSubscription = catchAsync(async (req, res) => {
+const cancelSubscription = catchAsync(async (req: any, res: any) => {
   const { userEmail } = req.user;
 
   // Use same approach as getMySubscription for consistency
@@ -216,7 +218,7 @@ const cancelSubscription = catchAsync(async (req, res) => {
 });
 
 // Admin Controllers
-const getAllSubscriptions = catchAsync(async (req, res) => {
+const getAllSubscriptions = catchAsync(async (req: any, res: any) => {
   const result = await SubscriptionService.getAllSubscriptions(req.query);
 
   sendResponse(res, {
@@ -228,7 +230,7 @@ const getAllSubscriptions = catchAsync(async (req, res) => {
   });
 });
 
-const getSingleSubscription = catchAsync(async (req, res) => {
+const getSingleSubscription = catchAsync(async (req: any, res: any) => {
   const { id } = req.params;
   const result = await SubscriptionService.getSingleSubscription(id);
 
@@ -254,9 +256,6 @@ const handleWebhook = catchAsync(async (req, res) => {
   let event: Stripe.Event;
 
   try {
-    // req.body should be a Buffer at this point, not parsed JSON
-    console.log('🔍 Webhook body type:', typeof req.body);
-    console.log('🔍 Webhook body is Buffer:', Buffer.isBuffer(req.body));
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err: any) {
     console.error('⚠️  Webhook signature verification failed:', err.message);
@@ -266,133 +265,31 @@ const handleWebhook = catchAsync(async (req, res) => {
     );
   }
 
-  console.log(`🔔 Received webhook event: ${event.type} - ${event.id}`);
-
   switch (event.type) {
-    // 🔥 ADD THIS MISSING CASE:
     case 'customer.subscription.created':
+    case 'customer.subscription.updated':
+      // This event means the subscription is active or changed!
       await SubscriptionService.handleSubscriptionCreated(
         event.data.object as Stripe.Subscription
       );
       break;
-    case 'checkout.session.completed':
-      await SubscriptionService.handleCheckoutCompleted(
-        event.data.object as Stripe.Checkout.Session
-      );
-      break;
-
-    // 🔥 HANDLE BOOKING PAYMENT SUCCESS
-    case 'payment_intent.succeeded': {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      if (paymentIntent.metadata?.type === 'booking_payment') {
-        await handleBookingPaymentSuccess(paymentIntent);
-      }
-      break;
-    }
-
-    // 🔥 HANDLE BOOKING PAYMENT FAILURE
-    case 'payment_intent.payment_failed': {
-      const failedPayment = event.data.object as Stripe.PaymentIntent;
-      if (failedPayment.metadata?.type === 'booking_payment') {
-        await handleBookingPaymentFailed(failedPayment);
-      }
-      break;
-    }
-
-    // Handle transfer completion
-    case 'transfer.created':
-      await handleTransferCreated(event.data.object as Stripe.Transfer);
-      break;
-
-    // 🔥 MODIFY THIS CASE - Remove the billing_reason check:
-    case 'invoice.payment_succeeded': {
-      const invoice = event.data.object as Stripe.Invoice;
-      if (invoice.subscription) {
-        const stripeSubscription = await stripe.subscriptions.retrieve(
-          invoice.subscription as string
-        );
-        await SubscriptionService.handleSubscriptionCreated(stripeSubscription);
-      }
-      break;
-    }
-
     case 'customer.subscription.deleted':
-      // eslint-disable-next-line no-case-declarations
-      const cancelledSubscription = event.data.object as Stripe.Subscription;
       await SubscriptionService.handleSubscriptionCancelled(
-        cancelledSubscription
+        event.data.object as Stripe.Subscription
       );
       break;
-
     case 'invoice.payment_failed':
-      // eslint-disable-next-line no-case-declarations
-      const failedInvoice = event.data.object as Stripe.Invoice;
-      await SubscriptionService.handlePaymentFailed(failedInvoice);
+      await SubscriptionService.handlePaymentFailed(
+        event.data.object as Stripe.Invoice
+      );
+      break;
+    // You can add more cases if needed (but don't print the invoice)
+    default:
       break;
   }
 
   res.json({ received: true });
 });
-
-// NEW: Handle booking payment success
-const handleBookingPaymentSuccess = async (
-  paymentIntent: Stripe.PaymentIntent
-) => {
-  const { bookingId } = paymentIntent.metadata;
-
-  console.log(`✅ Booking payment succeeded for booking: ${bookingId}`);
-
-  // Update booking status in database
-  await Booking.findByIdAndUpdate(bookingId, {
-    paymentStatus: 'paid',
-    status: 'ongoing',
-    paidAt: new Date(),
-    stripeChargeId: paymentIntent.latest_charge // Store charge ID
-  });
-
-  // TODO: Send notification to contractor about confirmed booking
-  // TODO: Send confirmation email to customer
-};
-
-// 🔥 NEW: Handle booking payment failure
-const handleBookingPaymentFailed = async (
-  paymentIntent: Stripe.PaymentIntent
-) => {
-  const { bookingId } = paymentIntent.metadata;
-
-  console.log(`❌ Booking payment failed for booking: ${bookingId}`);
-
-  // Update booking status
-  await Booking.findByIdAndUpdate(bookingId, {
-    paymentStatus: 'failed',
-    status: 'cancelled',
-    failedAt: new Date()
-  });
-
-  // TODO: Send failure notification
-  // TODO: Release reserved time slots
-};
-
-// NEW: Handle transfer completion
-const handleTransferCreated = async (transfer: Stripe.Transfer) => {
-  const { bookingId, type } = transfer.metadata;
-
-  if (type !== 'contractor_payout') return;
-
-  // Update booking with contractor payout information
-  await Booking.findByIdAndUpdate(bookingId, {
-    contractorPayout: {
-      transferId: transfer.id,
-      amount: transfer.amount / 100, // Convert from cents
-      transferredAt: new Date()
-    }
-  });
-
-  console.log(`✅ Funds transferred to contractor for booking: ${bookingId}`);
-
-  // TODO: Send notification to contractor about payout
-  // TODO: Send final receipt to customer
-};
 
 // Admin revenue analytics controllers
 const getRevenueSummary = catchAsync(async (req, res) => {
@@ -482,7 +379,6 @@ export const SubscriptionControllers = {
   getAllSubscriptions,
   getSingleSubscription,
   handleWebhook,
-  handleBookingPaymentSuccess,
   initializeDefaultPlans,
   changeSubscriptionPlan,
   getRevenueSummary,
