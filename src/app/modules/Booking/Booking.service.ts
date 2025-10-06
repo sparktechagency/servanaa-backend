@@ -678,11 +678,11 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   }
 
   const cus = await Customer.findOne({ userId: usr._id });
-  
+
 
   console.log('cus', cus);
 
-  if(!cus){
+  if (!cus) {
     throw new Error('No customer profile found for this user');
   }
 
@@ -876,18 +876,18 @@ const getAllBookingsByUserFromDB = async (
 ) => {
 
   // console.log('ahmad Musa');
-  console.log( 'ahmad Musa req iser', user);
+  console.log('ahmad Musa req iser', user);
 
   const usr = await User.findOne({ email: user.userEmail });
   // console.log('usr', usr)
   // const b: any = {};
 
 
-    console.log( 'ahmad Musa', usr);
+  console.log('ahmad Musa', usr);
 
   // if (user.role === 'customer') {
   //   // b.customerId = usr?._id;
-   
+
   //   const BookingQuery = new QueryBuilder(
   //   Booking.find({customerId:usr?._id}).populate('customerId'),
   //   query
@@ -908,28 +908,28 @@ const getAllBookingsByUserFromDB = async (
 
   if (user.role === 'contractor') {
     // b.contractorId = usr?._id;
-      const conData = await Contractor.findOne({ userId: usr?._id });
-  console.log( 'ahmad Musa contractor', usr?._id);
+    const conData = await Contractor.findOne({ userId: usr?._id });
+    console.log('ahmad Musa contractor', usr?._id);
 
-const BookingQuery = new QueryBuilder(
-    Booking.find({contractorId:conData?._id}),
-    query
-  )
-    .search(BOOKING_SEARCHABLE_FIELDS)
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
-  const result = await BookingQuery.modelQuery;
-  const meta = await BookingQuery.countTotal();
-  return {
-    result,
-    meta
-  };
+    const BookingQuery = new QueryBuilder(
+      Booking.find({ contractorId: conData?._id }),
+      query
+    )
+      .search(BOOKING_SEARCHABLE_FIELDS)
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+    const result = await BookingQuery.modelQuery;
+    const meta = await BookingQuery.countTotal();
+    return {
+      result,
+      meta
+    };
 
   }
 
-  
+
 };
 
 const getSingleBookingFromDB = async (id: string) => {
@@ -946,16 +946,13 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
   const updateData: any = { ...payload };
 
-
   if (files && Array.isArray(files) && files.length > 0) {
-    // Example: AWS S3 or local upload — assume files have `location` or `path`
     const uploadedFiles = files.map((file: any) => ({
       name: file.originalname || file.filename,
       url: file.location || file.path,
       mimetype: file.mimetype,
       size: file.size
     }));
-
 
     updateData.files = [...(booking.files || []), ...uploadedFiles];
   }
@@ -976,10 +973,10 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     if (!contractorData) throw new Error('No contractor found');
     if (!customerData) throw new Error('No customer found');
 
-    
+
     customerData.balance =
       (customerData?.balance ?? 0) - (updatedBooking.price || 0);
-      await customerData.save();
+    await customerData.save();
     contractorData.balance =
       (contractorData.balance || 0) + (updatedBooking.price || 0);
     customerData.balance =

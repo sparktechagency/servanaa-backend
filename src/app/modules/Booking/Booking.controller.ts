@@ -64,7 +64,7 @@ const getAllBookingsByUser = catchAsync(async (req, res) => {
     req.user
   );
 
-  if(!result){
+  if (!result) {
     throw new Error('No bookings found for this user');
   }
 
@@ -78,25 +78,20 @@ const getAllBookingsByUser = catchAsync(async (req, res) => {
 });
 
 const updateBooking = catchAsync(async (req, res) => {
-  const fileUrls = (req.files as Express.MulterS3.File[]).map(f => f.location);
-
+  const files = (req.files as Express.MulterS3.File[]) || [];
   const { id } = req.params;
   const booking = req.body;
-  console.log('test', booking);
 
-  const result = await BookingServices.updateBookingIntoDB(
-    id,
-    booking,
-    fileUrls
-  );
+  const result = await BookingServices.updateBookingIntoDB(id, booking, files);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Booking is updated successfully',
+    message: 'Booking updated successfully',
     data: result
   });
 });
+
 const updatePaymentStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { booking: data } = req.body;

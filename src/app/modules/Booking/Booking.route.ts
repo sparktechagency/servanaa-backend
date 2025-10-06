@@ -17,7 +17,7 @@ router.post(
 
 router.get(
   '/all-bookings-by-user',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.customer, USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   BookingControllers.getAllBookingsByUser
 );
 
@@ -37,7 +37,6 @@ router.patch(
 router.patch(
   '/:id',
   uploadFileS3(true).array('file', 5),
-  //  uploadFileS3(true).single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     if (req.body.data) {
       try {
@@ -48,9 +47,9 @@ router.patch(
     }
     next();
   },
-  // validateRequest(updateBookingValidationSchema),
   BookingControllers.updateBooking
 );
+
 
 router.delete('/:id', BookingControllers.deleteBooking);
 

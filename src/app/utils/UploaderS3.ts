@@ -101,8 +101,8 @@ const fileFilterFun = (req: Request, file: any, cb: FileFilterCallback) => {
         cb(
             new Error(
                 'Only ' +
-                    allowedMimeTypes.map((type) => type.split('/')[1]).join(', ') +
-                    ' formats are allowed!'
+                allowedMimeTypes.map((type) => type.split('/')[1]).join(', ') +
+                ' formats are allowed!'
             )
         );
     }
@@ -115,34 +115,3 @@ export const uploadFileS3 = (useS3: boolean = false) =>
         limits: { fileSize: 500 * 1024 * 1024 },
         fileFilter: fileFilterFun,
     });
-
-// Example usage
-// Single file upload
-// app.post('/upload/single', uploadFileS3(true).single('img'), (req: Request, res: Response) => {
-//     if (!req.file) {
-//         return res.status(400).json({ message: 'No file uploaded' });
-//     }
-//     res.status(200).json({
-//         message: 'File uploaded successfully',
-//         file: req.file,
-//     });
-// });
-
-// Multiple files upload
-// app.post(
-//     '/upload/multiple',
-//     uploadFileS3(true).fields([
-//         { name: 'img', maxCount: 1 },
-//         { name: 'equipment_img', maxCount: 1 },
-//         { name: 'muscle_group_img', maxCount: 1 },
-//     ]),
-//     (req: Request, res: Response) => {
-//         if (!req.files) {
-//             return res.status(400).json({ message: 'No files uploaded' });
-//         }
-//         res.status(200).json({
-//             message: 'Files uploaded successfully',
-//             files: req.files,
-//         });
-//     }
-// );
