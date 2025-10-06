@@ -850,11 +850,12 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
       .populate({
         path: 'contractorId', // Populate contractorId
         populate: {
-          path: 'contractor', // Populate contractor field inside contractorId
-          select: 'ratings rateHourly' // Specify the fields you want from contractor
+          path: 'contractor',
+          select: 'fullName img ratings rateHourly'
         }
       })
-      .populate('subCategoryId', 'name'),
+      .populate('subCategoryId', 'name')
+      .populate('customerId', 'fullName img'),
     query
   )
     .search(BOOKING_SEARCHABLE_FIELDS)

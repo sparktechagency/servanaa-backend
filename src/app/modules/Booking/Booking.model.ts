@@ -101,7 +101,6 @@ const bookingSchema = new Schema<TBooking>(
         required: true
       }
     ],
-
     price: {
       type: Number,
       required: [true, 'Price is required'],
