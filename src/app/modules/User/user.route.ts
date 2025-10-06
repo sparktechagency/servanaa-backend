@@ -43,7 +43,6 @@ router.patch(
   UserControllers.updateUser
 );
 
-
 router.delete('/:id', auth(USER_ROLE.superAdmin), UserControllers.deleteUser);
 
 router.get(
@@ -51,7 +50,6 @@ router.get(
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   UserControllers.getAllUsers
 );
-
 
 router.get('/:id', auth(USER_ROLE.superAdmin), UserControllers.getSingleUser);
 

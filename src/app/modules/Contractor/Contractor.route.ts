@@ -30,5 +30,9 @@ router.put('/materials',
 router.delete('/materials/:id',
   auth(USER_ROLE.contractor),
   ContractorControllers.deleteMaterials);
+// =================================
+router.post('/get_all_supports', ContractorControllers.getAllSupport);
+router.post('/create_support', auth(USER_ROLE.contractor), ContractorControllers.createSupport);
+
 
 export const ContractorRoutes = router;

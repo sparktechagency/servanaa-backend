@@ -44,6 +44,15 @@ export type TContractor = {
   isDeleted: boolean;
 };
 
+
+export type TSupportModel = {
+  userId: Types.ObjectId;
+  title: string;
+  details: string;
+  status: string;
+}
+
+
 export interface ContractorModel extends Model<TContractor> {
   isContractorExists(id: string): Promise<TContractor | null>;
 }
