@@ -9,6 +9,9 @@ import { Contractor } from './Contractor.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import { Booking } from '../Booking/Booking.model';
 import { Review } from '../Review/Review.model';
+import { TContractor } from './Contractor.interface';
+import { User } from '../User/user.model';
+import { Support } from './Support.model';
 // import { ObjectId } from 'mongoose';
 
 // Helper function to generate time slots
@@ -357,16 +360,142 @@ const deleteContractorFromDB = async (id: string) => {
 
 // ==================================================
 
-const createMaterials = async (id: string, payload: any) => {
+const createMaterials = async (email: string, payload: any) => {
+  // Find contractor using user's email
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const contractor = await Contractor.findOne({ userId: user._id }) as any;
+  if (!contractor) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
+  }
+
+  if (Array.isArray(payload)) {
+    contractor?.materials.push(...payload);
+  } else {
+    contractor?.materials.push(payload);
+  }
+
+  console.log(contractor)
+
+  await contractor.save();
+  return contractor.materials;
 };
 
-const updateMaterials = async (id: string, payload: any) => {
+
+const updateMaterials = async (email: string, payload: any) => {
+  console.log("==", payload)
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const contractor = await Contractor.findOne({ userId: user._id }) as any;
+  if (!contractor) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
+  }
+
+  const { id, name, unit, price } = payload;
+
+
+
+  const materialIndex = contractor.materials.findIndex(
+    (mat: any) => mat._id.toString() === id
+  );
+
+  if (materialIndex === -1) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Material not found');
+  }
+
+  // Update the existing material
+  if (name !== undefined) contractor.materials[materialIndex].name = name;
+  if (unit !== undefined) contractor.materials[materialIndex].unit = unit;
+  if (price !== undefined) contractor.materials[materialIndex].price = price;
+
+  await contractor.save();
+  return contractor.materials;
 };
 
-const deleteMaterials = async (id: string) => {
+
+const deleteMaterials = async (_id: string) => {
+  console.log('deleteMaterials called with id:', _id);
+
+  if (!mongoose.Types.ObjectId.isValid(_id)) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Invalid material ID format');
+  }
+
+  const contractor = await Contractor.findOne({ 'materials._id': _id });
+
+  if (!contractor) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Material not found');
+  }
+
+  // @ts-ignore
+  contractor.materials = contractor.materials.filter(
+    (mat: any) => mat._id.toString() !== _id
+  );
+
+  await contractor.save();
+
+  return contractor.materials;
 };
+
+const createSupport = async (email: string, payload: any) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  let createData = { ...payload };
+  createData.userId = user?._id;
+
+  const support = await Support.create(createData) as any;
+  if (!support) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Support not updated!');
+  }
+  return support;
+}
+
+const getAllSupport = async (query: any) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  console.log("query", query)
+
+  const filter: any = {};
+  if (query.searchTerm) {
+    filter.$or = [
+      { title: { $regex: query.searchTerm, $options: 'i' } },
+      { description: { $regex: query.searchTerm, $options: 'i' } },
+    ];
+  }
+
+  const supports = await Support.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Support.countDocuments(filter);
+
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+    data: supports,
+  };
+};
+
+
+
 
 export const ContractorServices = {
+  createSupport,
+  getAllSupport,
   createMaterials,
   updateMaterials,
   deleteMaterials,

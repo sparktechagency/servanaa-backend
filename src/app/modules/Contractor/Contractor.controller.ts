@@ -74,7 +74,7 @@ const deleteContractor = catchAsync(async (req, res) => {
 
 const createMaterials = catchAsync(async (req, res) => {
   const { userEmail } = req.user;
-  const { material } = req.body;
+  const material = req.body;
   const result = await ContractorServices.createMaterials(
     userEmail,
     material
@@ -89,7 +89,7 @@ const createMaterials = catchAsync(async (req, res) => {
 });
 const updateMaterials = catchAsync(async (req, res) => {
   const { userEmail } = req.user;
-  const { material } = req.body;
+  const material = req.body;
   const result = await ContractorServices.updateMaterials(userEmail, material);
 
   sendResponse(res, {
@@ -110,7 +110,38 @@ const deleteMaterials = catchAsync(async (req, res) => {
     data: result
   });
 });
+
+// ===================
+const createSupport = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+  const payload = req.body;
+  const result = await ContractorServices.createSupport(userEmail, payload);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Create successfully',
+    data: result
+  });
+});
+
+
+const getAllSupport = catchAsync(async (req, res) => {
+  console.log('req', req)
+  const query = req.query;
+  const result = await ContractorServices.getAllSupport(query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Retrieved successfully',
+    data: result
+  });
+});
+
 export const ContractorControllers = {
+  createSupport,
+  getAllSupport,
   createMaterials,
   updateMaterials,
   deleteMaterials,

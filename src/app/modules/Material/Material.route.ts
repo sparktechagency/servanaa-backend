@@ -2,6 +2,8 @@ import express from 'express';
 import { MaterialControllers } from './Material.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { createMaterialValidationSchema, updateMaterialValidationSchema } from './Material.validation';
+import auth from '../../middlewares/auth';
+import { USER_ROLE } from '../User/user.constant';
 
 const router = express.Router();
 
@@ -29,6 +31,7 @@ router.delete(
 
 router.get(
   '/',
+  auth(USER_ROLE.contractor),
   MaterialControllers.getAllMaterials,
 );
 
