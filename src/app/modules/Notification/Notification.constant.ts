@@ -20,3 +20,5 @@ export const NOTIFICATION_TYPES = {
 
 export const TypeValues = Object.values(NOTIFICATION_TYPES);
 export const NOTIFICATION_SEARCHABLE_FIELDS = ['message', 'title'];
+
+

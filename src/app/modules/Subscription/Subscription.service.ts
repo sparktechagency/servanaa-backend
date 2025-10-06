@@ -11,6 +11,8 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import config from '../../config';
+import { NotificationServices } from '../Notification/Notification.service';
+import { NOTIFICATION_TYPES } from '../Notification/Notification.constant';
 // import { User } from '../User/user.model';
 
 const stripe = new Stripe(config.stripe_secret_key!);
@@ -580,13 +582,11 @@ export class SubscriptionService {
     try {
       session.startTransaction();
 
-      // Extract contractor and pendingSubscriptionId from Stripe metadata
       let contractorId = stripeSubscription.metadata?.contractorId;
       const pendingSubscriptionId =
         stripeSubscription.metadata?.pendingSubscriptionId;
 
       if (!contractorId) {
-        // Fallback: Find by stripe customer if metadata missing
         const priorSub = await Subscription.findOne({
           stripeCustomerId: stripeSubscription.customer as string
         }).session(session);
@@ -683,6 +683,16 @@ export class SubscriptionService {
           'Contractor not found for update'
         );
 
+      // Notification
+      await NotificationServices.createNotificationIntoDB({
+        userId: contractorId,
+        type: NOTIFICATION_TYPES.PAYMENT_RECEIVED,
+        title: 'Subscription Activated',
+        message: `Your ${plan.type} subscription is now active.`,
+        isRead: [],
+        metadata: { subscriptionId: subscription?.id }
+      });
+
       await session.commitTransaction();
       console.log(
         '✅ Subscription and contractor updated successfully:',
@@ -743,6 +753,15 @@ export class SubscriptionService {
         { session }
       );
 
+      await NotificationServices.createNotificationIntoDB({
+        userId: subscription.contractorId,
+        type: NOTIFICATION_TYPES.PAYMENT_RECEIVED,
+        title: 'Subscription Updated',
+        message: `Your subscription has been updated successfully.`,
+        isRead: [],
+        metadata: { subscriptionId: subscription.id }
+      });
+
       await session.commitTransaction();
 
       console.log(
@@ -792,6 +811,15 @@ export class SubscriptionService {
         },
         { session }
       );
+
+      await NotificationServices.createNotificationIntoDB({
+        userId: subscription.contractorId,
+        type: NOTIFICATION_TYPES.PAYMENT_FAILED,
+        title: 'Subscription Cancelled',
+        message: `Your subscription has been cancelled.`,
+        isRead: [],
+        metadata: { subscriptionId: subscription.id }
+      });
 
       await session.commitTransaction();
 
@@ -1384,7 +1412,7 @@ export class SubscriptionService {
       },
       { $sort: { totalRevenue: -1 } }
     ]);
- 
+
     const totalRevenue = planRevenue.reduce(
       (sum, plan) => sum + plan.totalRevenue,
       0
@@ -1651,5 +1679,3 @@ export class SubscriptionService {
     };
   }
 }
-
-

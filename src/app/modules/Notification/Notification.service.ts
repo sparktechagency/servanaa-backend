@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
 
@@ -25,7 +28,7 @@ const getAllNotificationsFromDB = async (
   const usr = await User.findById(userId);
   if (!usr) throw new Error('User not found');
 
-  const filter: any = { isDeleted: false };
+  const filter: any = { userId: usr._id, isDeleted: false };
 
   // Role-based filtering
   if (usr?.role === 'contractor') {
@@ -45,7 +48,14 @@ const getAllNotificationsFromDB = async (
     .sort({ createdAt: -1 })
     .limit(10);
 
-  const result = notifications.map(n => n.toObject());
+  const result = notifications.map(n => {
+    const notificationObj = n.toObject();
+    return {
+      ...notificationObj,
+      isReadByUser: n.isRead.includes(usr._id) // Add convenience field
+    };
+  });
+
   const unreadCount = result.filter(
     //@ts-ignore
     n => !n.isRead.includes(usr._id.toString())
@@ -107,10 +117,44 @@ const deleteNotificationFromDB = async (id: string) => {
   return deletedService;
 };
 
+// In Notification.service.ts
+const markAsRead = async (notificationId: string, userId: string) => {
+  const notification = await Notification.findById(notificationId);
+
+  if (!notification) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Notification not found');
+  }
+
+  // Add userId to isRead array if not already present
+  if (!notification.isRead.includes(userId as any)) {
+    notification.isRead.push(userId as any);
+    await notification.save();
+  }
+
+  return notification;
+};
+
+const markAllAsRead = async (userId: string) => {
+  const result = await Notification.updateMany(
+    {
+      userId: userId,
+      isRead: { $ne: userId }, // Only update notifications not already read by this user
+      isDeleted: false
+    },
+    {
+      $addToSet: { isRead: userId } // Add userId to isRead array if not already present
+    }
+  );
+
+  return result;
+};
+
 export const NotificationServices = {
   createNotificationIntoDB,
   getAllNotificationsFromDB,
   getSingleNotificationFromDB,
   updateNotificationIntoDB,
-  deleteNotificationFromDB
+  deleteNotificationFromDB,
+  markAsRead,
+  markAllAsRead
 };

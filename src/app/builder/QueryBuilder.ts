@@ -5,37 +5,46 @@ class QueryBuilder<T> {
   public modelQuery: Query<T[], T>;
   public query: Record<string, unknown>;
 
-  constructor(modelQuery: Query<T[], T>, query: Record<string, unknown>) {
+  constructor (modelQuery: Query<T[], T>, query: Record<string, unknown>) {
     this.modelQuery = modelQuery;
     this.query = query;
   }
 
-  search(searchableFields: string[]) {
+  search (searchableFields: string[]) {
     const searchTerm = this?.query?.searchTerm;
     if (searchTerm) {
       this.modelQuery = this.modelQuery.find({
         $or: searchableFields.map(
-          (field) =>
+          field =>
             ({
-              [field]: { $regex: searchTerm, $options: 'i' },
-            }) as FilterQuery<T>,
-        ),
+              [field]: { $regex: searchTerm, $options: 'i' }
+            } as FilterQuery<T>)
+        )
       });
     }
 
     return this;
   }
 
-  filter() {
+  filter () {
     const queryObj = { ...this.query }; // copy
     // Filtering
-    const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields', 'days', 'startTime', 'duration'];
-    excludeFields.forEach((el) => delete queryObj[el]);
+    const excludeFields = [
+      'searchTerm',
+      'sort',
+      'limit',
+      'page',
+      'fields',
+      'days',
+      'startTime',
+      'duration'
+    ];
+    excludeFields.forEach(el => delete queryObj[el]);
     this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
     return this;
   }
 
-  sort() {
+  sort () {
     const sort =
       (this?.query?.sort as string)?.split(',')?.join(' ') || '-createdAt';
     this.modelQuery = this.modelQuery.sort(sort as string);
@@ -43,7 +52,7 @@ class QueryBuilder<T> {
     return this;
   }
 
-  paginate() {
+  paginate () {
     const page = Number(this?.query?.page) || 1;
     const limit = Number(this?.query?.limit) || 10;
     const skip = (page - 1) * limit;
@@ -53,7 +62,7 @@ class QueryBuilder<T> {
     return this;
   }
 
-  fields() {
+  fields () {
     const fields =
       (this?.query?.fields as string)?.split(',')?.join(' ') || '-__v';
 
@@ -64,8 +73,8 @@ class QueryBuilder<T> {
   // public aggregate(pipeline: any[]) {
   //   return this.modelQuery.model.aggregate(pipeline);
   // }
-////
- filterSchedule(days: string[], startTime: string, duration: number) {
+  ////
+  filterSchedule (days: string[], startTime: string, duration: number) {
     if (!days || days.length === 0 || !startTime || !duration) {
       return this;
     }
@@ -81,15 +90,15 @@ class QueryBuilder<T> {
         $elemMatch: {
           day: { $in: days },
           startTime: { $lte: startTime },
-          endTime: { $gte: endTime },
-        },
-      },
+          endTime: { $gte: endTime }
+        }
+      }
     });
 
     return this;
   }
 
-  private calculateEndTime(startTime: string, duration: number): string {
+  private calculateEndTime (startTime: string, duration: number): string {
     const [hourStr, minuteStr] = startTime.split(':');
     let hour = parseInt(hourStr, 10);
     const minute = parseInt(minuteStr, 10);
@@ -97,10 +106,14 @@ class QueryBuilder<T> {
     hour += duration;
     if (hour >= 24) hour = hour - 24;
 
-    return hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0');
+    return (
+      hour.toString().padStart(2, '0') +
+      ':' +
+      minute.toString().padStart(2, '0')
+    );
   }
-////
-  async countTotal() {
+  ////
+  async countTotal () {
     const totalQueries = this.modelQuery.getFilter();
     const total = await this.modelQuery.model.countDocuments(totalQueries);
     const page = Number(this?.query?.page) || 1;
@@ -111,11 +124,9 @@ class QueryBuilder<T> {
       page,
       limit,
       total,
-      totalPage,
+      totalPage
     };
   }
 }
 
 export default QueryBuilder;
-
-

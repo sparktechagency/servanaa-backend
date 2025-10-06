@@ -12,6 +12,12 @@ const CustomerSchema = new Schema<TCustomer, CustomerModel>({
   isDeleted: { type: Boolean, default: false }
 });
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Check if a customer exists with given id and is not deleted.
+ * @param {string} id - Customer ID
+
+/*******  9b934d55-fdf4-4909-aa39-74289fdcbdb0  *******/
 CustomerSchema.statics.isCustomerExists = async function (id: string) {
   return await this.findOne({ _id: id, isDeleted: false });
 };

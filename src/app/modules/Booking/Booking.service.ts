@@ -732,15 +732,19 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
     customerData.balance = (customerData.balance || 0) + (booking.price || 0);
     await customerData.save();
 
+    const contractorUser = await Contractor.findById(booking.contractorId);
+
+    if (!contractorUser) throw new Error('No contractor found');
+
     // Create notifications
     const notifications = [];
 
     // Notification for contractor
     notifications.push({
-      userId: booking.contractorId.toString(),
+      userId: contractorUser.userId.toString(),
       type: NOTIFICATION_TYPES.BOOKING_REQUEST,
       title: 'New Booking Request',
-      message: `New ${bookingType} booking request received for ${dayName}`,
+      message: `New ${bookingType} booking request received for ${requestedDate}`,
       bookingId: booking._id.toString(),
       isRead: []
     });
@@ -921,8 +925,8 @@ const getSingleBookingFromDB = async (id: string) => {
 };
 
 const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
-  console.log('Booking ID CHeck: ', id);
   const booking = await Booking.findById(id);
+
   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
   if (booking.isDeleted)
     throw new AppError(
@@ -953,25 +957,20 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     throw new AppError(httpStatus.BAD_REQUEST, 'Booking could not be updated');
 
   // Prepare notification details==== changes
-  const contractorId = updatedBooking.contractorId?.toString();
-  const customerId = updatedBooking.customerId?.toString();
-  const bookingId = updatedBooking._id.toString();
-  const adminUsers = await User.find({ role: 'superAdmin' });
+  // const contractorId = updatedBooking.contractorId?.toString();
+  // const customerId = updatedBooking.customerId?.toString();
+  // const bookingId = updatedBooking._id.toString();
+  // const adminUsers = await User.find({ role: 'superAdmin' });
 
   // Determine notification details based on booking status or update
-  const notificationType = '';
-  const title = '';
-  const message = '';
+
+  const customerData = await Customer.findById(updatedBooking.customerId);
+  if (!customerData) throw new Error('No customer found');
+
+  const contractorData = await Contractor.findById(updatedBooking.contractorId);
+  if (!contractorData) throw new Error('No contractor found');
 
   if (updatedBooking.status === 'completed') {
-    const contractorData = await Contractor.findById(
-      updatedBooking.contractorId
-    );
-    const customerData = await Customer.findById(updatedBooking.customerId);
-
-    if (!contractorData) throw new Error('No contractor found');
-    if (!customerData) throw new Error('No customer found');
-
     customerData.balance =
       (customerData?.balance ?? 0) - (updateData.price || 0);
     await customerData.save();
@@ -984,7 +983,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     await customerData.save();
 
     await NotificationServices.createNotificationIntoDB({
-      userId: updatedBooking.customerId,
+      userId: customerData.userId,
       type: NOTIFICATION_TYPES.WORK_COMPLETED,
       title: 'Work Completed',
       message: 'Your work has been marked as completed',
@@ -994,19 +993,27 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   }
 
   if (updatedBooking.status === 'rejected') {
+    const customerData = await Customer.findById(updatedBooking.customerId);
+
+    if (!customerData) throw new Error('No customer found');
+
     await NotificationServices.createNotificationIntoDB({
-      userId: updatedBooking.customerId,
+      userId: customerData.userId,
       type: NOTIFICATION_TYPES.BOOKING_REJECTED,
       title: 'Booking Cancelled',
-      message: 'The booking has been cancelled or rejected.',
+      message: 'The booking has been rejected.',
       bookingId: updatedBooking._id,
       isRead: []
     });
   }
 
   if (payload && Object.keys(payload).length > 0) {
+    const customerData = await Customer.findById(updatedBooking.customerId);
+
+    if (!customerData) throw new Error('No customer found');
+
     await NotificationServices.createNotificationIntoDB({
-      userId: updatedBooking.customerId,
+      userId: customerData.userId,
       type: NOTIFICATION_TYPES.SESSION_COMPLETED,
       title: 'Booking Updated',
       message: 'Your booking has been updated.',
@@ -1016,8 +1023,16 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   }
 
   if (updatedBooking.status === 'ongoing') {
+    const contractorData = await Contractor.findById(
+      updatedBooking.contractorId
+    );
+    const customerData = await Customer.findById(updatedBooking.customerId);
+
+    if (!contractorData) throw new Error('No contractor found');
+    if (!customerData) throw new Error('No customer found');
+
     await NotificationServices.createNotificationIntoDB({
-      userId: updatedBooking.customerId,
+      userId: customerData.userId,
       type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,
       title: 'Work Accepted',
       message: 'Your work has started',
@@ -1026,7 +1041,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     });
 
     await NotificationServices.createNotificationIntoDB({
-      userId: updatedBooking.contractorId,
+      userId: contractorData.userId,
       type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,
       title: 'Work Accepted',
       message: 'Your work has started',

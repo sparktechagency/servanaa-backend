@@ -21,11 +21,11 @@ export type TContractor = {
   ratings: number;
   skills: string | string[];
   subscriptionStatus:
-  | 'active'
-  | 'inactive'
-  | 'cancelled'
-  | 'expired'
-  | 'failed';
+    | 'active'
+    | 'inactive'
+    | 'cancelled'
+    | 'expired'
+    | 'failed';
 
   // Stripe integration
   stripeCustomerId: string;

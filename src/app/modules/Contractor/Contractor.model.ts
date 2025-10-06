@@ -20,7 +20,7 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     },
     subCategory: {
       type: Schema.Types.ObjectId,
-      ref: 'SubCategory',
+      ref: 'SubCategory'
     },
     skillsCategory: { type: String, default: '' },
     ratings: { type: Number, required: true, default: 0 },

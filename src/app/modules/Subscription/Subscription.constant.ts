@@ -27,7 +27,3 @@ export const SUBSCRIPTION_FILTERABLE_FIELDS = [
   'contractorId',
   'searchTerm'
 ];
-
-
-
-

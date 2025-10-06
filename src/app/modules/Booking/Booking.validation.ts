@@ -77,7 +77,7 @@ export const createBookingValidationSchema = z.object({
     rateHourly: z.number().positive().optional(),
 
     // Weekly booking specific
-    periodInDays: z.number().positive('Period must be positive').optional(),
+    periodInDays: z.number().positive('Period must be positive').optional()
   })
 });
 
@@ -118,9 +118,3 @@ export const BookingValidation = {
   createBookingValidationSchema,
   updateBookingValidationSchema
 };
-
-
-
-
-
-

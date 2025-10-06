@@ -2,6 +2,8 @@ import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { NotificationServices } from './Notification.service';
+import { User } from '../User/user.model';
+import AppError from '../../errors/AppError';
 
 const createNotification = catchAsync(async (req, res) => {
   const notification = req.body;
@@ -72,10 +74,49 @@ const deleteNotification = catchAsync(async (req, res) => {
   });
 });
 
+const markAsRead = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { userEmail } = req.user;
+
+  const user = await User.findOne({ email: userEmail });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const result = await NotificationServices.markAsRead(id, user._id.toString());
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Notification marked as read successfully',
+    data: result
+  });
+});
+
+const markAllAsRead = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+
+  const user = await User.findOne({ email: userEmail });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const result = await NotificationServices.markAllAsRead(user._id.toString());
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'All notifications marked as read successfully',
+    data: result
+  });
+});
+
 export const NotificationControllers = {
   createNotification,
   getSingleNotification,
   getAllNotifications,
   updateNotification,
-  deleteNotification
+  deleteNotification,
+  markAsRead,
+  markAllAsRead
 };
