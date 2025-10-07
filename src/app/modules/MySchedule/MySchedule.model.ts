@@ -22,7 +22,7 @@ const MyScheduleSchema = new Schema<TMySchedule, MyScheduleModel>(
       required: true
     },
     schedules: {
-      type: [ScheduleDaySchema], // Array of day + slots
+      type: [ScheduleDaySchema],
       required: true
     },
     isDeleted: { type: Boolean }

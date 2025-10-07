@@ -624,37 +624,33 @@ export const getNextWeekDayDate = (dayName: string, startDate: Date): Date => {
   return nextDay;
 };
 
-// Common function to calculate endTime, price, and rateHourly for both booking types
-
 export const getBookingDetails = async (payload: TBooking) => {
   const { startTime, duration, contractorId } = payload;
-  // Calculate end time
+
   const [startHour, startMinute] = startTime.split(':').map(Number);
   const startDate = new Date();
   startDate.setHours(startHour, startMinute, 0, 0);
 
-  const endDate = new Date(startDate.getTime() + duration * 60 * 60 * 1000); // Calculate end time based on duration
+  const endDate = new Date(startDate.getTime() + duration * 60 * 60 * 1000);
   const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate
     .getMinutes()
     .toString()
     .padStart(2, '0')}`;
-  payload.endTime = endTime; // Attach endTime to payload
+  payload.endTime = endTime;
 
-  // Get contractor rate and calculate price
   const contractor = await Contractor.findById(contractorId);
   if (!contractor) throw new Error('Contractor not found');
   payload.rateHourly = contractor.rateHourly;
-  // Calculate material total price
   const materialTotalPrice = payload.material.reduce(
     (total, material) => total + material.price,
     0
   );
-  const price = materialTotalPrice + payload.rateHourly * duration; // Final price
+  const price = materialTotalPrice + payload.rateHourly * duration;
   payload.price = price;
 
   payload.timeSlots = generateTimeSlots(startTime, endTime);
 
-  return payload; // Return updated payload with all the details
+  return payload;
 };
 
 export const createRecurringBookingIntoDB = async (
@@ -751,22 +747,24 @@ export const checkAvailability = async (
   days: any,
   bookingType: any
 ) => {
+
+  console.log("contractorId////", contractorId, startTime, bookingType, days)
   const requestedTimeSlots = generateTimeSlots(
     startTime,
     addOneHour(startTime)
   );
-    console.log('requestedTimeSlots:', requestedTimeSlots);
+  console.log('requestedTimeSlots:', requestedTimeSlots);
 
   const schedule = await MySchedule.findOne({ contractorId });
   if (!schedule) throw new Error('Contractor schedule not found');
-     console.log('schedule:', schedule);
+
   if (bookingType === 'oneTime') {
-          console.log('inside OneTime:');
-    const requestedDate = new Date(days as string); // ex: "2025-07-14"
-    requestedDate.setUTCHours(0, 0, 0, 0); // normalize to 00:00 UTC
-    const dayName = getDayName(days as string); // "Monday"
+    console.log('inside OneTime:');
+    const requestedDate = new Date(days as string);
+    requestedDate.setUTCHours(0, 0, 0, 0);
+    const dayName = getDayName(days as string);
     const daySchedule = schedule.schedules.find(s => s.days === dayName);
-      console.log('daySchedule:', daySchedule);
+    console.log('daySchedule====:', daySchedule);
     if (!daySchedule) {
       return {
         available: false,
@@ -777,37 +775,43 @@ export const checkAvailability = async (
     const unavailableSlots = requestedTimeSlots.filter(
       (slot: any) => !daySchedule.timeSlots.includes(slot)
     );
-      console.log('unavailableSlots:', unavailableSlots);
+    console.log('=====unavailableSlots=========:', unavailableSlots);
 
     if (unavailableSlots.length > 0) {
       return { available: false, message: 'Requested slots are unavailable.' };
     }
 
-    // ✅ Duplicate check using date and time slot match
+    console.log('=========================S', {
+      contractorId,
+      bookingDate: requestedDate,
+      requestedTimeSlots
+    })
+
     const existingBooking = await Booking.findOne({
       contractorId,
-      bookingDate: requestedDate, // must match exactly (normalized date)
-      timeSlots: { $in: requestedTimeSlots }, // any overlap
+      bookingDate: requestedDate,
+      timeSlots: { $in: requestedTimeSlots },
       status: { $ne: 'cancelled' }
     });
-  console.log('Existing booking found:', existingBooking);
+
+    console.log('Existing booking found:', existingBooking);
+
     if (existingBooking) {
       return { available: false, message: 'Time slot is already booked.' };
     }
-      // console.log('available:', available);
-    const a =  { available: true }
+    // console.log('available:', available);
+    const a = { available: true }
     return a;
   }
 
   if (bookingType === 'weekly') {
-     console.log('inside: weekly');
+    console.log('inside: weekly');
 
     for (const day of days) {
       let daySchedule: any;
 
-      // Convert specific date to day name if one-time booking
       if (bookingType === 'oneTime') {
-        const requestedDay = getDayName(day); // Convert to day name
+        const requestedDay = getDayName(day);
         daySchedule = schedule.schedules.find(s => s.days === requestedDay);
       } else if (bookingType === 'weekly') {
         daySchedule = schedule.schedules.find(s => s.days === day);
@@ -828,11 +832,10 @@ export const checkAvailability = async (
       }
     }
 
-    // Check for overlapping bookings for future recurring or one-time slots
     const existingBooking = await Booking.findOne({
       contractorId,
-      days: { $in: days }, // This checks if the requested day matches any day in the booking collection
-      startTime: { $gte: startTime, $lte: addOneHour(startTime) }, // Compare time range
+      days: { $in: days },
+      startTime: { $gte: startTime, $lte: addOneHour(startTime) },
       status: { $ne: 'cancelled' }
     });
 

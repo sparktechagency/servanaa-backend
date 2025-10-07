@@ -11,7 +11,7 @@ const createMaterialIntoDB = async (
   payload: TMaterial,
 ) => {
   const result = await Material.create(payload);
-  
+
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Material');
   }
@@ -21,7 +21,7 @@ const createMaterialIntoDB = async (
 
 const getAllMaterialsFromDB = async (query: Record<string, unknown>) => {
   const MaterialQuery = new QueryBuilder(
-    Material.find(),
+    Material.find({}),
     query,
   )
     .search(MATERIAL_SEARCHABLE_FIELDS)
@@ -45,7 +45,7 @@ const getSingleMaterialFromDB = async (id: string) => {
 };
 
 const updateMaterialIntoDB = async (id: string, payload: any) => {
- 
+
 
   const isDeletedService = await mongoose.connection
     .collection('materials')
