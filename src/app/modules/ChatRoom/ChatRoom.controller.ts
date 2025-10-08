@@ -5,8 +5,7 @@ import { ChatRoomServices } from './ChatRoom.service';
 
 const createChatRoom = catchAsync(async (req, res) => {
   // const { contractorId, customerId } = req.body;
-  const result = await ChatRoomServices.createChatRoomIntoDB( req.body);
-
+  const result = await ChatRoomServices.createChatRoomIntoDB(req.body);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

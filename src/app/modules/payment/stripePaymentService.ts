@@ -10,6 +10,7 @@ import { User } from '../User/user.model';
 import mongoose from 'mongoose';
 import { Transaction } from '../Transaction/transaction.model';
 import { Contractor } from '../Contractor/Contractor.model';
+import { Booking } from '../Booking/Booking.model';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const stripe = new Stripe(config.stripe_secret_key as string);
 
@@ -41,7 +42,7 @@ const createSingleStripePaymentIntoDB = async (
   };
 
 
-  const paymentIntent = await stripe.paymentIntents.create({ 
+  const paymentIntent = await stripe.paymentIntents.create({
     amount: 500,
     // amount: entryFeeInCents,
     currency: 'usd',
@@ -54,88 +55,78 @@ const createSingleStripePaymentIntoDB = async (
 
   return paymentIntent.client_secret as string;
 
-  //   const currency = customerRegion === 'EU' ? 'eur' : 'usd';
-  // const paymentMethods = currency === 'eur' 
-  //     ? ['card', 'ideal', 'sofort', 'paypal'] 
-  //     : ['card', 'paypal', 'afterpay_clearpay'];
 
-  // const paymentIntent = await stripe.paymentIntents.create({
-  //     amount: Number(competition.entryFee),
-  //     currency,
-  //     payment_method_types: paymentMethods,
-  //     metadata,
-  //     description: 'Competition Entry Fee',
-  // });
 }
 
 const createStripeCheckoutSessionIntoDB = async (
   user: any,
   paymentData: any,
 ): Promise<string> => {
-  
-  console.log('user', user)
 
-const email = user?.email || 'ahmadmusa9805@gmail.com'
+  console.log('user', user);
 
-const { serviceId = 'ahmadmusa', amount = 50, currency= 'USD' } = paymentData;
-    // const amounts = Number(paymentData?.amount);
-    let session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      success_url: `${config.frontend_url}/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${config.frontend_url}/cancel`,
-      customer_email: `${email}`,
-      // client_reference_id: serviceId,
-      metadata: {
-        payUser: `${user.fullName}`,
-        // payUserType: payUserRole,
-        // receiveUser: receiveUser.toHexString(),
-        // receiveUserType: receiveUserRole,
-        // serviceId: serviceId,
-        // stripeAccountId: bankAccount?.stripeAccountId,
-        // partnerId: partnerId,
-        // winBid: bidDetails.price,
-      },
-      line_items: [
-        {
-          price_data: {
-            currency: currency,
-            unit_amount: Number(parseFloat(amount).toFixed(2)),
-            product_data: {
-              name: 'Servana Service Payment',
-              // name: service.service,
-              description:  `Service ID: ahmadmusa`,
-              // description:  `Service ID: ${serviceId} | ${service.description}`,
-            },
+  const email = user?.email || 'ahmadmusa9805@gmail.com';
+
+  const { serviceId = 'ahmadmusa', amount = 50, currency = 'USD', bookingId } = paymentData;
+
+  // Fetch the booking and populate contractor details
+  const booking = await Booking.findOne({ bookingId }).populate('contractorId fullName img');
+
+  // @ts-ignore
+  const contractorName = booking?.contractorId?.fullName || 'Contractor';
+  // @ts-ignore
+  const contractorImg = booking?.contractorId?.img ? [booking.contractorId.img] : [];
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    mode: 'payment',
+    success_url: `${config.frontend_url}/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${config.frontend_url}/cancel`,
+    customer_email: `${email}`,
+    metadata: {
+      payUser: `${user.fullName}`,
+      bookingId,
+    },
+    line_items: [
+      {
+        price_data: {
+          currency: currency,
+          unit_amount: Math.round(Number(amount) * 100), // Stripe expects amount in cents
+          product_data: {
+            name: `Payment for ${contractorName}`,
+            images: contractorImg,
+            description: `Booking ID: ${bookingId}`,
           },
-          quantity: 1,
         },
-      ],
-    });
+        quantity: 1,
+      },
+    ],
+  });
 
-    return session.url as string;
-} 
+  return session.url as string;
+}
+
 
 const verifyStripeSessionIntoDB = async (sessionId: any) => {
 
   console.log('sessionId', sessionId)
 
   if (!sessionId) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'sessionId is required');
+    throw new AppError(httpStatus.BAD_REQUEST, 'sessionId is required');
   }
- 
+
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     //payment_status = "no_payment_required", "paid", "unpaid"
     if (session.payment_status !== "paid") {
-        throw new AppError(httpStatus.BAD_REQUEST, "Payment Failled");
+      throw new AppError(httpStatus.BAD_REQUEST, "Payment Failled");
     }
- 
+
     const metadata = session?.metadata;
-    if(!metadata){
-        throw new AppError(httpStatus.BAD_REQUEST, "Invalid Session Id");
+    if (!metadata) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Invalid Session Id");
     }
-   
+
 
 
     //update database base on metadata = session.metadata
@@ -145,9 +136,9 @@ const verifyStripeSessionIntoDB = async (sessionId: any) => {
     // }, {
     //   paymentStatus: "paid"
     // })
- 
+
     return 'payment successfully';
-  } catch (err:any) {
+  } catch (err: any) {
     throw new Error(err)
   }
 };
@@ -255,21 +246,21 @@ const checkBankStatusAndTransferIntoDB = async (id: any) => {
     const transactionData = await Transaction.findOne({ userId: userData?._id, paymentStatus: 'pending' });
     // const competetionResult = await CompetitionResult.findOne({ _id: transactions?.competitionId });
 
-      const result = await withdrawalProcessPaymentIntoDB(transactionData?.amount, stripeAccountId as string);
-      if (result && transactionData) {
-        transactionData.paymentStatus = 'paid';
-        await transactionData.save();
-      }
-      return result;
+    const result = await withdrawalProcessPaymentIntoDB(transactionData?.amount, stripeAccountId as string);
+    if (result && transactionData) {
+      transactionData.paymentStatus = 'paid';
+      await transactionData.save();
+    }
+    return result;
   } else {
-        let accountLink = null;
+    let accountLink = null;
 
     // Create an account link for Stripe onboarding if the actor has a Stripe account ID
     if (userData && userData?.stripeAccountId) {
       accountLink = await stripe.accountLinks.create({
         account: userData.stripeAccountId,
         refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
-          return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`,
+        return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`,
         type: 'account_onboarding',
       });
     } else {
@@ -286,8 +277,8 @@ const checkBankStatusAndTransferIntoDB = async (id: any) => {
       }
       accountLink = await stripe.accountLinks.create({
         account: userData?.stripeAccountId as any,
-       refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
-          return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`,
+        refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+        return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`,
         type: 'account_onboarding',
       });
       // let accountLink = null;
@@ -306,8 +297,6 @@ const checkBankStatusAndTransferIntoDB = async (id: any) => {
     // return { message: "Bank information still incomplete" };
   }
 }
-
-
 
 const withdrawalProcessPaymentIntoDB = async (amount: any, stripeAccountId: string) => {
   const transfer = await stripe.transfers.create({
@@ -359,12 +348,12 @@ const singleWithdrawalProcessIntoDB = async (
   payload: any,
   user: any,
 ) => {
-   let userData = null;
+  let userData = null;
 
   if (user?.role === 'contractor') {
     userData = await User.findOne({ email: user.userEmail }).populate('contractor');
   }
-let newTransaction;
+  let newTransaction;
   const transactionData = {
     userId: userData?._id,
     type: 'withdraw',
@@ -372,86 +361,86 @@ let newTransaction;
   };
   // const session = await mongoose.startSession();
   // try {
-    // session.startTransaction();
-    
-      newTransaction = await Transaction.create(transactionData);
+  // session.startTransaction();
 
-    if (!newTransaction) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Transaction');
-    }
+  newTransaction = await Transaction.create(transactionData);
 
-    // Check if the actor has a Stripe account ID, create one if they don’t
-    if (!userData?.stripeAccountId) {
+  if (!newTransaction) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Transaction');
+  }
 
-      const account = await stripe.accounts.create({
-        type: 'express',
-        email: userData?.email,
-      });
+  // Check if the actor has a Stripe account ID, create one if they don’t
+  if (!userData?.stripeAccountId) {
 
-      // Assign the Stripe account ID to the actor and save it
-      if (userData) {
+    const account = await stripe.accounts.create({
+      type: 'express',
+      email: userData?.email,
+    });
 
-        userData.stripeAccountId = account.id;
+    // Assign the Stripe account ID to the actor and save it
+    if (userData) {
 
-          // Handle encryption or hashing if required (e.g., for password or sensitive fields)
-        try {
-            // await userData.save(); // Ensure save is part of the transaction
-            // await User.updateOne({ stripeAccountId: account.id });
-               await User.findByIdAndUpdate(userData._id, { stripeAccountId: account.id }, {
-                new: true,
-                runValidators: true
-              }).select('-password');
-            console.log('userData updated successfully', userData);
-        } catch (error) {
-            console.error('Error saving user data:', error);
-            // Handle error, such as validation issues or encryption problems
-            throw new Error('Error saving user data.');
-        }
+      userData.stripeAccountId = account.id;
+
+      // Handle encryption or hashing if required (e.g., for password or sensitive fields)
+      try {
         // await userData.save(); // Ensure save is part of the transaction
-        // await userData.save({ session }); // Ensure save is part of the transaction
-                  console.log('userData ahmad', userData)
+        // await User.updateOne({ stripeAccountId: account.id });
+        await User.findByIdAndUpdate(userData._id, { stripeAccountId: account.id }, {
+          new: true,
+          runValidators: true
+        }).select('-password');
+        console.log('userData updated successfully', userData);
+      } catch (error) {
+        console.error('Error saving user data:', error);
+        // Handle error, such as validation issues or encryption problems
+        throw new Error('Error saving user data.');
       }
-  
-      let accountLink = null;
-           console.log('userData.stripeAccountId', userData?.stripeAccountId)
-      // // Create an account link for Stripe onboarding if the actor has a Stripe account ID
-      // if (userData && userData.stripeAccountId) {
-          console.log('user 388', userData?.stripeAccountId)
-          accountLink = await stripe.accountLinks.create({
-          account: userData?.stripeAccountId as string,
-          refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
-          return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
-          type: 'account_onboarding',
-        });
-      // }
-
-      // Commit transaction if everything went well
-      // await session.commitTransaction();
-      return { url: accountLink?.url };
+      // await userData.save(); // Ensure save is part of the transaction
+      // await userData.save({ session }); // Ensure save is part of the transaction
+      console.log('userData ahmad', userData)
     }
 
+    let accountLink = null;
+    console.log('userData.stripeAccountId', userData?.stripeAccountId)
+    // // Create an account link for Stripe onboarding if the actor has a Stripe account ID
+    // if (userData && userData.stripeAccountId) {
+    console.log('user 388', userData?.stripeAccountId)
+    accountLink = await stripe.accountLinks.create({
+      account: userData?.stripeAccountId as string,
+      refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+      return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
+      type: 'account_onboarding',
+    });
+    // }
 
-    const stripeAccountId = userData?.stripeAccountId
-    const account = await stripe.accounts.retrieve(stripeAccountId as string);
+    // Commit transaction if everything went well
+    // await session.commitTransaction();
+    return { url: accountLink?.url };
+  }
 
 
-    if (account?.requirements?.currently_due?.includes("external_account")) {
+  const stripeAccountId = userData?.stripeAccountId
+  const account = await stripe.accounts.retrieve(stripeAccountId as string);
 
-      // Bank info is not complete, trigger to generate onboarding link
-      let accountLink = null;
 
-      // Create an account link for Stripe onboarding if the actor has a Stripe account ID
-      if (userData && userData.stripeAccountId) {
-        accountLink = await stripe.accountLinks.create({
-          account: userData.stripeAccountId,
-          refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
-          return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
-          type: 'account_onboarding',
-        });
-      }
-      // await session.commitTransaction();
-      return { url: accountLink?.url };
+  if (account?.requirements?.currently_due?.includes("external_account")) {
+
+    // Bank info is not complete, trigger to generate onboarding link
+    let accountLink = null;
+
+    // Create an account link for Stripe onboarding if the actor has a Stripe account ID
+    if (userData && userData.stripeAccountId) {
+      accountLink = await stripe.accountLinks.create({
+        account: userData.stripeAccountId,
+        refresh_url: `${config.frontend_url}/session/bank-info-required?userId=${userData?._id}`,
+        return_url: `${config.frontend_url}/session/bank-info-successfull?userId=${userData?._id}`, // Include actorId here
+        type: 'account_onboarding',
+      });
     }
+    // await session.commitTransaction();
+    return { url: accountLink?.url };
+  }
 
 
   // const result = await withdrawalProcessPaymentIntoDB(newTransaction?.amount, user?.stripeAccountId as string);
@@ -463,19 +452,19 @@ let newTransaction;
   });
   // return transfer;
 
-  
+
   if (transfer && newTransaction) {
 
     newTransaction.paymentStatus = 'paid';
     await newTransaction.save();
-   const contractorData = await Contractor.findOne({userId:userData?._id});
+    const contractorData = await Contractor.findOne({ userId: userData?._id });
 
-     if (contractorData ) {
-           contractorData.balance = Number(contractorData.balance) - transfer.amount;
-           await contractorData.save();
-      }
+    if (contractorData) {
+      contractorData.balance = Number(contractorData.balance) - transfer.amount;
+      await contractorData.save();
+    }
 
- 
+
 
   }
 
@@ -494,7 +483,7 @@ let newTransaction;
 export const PaymentServices = {
   checkPaymentCompletefromDB,
   webhookToService,
- withdrawalProcessPaymentIntoDB,
+  withdrawalProcessPaymentIntoDB,
   createSingleStripePaymentIntoDB,
   confirmStripePaymentIntoDB,
   checkAccountStatusIntoDB,

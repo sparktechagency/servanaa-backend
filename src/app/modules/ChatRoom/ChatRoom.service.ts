@@ -11,7 +11,7 @@ import { Chat } from '../Chat/Chat.model';
 // const createChatRoomIntoDB = async (
 //   payload: any,
 // ) => {
- 
+
 //     const { contractorId, customerId } = payload;
 // console.log('contractorId', contractorId)
 // console.log('customerId', customerId)
@@ -23,7 +23,7 @@ import { Chat } from '../Chat/Chat.model';
 //     room = await ChatRoom.create({ participants: [contractorId, customerId] });
 //   }
 
-  
+
 //   if (!room) {
 //     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create ChatRoom');
 //   }
@@ -60,7 +60,7 @@ const createChatRoomIntoDB = async (payload: any) => {
 
 const getAllChatRoomsFromDB = async (query: Record<string, unknown>) => {
   const ChatRoomQuery = new QueryBuilder(
-    ChatRoom.find(),
+    ChatRoom.find().populate(''),
     query,
   )
     .search(CHATROOM_SEARCHABLE_FIELDS)
@@ -76,31 +76,18 @@ const getAllChatRoomsFromDB = async (query: Record<string, unknown>) => {
     meta,
   };
 };
-// const getAllMyChatRoomsFromDB = async (id: string, query: Record<string, unknown>) => {
-//   const ChatRoomQuery = new QueryBuilder(
-//     ChatRoom.find( { participants: id } ),
-//     query,
-//   )
-//     .search(CHATROOM_SEARCHABLE_FIELDS)
-//     .filter()
-//     .sort()
-//     .paginate()
-//     .fields();
 
-//   const result = await ChatRoomQuery.modelQuery;
-//   const meta = await ChatRoomQuery.countTotal();
-//   return {
-//     result,
-//     meta,
-//   };
-// };
 
 const getAllMyChatRoomsFromDB = async (
   userId: string,
   query: Record<string, unknown>
 ) => {
   const ChatRoomQuery = new QueryBuilder(
-    ChatRoom.find({ participants: userId }),
+    ChatRoom.find({ participants: userId })
+      .populate({
+        path: 'participants',
+        select: 'fullName img _id',
+      }),
     query
   )
     .search(CHATROOM_SEARCHABLE_FIELDS)
@@ -110,69 +97,41 @@ const getAllMyChatRoomsFromDB = async (
     .fields();
 
   const rooms = await ChatRoomQuery.modelQuery;
-
-
   const meta = await ChatRoomQuery.countTotal();
 
   const enrichedRooms = await Promise.all(
     rooms.map(async (room) => {
+      // Convert to object
+      const roomObj = room.toObject();
 
-      // Get the "other" participant (not the current user)
-      const otherUserId = room.participants.find(
-        (id: string) => {
-          return id.toString() !== userId;
-        }
+      // Find the "other" participant (not the current user)
+      const otherUser: any = roomObj.participants.find(
+        (participant: any) => participant._id.toString() !== userId
       );
 
-      if (!otherUserId) {
-        // If somehow user is chatting with themselves or invalid data
-        return {
-          ...room.toObject(),
-          otherUserName: null,
-          otherUserImage: null,
-          lastMessage: null,
-          lastMessageTime: null,
-        };
-      }
-
-      // Fetch user and last message in parallel
-      const [otherUser, lastMessage] = await Promise.all([
-        User.findById(otherUserId).select('fullName img  _id').lean(),
-        Chat.findOne({ chatRoomId: room._id })
-          .sort({ createdAt: -1 })
-          .select('message createdAt')
-          .lean(),
-      ]);
+      // Get last message
+      const lastMessage = await Chat.findOne({ chatRoomId: room._id })
+        .sort({ createdAt: -1 })
+        .select('message createdAt')
+        .lean();
 
       return {
-        ...room.toObject(),
+        ...roomObj,
         otherUserName: otherUser?.fullName || null,
         otherUserImage: otherUser?.img || null,
         otherUserId: otherUser?._id || null,
         lastMessage: lastMessage?.message || null,
-      //  lastMessageTime: lastMessage && lastMessage.createdAt ? new Date(lastMessage.createdAt) : null,
         lastMessageTime: lastMessage?.createdAt || null,
       };
-    
-//     return {
-//   ...room.toObject(),
-//   otherUserName: otherUser?.fullName || null,
-//   otherUserImage: otherUser?.img || null,
-//   lastMessage: lastMessage?.message || null,
-//   lastMessageTime: (lastMessage?.createdAt instanceof Date || typeof lastMessage?.createdAt === 'string')
-//     ? new Date(lastMessage.createdAt)
-//     : null,
-// };
-
     })
   );
-
 
   return {
     result: enrichedRooms,
     meta,
   };
 };
+
 
 
 // const getAllMyChatRoomsFromDB = async (userId: string, query: Record<string, unknown>) => {
@@ -194,7 +153,7 @@ const getAllMyChatRoomsFromDB = async (
 //       const otherUserId = room.participants.find((id: string) => id !== userId);
 
 
-      
+
 //     const [otherUser, lastMessage] = await Promise.all([
 //   User.findById(otherUserId).select('fullName img').lean(),
 //   Chat.findOne({ chatRoomId: room._id }).sort({ createdAt: -1 }).select('message createdAt').lean(),

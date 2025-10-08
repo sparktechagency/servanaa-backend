@@ -10,11 +10,12 @@ import AppError from '../../errors/AppError';
 // Create a chat message
 const createChatIntoDB = async (payload: Partial<TChat>) => {
 
-  if(!payload.chatRoomId || !payload.sender || !payload.receiver || !payload.message){
+  if (!payload.chatRoomId || !payload.sender || !payload.receiver || !payload.message) {
     throw new AppError(httpStatus.BAD_REQUEST, "Missing required fields");
   }
 
   const result = await Chat.create(payload);
+  // console.log("68700557306b929dd30df631", result)
 
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, "Failed to create Chat");
@@ -78,7 +79,7 @@ const getAllChatsFromDB = async (id: string) => {
 
 const markMessagesAsReadIntoDB = async (senderId: string, receiverId: string) => {
   // console.log(`senderId: ${senderId}, receiverId: ${receiverId}`);
- const result = await Chat.updateMany({ sender: senderId, receiver: receiverId, isRead: false }, { isRead: true });
+  const result = await Chat.updateMany({ sender: senderId, receiver: receiverId, isRead: false }, { isRead: true });
 
   if (result.modifiedCount === 0) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to mark messages as read');

@@ -21,14 +21,16 @@ import { NotificationServices } from '../Notification/Notification.service';
 import { NOTIFICATION_TYPES } from '../Notification/Notification.constant';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
-
+const generateBookingId = () => {
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
+};
 
 const createBookingIntoDB = async (payload: TBooking, user: any) => {
   const { bookingType, contractorId, day, startTime, duration } = payload;
 
   const [usr, contractor] = await Promise.all([
     User.findOne({ email: user.userEmail }),
-    Contractor.findById(contractorId),
+    User.findById(contractorId),
   ]);
 
   if (!usr) throw new AppError(httpStatus.NOT_FOUND, "User not found");
@@ -37,7 +39,7 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
 
   payload.customerId = usr._id;
 
-  const mySchedule = await MySchedule.findOne({ contractorId }).lean();
+  const mySchedule = await MySchedule.findOne({ contractorId: contractor.contractor?.toString() }).lean();
   if (!mySchedule)
     throw new AppError(httpStatus.NOT_FOUND, "Contractor schedule not found");
 
@@ -96,13 +98,14 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
         );
     })
   );
-
+  const bookingId = generateBookingId();
   const createdBookings =
     bookingType === "weekly" && requestedDays.length > 1
       ? await Booking.insertMany(
         requestedDays.map((d) => ({
           ...payload,
           bookingDate: d,
+          bookingId,
           status: "pending",
           paymentStatus: "pending",
         }))
@@ -111,6 +114,7 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
         await Booking.create({
           ...payload,
           bookingDate: requestedDays[0],
+          bookingId,
           status: "pending",
           paymentStatus: "pending",
         }),
@@ -228,11 +232,15 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
   const BookingQuery = new QueryBuilder(
     Booking.find()
       .populate({
-        path: 'contractorId', // Populate contractorId
+        path: 'contractorId',
         populate: {
-          path: 'contractor', // Populate contractor field inside contractorId
-          select: 'ratings rateHourly' // Specify the fields you want from contractor
+          path: 'contractor',
+          select: 'ratings rateHourly'
         }
+      })
+      .populate({
+        path: 'customerId',
+        select: 'fullName img'
       })
       .populate('subCategoryId', 'name'),
     query

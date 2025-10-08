@@ -13,6 +13,7 @@ const ScheduleDaySchema = new Schema({
     required: true
   }
 });
+
 const MyScheduleSchema = new Schema<TMySchedule, MyScheduleModel>(
   {
     contractorId: {

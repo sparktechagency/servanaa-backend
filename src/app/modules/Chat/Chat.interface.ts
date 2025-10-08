@@ -2,7 +2,7 @@
 import { Model, Types } from 'mongoose';
 
 export type TChat = {
-  chatRoomId: Types.ObjectId;
+  chatRoomId: any;
   sender: Types.ObjectId;
   receiver: Types.ObjectId;
   message: string;

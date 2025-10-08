@@ -3,7 +3,6 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import router from './app/routes/index';
-// import { PaymentControllers } from './app/modules/Payment/Payment.controller';
 import globalErrorHandler from './app/middlewares/globalErrorhandler';
 import { SubscriptionControllers } from './app/modules/Subscription/Subscription.controller';
 

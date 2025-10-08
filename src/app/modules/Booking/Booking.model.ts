@@ -18,7 +18,10 @@ const bookingSchema = new Schema<TBooking>(
       ref: 'SubCategory',
       required: [true, 'Sub category ID is required']
     },
-
+    bookingId: {
+      type: Number,
+      required: true,
+    },
     // Fix enum values to match your service
     bookingType: {
       type: String,
@@ -63,6 +66,10 @@ const bookingSchema = new Schema<TBooking>(
           type: String,
           required: [true, 'Material unit is required']
         },
+        count: {
+          type: Number,
+          required: [true, 'Material count is required']
+        },
         price: {
           type: Number,
           required: [true, 'Material price is required'],
@@ -101,12 +108,11 @@ const bookingSchema = new Schema<TBooking>(
         required: true
       }
     ],
-
-    price: {
-      type: Number,
-      required: [true, 'Price is required'],
-      min: [0, 'Price cannot be negative']
-    },
+    // price: {
+    //   type: Number,
+    //   required: [true, 'Price is required'],
+    //   min: [0, 'Price cannot be negative']
+    // },
     rateHourly: {
       type: Number,
       required: [true, 'Hourly rate is required'],

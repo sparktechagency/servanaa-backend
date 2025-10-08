@@ -18,12 +18,12 @@ async function main() {
 
     const io = new Server(server, {
       cors: {
-        //   origin: "*", // Replace with frontend URL
-        origin: [
-          'http://localhost:5173',
-          'http://localhost:3000',
-          'https://your-production-url.com'
-        ],
+        origin: "*",
+        // origin: [
+        //   'http://localhost:5173',
+        //   'http://localhost:3000',
+        //   'https://your-production-url.com'
+        // ],
         methods: ['GET', 'POST']
       }
     });

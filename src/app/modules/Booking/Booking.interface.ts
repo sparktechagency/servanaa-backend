@@ -21,6 +21,7 @@ export interface DaySchedule {
 }
 
 export type TBooking = {
+  bookingId: number,
   customerId: Types.ObjectId;
   contractorId: Types.ObjectId;
   subCategoryId: Types.ObjectId;
@@ -38,7 +39,7 @@ export type TBooking = {
   duration: number;
   rateHourly: number;
   files?: any[];
-  status: 'pending' | 'ongoing' | 'completed' | 'rejected' ;
+  status: 'pending' | 'ongoing' | 'completed' | 'rejected';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   totalAmount: number;
   isDeleted: boolean;
