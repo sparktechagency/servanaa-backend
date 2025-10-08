@@ -108,11 +108,11 @@ const bookingSchema = new Schema<TBooking>(
         required: true
       }
     ],
-    // price: {
-    //   type: Number,
-    //   required: [true, 'Price is required'],
-    //   min: [0, 'Price cannot be negative']
-    // },
+    price: {
+      type: Number,
+      required: [true, 'Price is required'],
+      min: [0, 'Price cannot be negative']
+    },
     rateHourly: {
       type: Number,
       required: [true, 'Hourly rate is required'],

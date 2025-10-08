@@ -1,7 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { BookingControllers } from './Booking.controller';
-import validateRequest from '../../middlewares/validateRequest';
-import { updateBookingValidationSchema } from './Booking.validation';
 // import { bookingValidationSchema, updateBookingValidationSchema } from './Booking.validation';
 import auth from '../../middlewares/auth';
 import { USER_ROLE } from '../User/user.constant';
@@ -37,7 +35,6 @@ router.patch(
 router.patch(
   '/:id',
   uploadFileS3(true).array('file', 5),
-  //  uploadFileS3(true).single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     if (req.body.data) {
       try {
@@ -48,9 +45,9 @@ router.patch(
     }
     next();
   },
-  // validateRequest(updateBookingValidationSchema),
   BookingControllers.updateBooking
 );
+
 
 router.delete('/:id', BookingControllers.deleteBooking);
 

@@ -55,7 +55,8 @@ export const createCustomerIntoDB = async (payload: any) => {
     const userResult = await User.create([payload], { session });
     const newUser = userResult[0];
     if (!newUser) throw new Error('Failed to create user');
-
+    customer.userId = newUser._id;
+    await customer.save({ session });
     // Commit transaction
     await session.commitTransaction();
 
@@ -218,7 +219,8 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const studentQuery = new QueryBuilder(
     User.find({ role: { $ne: 'superAdmin' } })
       .populate('contractor', 'location') // Populating location from contractor
-      .populate('customer', 'location'), // Populating location from customer
+      .populate('customer', 'location') // Populating location from customer
+      .populate( 'messageId', 'adminMessage clientMessage'), // Populating location from customer
     query
   )
     .search(usersSearchableFields)
