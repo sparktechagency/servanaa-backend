@@ -2,6 +2,8 @@
 
 import express from 'express';
 import {
+  createSubscription,
+  deleteSubscription,
   getAllAdminNotifications,
   getAllSubscriptionPlansTable,
   getCategoryTable,
@@ -9,7 +11,8 @@ import {
   getDashboardData,
   getServiceTable,
   getSubCategoryTable,
-  getTransactionHistoryTable
+  getTransactionHistoryTable,
+  updateSubscription
 } from './Dashboard.controller';
 
 const router = express.Router();
@@ -18,6 +21,10 @@ router.get('/', getDashboardData);
 router.get('/admin-notification', getAllAdminNotifications);
 router.get('/subscription-plans', getAllSubscriptionPlansTable);
 router.get('/transaction-history', getTransactionHistoryTable);
+// ===========================
+router.get('/subscription-plan', createSubscription);
+router.patch('/subscription-plan/:id', updateSubscription);
+router.delete('/subscription-plan/:id', deleteSubscription);
 
 // router.get('/contractor-manage', getContractorTableData);
 // router.get('/customer-manage', getCustomerTableData);

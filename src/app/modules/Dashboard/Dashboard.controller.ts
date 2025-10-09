@@ -469,3 +469,62 @@ export const getTransactionHistoryTable = catchAsync(async (req, res) => {
     }
   });
 });
+
+
+
+// ✅ Create a new subscription
+export const createSubscription = catchAsync(async (req, res) => {
+  try {
+
+    const newSub = await SubscriptionPlan.create(req.body);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Subscription create successfully.',
+      data: newSub
+    });
+
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+export const updateSubscription = catchAsync(async (req, res) => {
+  try {
+    const updatedSub = await SubscriptionPlan.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!updatedSub)
+      return res.status(404).json({ success: false, message: 'Not found' });
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Subscription update successfully.',
+      data: updatedSub
+    });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+export const deleteSubscription = catchAsync(async (req, res) => {
+  try {
+    const deleted = await SubscriptionPlan.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true }
+    );
+    if (!deleted)
+      return res.status(404).json({ success: false, message: 'Not found' });
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Subscription delete successfully.',
+      data: deleted
+    });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
