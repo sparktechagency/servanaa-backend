@@ -516,6 +516,7 @@ export const deleteSubscription = catchAsync(async (req, res) => {
       { isDeleted: true },
       { new: true }
     );
+
     if (!deleted)
       return res.status(404).json({ success: false, message: 'Not found' });
     sendResponse(res, {

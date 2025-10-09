@@ -173,8 +173,6 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   };
 };
 
-
-
 const checkAvailabilityIntoDB = async (
   contractorId: any,
   startTime: any,
@@ -254,67 +252,72 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
     meta
   };
 };
+
 const getAllBookingsByUserFromDB = async (
-  query: Record<string, unknown>,
+  query: Record<string, any>,
   user: any
 ) => {
+  const { status: stat, page = 1, limit = 10 } = query;
 
-  // console.log('ahmad Musa');
-  console.log('ahmad Musa req iser', user);
+  let status: string[] = [];
 
-  const usr = await User.findOne({ email: user.userEmail });
-  // console.log('usr', usr)
-  // const b: any = {};
-
-
-  console.log('ahmad Musa', usr);
-
-  // if (user.role === 'customer') {
-  //   // b.customerId = usr?._id;
-
-  //   const BookingQuery = new QueryBuilder(
-  //   Booking.find({customerId:usr?._id}).populate('customerId'),
-  //   query
-  // )
-  //   .search(BOOKING_SEARCHABLE_FIELDS)
-  //   .filter()
-  //   .sort()
-  //   .paginate()
-  //   .fields();
-  // const result = await BookingQuery.modelQuery;
-  // const meta = await BookingQuery.countTotal();
-  // return {
-  //   result,
-  //   meta
-  // };
-
-  // }
-
-  if (user.role === 'contractor') {
-    // b.contractorId = usr?._id;
-    const conData = await Contractor.findOne({ userId: usr?._id });
-    console.log('ahmad Musa contractor', usr?._id);
-
-    const BookingQuery = new QueryBuilder(
-      Booking.find({ contractorId: conData?._id }),
-      query
-    )
-      .search(BOOKING_SEARCHABLE_FIELDS)
-      .filter()
-      .sort()
-      .paginate()
-      .fields();
-    const result = await BookingQuery.modelQuery;
-    const meta = await BookingQuery.countTotal();
-    return {
-      result,
-      meta
-    };
-
+  if (stat === 'history') {
+    status = ['completed', 'rejected', 'cancelled'];
+  } else if (stat) {
+    status = [stat];
   }
 
+  const usr = await User.findOne({ email: user.userEmail });
+  if (!usr) throw new Error('User not found');
 
+  let filter: Record<string, any> = {};
+  let roleField = '';
+
+  if (user.role === 'customer') {
+    roleField = 'customerId';
+    filter.customerId = usr._id;
+
+  } else if (user.role === 'contractor') {
+    if (stat === 'pending') {
+      status = ['pending', 'accepted'];
+    }
+    if (stat === 'home') {
+      status = ['pending', 'accepted', 'ongoing'];
+    }
+    roleField = 'contractorId';
+    filter.contractorId = usr._id;
+  } else {
+    throw new Error('Invalid user role');
+  }
+
+  if (status.length) {
+    filter.status = { $in: status };
+  }
+
+  const total = await Booking.countDocuments(filter);
+
+  const skip = (Number(page) - 1) * Number(limit);
+  const totalPage = Math.ceil(total / Number(limit));
+
+  const bookings = await Booking.find(filter)
+    .populate('customerId', 'fullName email')
+    .populate('contractorId', 'fullName img')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(Number(limit));
+
+  return {
+    success: true,
+    data: bookings,
+    meta: {
+      page: Number(page),
+      limit: Number(limit),
+      total,
+      totalPage,
+    },
+  };
 };
+
 
 const getSingleBookingFromDB = async (id: string) => {
   const result = await Booking.findById(id);
@@ -422,152 +425,8 @@ const deleteBookingFromDB = async (id: string) => {
 
   return deletedService;
 };
+
 // =============================added by rakib==========================
-
-// Accept booking (Contractor only)
-// const acceptBookingIntoDB = async (id: string, contractorUser: any) => {
-//   const booking = await Booking.findByIdAndUpdate(id);
-
-//   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
-
-//   // -------- START WEEKLY BOOKING LOGIC --------
-
-//   if (booking.bookingType === 'weekly' && booking.recurring) {
-//     const occurrences = await Booking.find({
-//       parentBookingId: id,
-//       bookingType: 'Weekly'
-//     });
-
-//     // Update status of all occurrences to "accepted"
-//     for (const occurrence of occurrences) {
-//       occurrence.status = 'accepted';
-//       await occurrence.save();
-//     }
-
-//     // Update status of the parent booking itself
-//     booking.status = 'accepted';
-//     await booking.save();
-//   } else {
-//     booking.status = 'accepted';
-//     await booking.save();
-//   }
-//   // -------- END WEEKLY BOOKING LOGIC --------
-
-//   // --------- NOTIFICATIONS SECTION ---------
-//   // Get customer user
-//   const customer = await User.findById(booking.customerId);
-//   // Get all admins
-//   const admins = await User.find({ role: 'superAdmin' });
-
-//   // Notify Customer
-//   if (customer) {
-//     await NotificationServices.createNotificationIntoDB({
-//       userId: customer._id,
-//       title: 'Booking Accepted',
-//       type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,
-//       message: 'Your weekly booking has been accepted by the contractor.',
-//       bookingId: booking._id,
-//       isDeleted: false,
-//       isRead: []
-//     });
-//   }
-
-//   // Notify All Admins
-//   for (const admin of admins) {
-//     await NotificationServices.createNotificationIntoDB({
-//       userId: admin._id,
-//       title: 'Weekly Booking Accepted',
-//       type: NOTIFICATION_TYPES.BOOKING_ACCEPTED,
-//       message: `Weekly booking ${booking._id} has been accepted by contractor ${
-//         contractorUser.userEmail || contractorUser._id
-//       }.`,
-//       bookingId: booking._id,
-//       isDeleted: false,
-//       isRead: []
-//     });
-//   }
-
-//   // --------- END NOTIFICATIONS SECTION ---------
-
-//   return booking;
-// };
-
-// // Reject booking (Contractor only)
-// const rejectBookingIntoDB = async (
-//   id: string,
-//   reason: string,
-//   contractorUser: any
-// ) => {
-//   const booking = await Booking.findByIdAndUpdate(
-//     id,
-//     { status: 'rejected' },
-//     { new: true }
-//   );
-
-//   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
-
-//   // Notify customer of rejection
-//   await NotificationServices.createNotificationIntoDB({
-//     userId: booking.customerId,
-//     type: NOTIFICATION_TYPES.BOOKING_REJECTED,
-//     title: 'Booking Rejected',
-//     message: `Your booking request was rejected. Reason: ${reason}`,
-//     bookingId: booking._id,
-//     isRead: []
-//   });
-
-//   return booking;
-// };
-
-// // Mark work completed (Customer only)
-// const markWorkCompletedIntoDB = async (id: string, customerUser: any) => {
-//   const booking = await Booking.findByIdAndUpdate(
-//     id,
-//     { status: 'completed' },
-//     { new: true }
-//   );
-
-//   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
-
-//   // Notify all admins for payment processing
-//   const admins = await User.find({ role: 'superAdmin' });
-
-//   for (const admin of admins) {
-//     await NotificationServices.createNotificationIntoDB({
-//       userId: admin._id,
-//       type: NOTIFICATION_TYPES.WORK_COMPLETED,
-//       title: 'Work Completed',
-//       message: 'Customer marked work as completed - ready for payment transfer',
-//       bookingId: booking._id,
-//       isRead: []
-//     });
-//   }
-
-//   return booking;
-// };
-
-// // Transfer payment (Admin only)
-// const transferPaymentIntoDB = async (id: string, adminUser: any) => {
-//   const booking = await Booking.findByIdAndUpdate(
-//     id,
-//     { paymentStatus: 'paid' },
-//     { new: true }
-//   );
-
-//   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
-
-//   // Notify contractor of payment transfer
-//   await NotificationServices.createNotificationIntoDB({
-//     userId: booking.contractorId,
-//     type: NOTIFICATION_TYPES.PAYMENT_TRANSFERRED,
-//     title: 'Payment Transferred',
-//     message: 'Payment for completed work has been transferred to your account',
-//     bookingId: booking._id,
-//     isRead: []
-//   });
-
-//   return booking;
-// };
 
 export const BookingServices = {
   createBookingIntoDB,

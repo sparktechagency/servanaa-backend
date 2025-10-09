@@ -19,7 +19,7 @@ const processedEvents = new Map<string, boolean>();
 const PENDING_EXPIRY_MINUTES = 10;
 
 export class SubscriptionService {
-  static async initializeDefaultPlans () {
+  static async initializeDefaultPlans() {
     // Check if plans already exist
     const existingPlans = await SubscriptionPlan.find();
     if (existingPlans.length > 0) {
@@ -112,88 +112,8 @@ export class SubscriptionService {
     return { message: 'Plans created successfully', plans: createdPlans };
   }
 
-  static async handleWebhookEvent (event: Stripe.Event) {
-    if (processedEvents.has(event.id)) {
-      console.log(`🔄 Event ${event.id} already processed, skipping...`);
-      return;
-    }
 
-    try {
-      switch (event.type) {
-        case 'customer.subscription.created':
-          await this.handleSubscriptionCreated(
-            event.data.object as Stripe.Subscription
-          );
-          break;
-        case 'customer.subscription.updated':
-          await this.handleSubscriptionUpdated(
-            event.data.object as Stripe.Subscription
-          );
-          break;
-        case 'customer.subscription.deleted':
-          await this.handleSubscriptionDeleted(
-            event.data.object as Stripe.Subscription
-          );
-          break;
-
-        // Invoice events
-        case 'invoice.paid':
-          await this.handleInvoicePaymentSucceeded(
-            event.data.object as Stripe.Invoice
-          );
-          break;
-        case 'invoice.payment_succeeded':
-          await this.handleInvoicePaymentSucceeded(
-            event.data.object as Stripe.Invoice
-          );
-          break;
-        case 'invoice.payment_failed':
-          await this.handleInvoicePaymentFailed(
-            event.data.object as Stripe.Invoice
-          );
-          break;
-
-        case 'invoice.upcoming':
-          await this.handleInvoiceUpcoming(event.data.object as Stripe.Invoice);
-          break;
-
-        // Checkout events
-        case 'checkout.session.completed':
-          await this.handleCheckoutCompleted(
-            event.data.object as Stripe.Checkout.Session
-          );
-          break;
-
-        case 'checkout.session.expired':
-          await this.handleCheckoutExpired(
-            event.data.object as Stripe.Checkout.Session
-          );
-          break;
-
-        // Customer events
-        case 'customer.subscription.trial_will_end':
-          await this.handleTrialWillEnd(
-            event.data.object as Stripe.Subscription
-          );
-          break;
-
-        default:
-          console.log(`🤷‍♂️ Unhandled event type: ${event.type}`);
-      }
-
-      processedEvents.set(event.id, true);
-
-      if (processedEvents.size > 10000) {
-        const oldestKeys = Array.from(processedEvents.keys()).slice(0, 1000);
-        oldestKeys.forEach(key => processedEvents.delete(key));
-      }
-    } catch (error) {
-      console.error(`❌ Error processing webhook event ${event.id}:`, error);
-      throw error;
-    }
-  }
-
-  static async createSubscriptionPlan (payload: TSubscriptionPlan) {
+  static async createSubscriptionPlan(payload: TSubscriptionPlan) {
     // Create Stripe price first
     const stripePrice = await stripe.prices.create({
       unit_amount: payload.price * 100, // Convert to cents
@@ -216,7 +136,7 @@ export class SubscriptionService {
     return result;
   }
 
-  static async changeSubscriptionPlan (
+  static async changeSubscriptionPlan(
     contractorId: string,
     newPlanType: string,
     prorate: boolean = true
@@ -302,7 +222,7 @@ export class SubscriptionService {
     }
   }
 
-  static async getAllSubscriptionPlans (query: Record<string, unknown>) {
+  static async getAllSubscriptionPlans(query: Record<string, unknown>) {
     const planQuery = new QueryBuilder(
       SubscriptionPlan.find({ isActive: true }),
       query
@@ -318,7 +238,7 @@ export class SubscriptionService {
     return { result, meta };
   }
 
-  static async getSingleSubscriptionPlan (id: string) {
+  static async getSingleSubscriptionPlan(id: string) {
     const result = await SubscriptionPlan.findById(id);
     if (!result) {
       throw new AppError(httpStatus.NOT_FOUND, 'Subscription plan not found');
@@ -326,7 +246,7 @@ export class SubscriptionService {
     return result;
   }
 
-  static async updateSubscriptionPlan (
+  static async updateSubscriptionPlan(
     id: string,
     payload: Partial<TSubscriptionPlan>
   ) {
@@ -341,7 +261,7 @@ export class SubscriptionService {
     return result;
   }
 
-  static async deleteSubscriptionPlan (id: string) {
+  static async deleteSubscriptionPlan(id: string) {
     const result = await SubscriptionPlan.findByIdAndUpdate(
       id,
       { isActive: false },
@@ -355,7 +275,7 @@ export class SubscriptionService {
   }
 
   // Helper to clean up stale pending subscriptions before a new session is started
-  static async cleanUpStalePendingSubscriptions (contractorId: string) {
+  static async cleanUpStalePendingSubscriptions(contractorId: string) {
     const now = new Date();
     const expiryDate = new Date(now.getTime() - PENDING_EXPIRY_MINUTES * 60000);
 
@@ -374,7 +294,7 @@ export class SubscriptionService {
   }
 
   // Helper to delete cancelled subscriptions before a new one is started
-  static async deleteCancelledSubscriptions (contractorId: string) {
+  static async deleteCancelledSubscriptions(contractorId: string) {
     // Hard delete. To soft-delete for audit/history, use updateMany and set isDeleted: true
     await Subscription.deleteMany({
       contractorId: new mongoose.Types.ObjectId(contractorId),
@@ -383,7 +303,7 @@ export class SubscriptionService {
   }
 
   // Main function for starting a contractor Stripe subscription session
-  static async createCheckoutSession (contractorId: string, planType: string) {
+  static async createCheckoutSession(contractorId: string, planType: string) {
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
@@ -496,7 +416,7 @@ export class SubscriptionService {
     }
   }
 
-  static async getAllSubscriptions (query: Record<string, unknown>) {
+  static async getAllSubscriptions(query: Record<string, unknown>) {
     const subscriptionQuery = new QueryBuilder(
       Subscription.find({ isDeleted: false })
         .populate('contractorId')
@@ -517,7 +437,7 @@ export class SubscriptionService {
     return { result, meta };
   }
 
-  static async getSingleSubscription (id: string) {
+  static async getSingleSubscription(id: string) {
     const result = await Subscription.findById(id)
       .populate('contractorId')
       .populate({
@@ -531,7 +451,7 @@ export class SubscriptionService {
     return result;
   }
 
-  static async getSubscriptionByContractorId (contractorId: string) {
+  static async getSubscriptionByContractorId(contractorId: string) {
     const result = await Subscription.findOne({
       contractorId,
       isDeleted: false
@@ -540,7 +460,7 @@ export class SubscriptionService {
     return result;
   }
 
-  static async cancelSubscription (contractorId: string) {
+  static async cancelSubscription(contractorId: string) {
     const subscription = await Subscription.findOne({
       contractorId,
       status: 'active',
@@ -570,196 +490,8 @@ export class SubscriptionService {
     return result;
   }
 
-  // Webhook Handlers
-  // FIXED: Proper transaction management and contractor sync
-
-  static async handleSubscriptionCreated (
-    stripeSubscription: Stripe.Subscription
-  ) {
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-
-      // Extract contractor and pendingSubscriptionId from Stripe metadata
-      let contractorId = stripeSubscription.metadata?.contractorId;
-      const pendingSubscriptionId =
-        stripeSubscription.metadata?.pendingSubscriptionId;
-
-      if (!contractorId) {
-        // Fallback: Find by stripe customer if metadata missing
-        const priorSub = await Subscription.findOne({
-          stripeCustomerId: stripeSubscription.customer as string
-        }).session(session);
-        if (priorSub) contractorId = priorSub.contractorId.toString();
-      }
-      if (!contractorId)
-        throw new AppError(
-          httpStatus.NOT_FOUND,
-          'Contractor not found for subscription'
-        );
-
-      // Look up plan info from Stripe price
-      const priceId = stripeSubscription.items.data[0].price.id;
-      const plan = await SubscriptionPlan.findOne({
-        stripePriceId: priceId
-      }).session(session);
-      if (!plan)
-        throw new AppError(httpStatus.NOT_FOUND, 'Subscription plan not found');
-
-      // Safely convert Stripe timestamps (UNIX seconds) to JS Dates
-      const startDate = stripeSubscription.current_period_start
-        ? new Date(stripeSubscription.current_period_start * 1000)
-        : new Date();
-      const endDate = stripeSubscription.current_period_end
-        ? new Date(stripeSubscription.current_period_end * 1000)
-        : null;
-
-      if (isNaN(startDate.getTime()))
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          'Invalid startDate from Stripe'
-        );
-      if (endDate && isNaN(endDate.getTime()))
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          'Invalid endDate from Stripe'
-        );
-
-      // Payment method, if present
-      let paymentMethodId = '';
-      if (stripeSubscription.default_payment_method) {
-        paymentMethodId = stripeSubscription.default_payment_method as string;
-      }
-
-      // Prepare subscription data for update/creation
-      const subscriptionData = {
-        contractorId: new mongoose.Types.ObjectId(contractorId),
-        planType: plan.type,
-        stripeCustomerId: stripeSubscription.customer as string,
-        stripeSubscriptionId: stripeSubscription.id,
-        status: SubscriptionService.mapStripeStatus(stripeSubscription.status),
-        startDate,
-        endDate,
-        paymentMethodId,
-        isDeleted: false
-      };
-
-      let subscription;
-      if (pendingSubscriptionId) {
-        // Update or activate the pending subscription
-        subscription = await Subscription.findByIdAndUpdate(
-          pendingSubscriptionId,
-          subscriptionData,
-          { new: true, session }
-        );
-      } else {
-        // Upsert by Stripe subscriptionId if no pending ID
-        subscription = await Subscription.findOneAndUpdate(
-          { stripeSubscriptionId: stripeSubscription.id },
-          subscriptionData,
-          { upsert: true, new: true, session }
-        );
-      }
-
-      // Update contractor data to stay in sync
-      const contractorUpdate = {
-        subscriptionId: subscription?._id,
-        hasActiveSubscription: stripeSubscription.status === 'active',
-        subscriptionStatus: SubscriptionService.mapStripeStatus(
-          stripeSubscription.status
-        ),
-        paymentMethodId,
-        stripeCustomerId: stripeSubscription.customer as string
-      };
-
-      const updatedContractor = await Contractor.findByIdAndUpdate(
-        contractorId,
-        contractorUpdate,
-        { new: true, session }
-      );
-      if (!updatedContractor)
-        throw new AppError(
-          httpStatus.NOT_FOUND,
-          'Contractor not found for update'
-        );
-
-      await session.commitTransaction();
-      console.log(
-        '✅ Subscription and contractor updated successfully:',
-        contractorId
-      );
-      return subscription;
-    } catch (error) {
-      console.error('❌ Error in handleSubscriptionCreated:', error);
-      if (session.inTransaction()) await session.abortTransaction();
-      throw error;
-    } finally {
-      await session.endSession();
-    }
-  }
-
-  // Subscription updated // FIXED: Ensure contractor field updates
-  static async handleSubscriptionUpdated (
-    stripeSubscription: Stripe.Subscription
-  ) {
-    const session = await mongoose.startSession();
-
-    try {
-      session.startTransaction();
-
-      const subscription = await Subscription.findOne({
-        stripeSubscriptionId: stripeSubscription.id
-      }).session(session);
-
-      if (!subscription) {
-        console.log('⚠️ Subscription not found, creating new one');
-        return this.handleSubscriptionCreated(stripeSubscription);
-      }
-
-      const updatedStatus = this.mapStripeStatus(stripeSubscription.status);
-      const startDate = new Date(
-        stripeSubscription.current_period_start * 1000
-      );
-      const endDate = new Date(stripeSubscription.current_period_end * 1000);
-
-      // Update subscription
-      await Subscription.findByIdAndUpdate(
-        subscription._id,
-        {
-          status: updatedStatus,
-          startDate,
-          endDate
-        },
-        { session }
-      );
-
-      // CRITICAL: Update contractor in same transaction
-      await Contractor.findByIdAndUpdate(
-        subscription.contractorId,
-        {
-          hasActiveSubscription: stripeSubscription.status === 'active',
-          subscriptionStatus: updatedStatus
-        },
-        { session }
-      );
-
-      await session.commitTransaction();
-
-      console.log(
-        `✅ Subscription updated for contractor: ${subscription.contractorId}`
-      );
-    } catch (error) {
-      console.error('❌ Error in handleSubscriptionUpdated:', error);
-      if (session.inTransaction()) {
-        await session.abortTransaction();
-      }
-      throw error;
-    } finally {
-      await session.endSession();
-    }
-  }
   // Subscription deleted/cancelled
-  static async handleSubscriptionDeleted (
+  static async handleSubscriptionDeleted(
     stripeSubscription: Stripe.Subscription
   ) {
     const session = await mongoose.startSession();
@@ -810,7 +542,7 @@ export class SubscriptionService {
   }
 
   // Invoice payment succeeded
-  static async handleInvoicePaymentSucceeded (invoice: Stripe.Invoice) {
+  static async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     if (!invoice.subscription) return;
 
     const stripeSubscription = await stripe.subscriptions.retrieve(
@@ -839,7 +571,7 @@ export class SubscriptionService {
   }
 
   // Invoice payment failed
-  static async handleInvoicePaymentFailed (invoice: Stripe.Invoice) {
+  static async handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     console.log(`💳❌ Processing payment failed: ${invoice.id}`);
 
     if (!invoice.subscription) return;
@@ -867,7 +599,7 @@ export class SubscriptionService {
   }
 
   // Invoice upcoming (7 days before renewal)
-  static async handleInvoiceUpcoming (invoice: Stripe.Invoice) {
+  static async handleInvoiceUpcoming(invoice: Stripe.Invoice) {
     console.log(`📅 Processing upcoming invoice: ${invoice.id}`);
 
     if (!invoice.subscription) return;
@@ -890,7 +622,7 @@ export class SubscriptionService {
   }
 
   // Checkout completed
-  static async handleCheckoutCompleted (session: Stripe.Checkout.Session) {
+  static async handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.log(`✅ Processing checkout completed: ${session.id}`);
 
     if (session.mode === 'subscription' && session.subscription) {
@@ -898,19 +630,19 @@ export class SubscriptionService {
         session.subscription as string
       );
 
-      await this.handleSubscriptionCreated(stripeSubscription);
+      // await this.handleSubscriptionCreated(stripeSubscription);
     }
   }
 
   // Checkout expired
-  static async handleCheckoutExpired (session: Stripe.Checkout.Session) {
+  static async handleCheckoutExpired(session: Stripe.Checkout.Session) {
     console.log(`⏰ Checkout session expired: ${session.id}`);
 
     // TODO: Log analytics or send follow-up email
   }
 
   // Trial will end
-  static async handleTrialWillEnd (stripeSubscription: Stripe.Subscription) {
+  static async handleTrialWillEnd(stripeSubscription: Stripe.Subscription) {
     console.log(`⏰ Trial ending soon: ${stripeSubscription.id}`);
 
     const subscription = await Subscription.findOne({
@@ -931,7 +663,7 @@ export class SubscriptionService {
     // Helper: Map Stripe status to internal status
   }
 
-  static mapStripeStatus (
+  static mapStripeStatus(
     stripeStatus: string
   ):
     | 'active'
@@ -961,7 +693,7 @@ export class SubscriptionService {
     }
   }
 
-  static async updateSubscriptionStatusFromStripe (
+  static async updateSubscriptionStatusFromStripe(
     stripeSubscription: Stripe.Subscription
   ) {
     const session = await mongoose.startSession();
@@ -1003,43 +735,8 @@ export class SubscriptionService {
     }
   }
 
-  static async handleSubscriptionCancelled (
-    stripeSubscription: Stripe.Subscription
-  ) {
-    const subscription = await Subscription.findOne({
-      stripeSubscriptionId: stripeSubscription.id
-    });
 
-    if (subscription) {
-      await Subscription.findByIdAndUpdate(subscription._id, {
-        status: 'cancelled'
-      });
-
-      await Contractor.findByIdAndUpdate(subscription.contractorId, {
-        hasActiveSubscription: false,
-        subscriptionStatus: 'cancelled'
-      });
-    }
-  }
-
-  static async handlePaymentFailed (stripeInvoice: Stripe.Invoice) {
-    const subscription = await Subscription.findOne({
-      stripeSubscriptionId: stripeInvoice.subscription as string
-    });
-
-    if (subscription) {
-      await Subscription.findByIdAndUpdate(subscription._id, {
-        status: 'failed'
-      });
-
-      await Contractor.findByIdAndUpdate(subscription.contractorId, {
-        hasActiveSubscription: false,
-        subscriptionStatus: 'failed'
-      });
-    }
-  }
-
-  static async hasActiveSubscription (contractorId: string): Promise<boolean> {
+  static async hasActiveSubscription(contractorId: string): Promise<boolean> {
     const subscription = await Subscription.findOne({
       contractorId,
       status: { $in: ['active', 'pending', 'processing'] },
@@ -1051,7 +748,7 @@ export class SubscriptionService {
   }
 
   // Helper function to safely convert timestamps
-  static convertTimestampToDate (ts: number) {
+  static convertTimestampToDate(ts: number) {
     if (typeof ts === 'number' && !isNaN(ts) && ts > 0) {
       const date = new Date(ts * 1000);
       if (!isNaN(date.getTime())) {
@@ -1062,7 +759,7 @@ export class SubscriptionService {
     return new Date();
   }
 
-  static validateAndConvertDate (timestamp: number | undefined | null): Date {
+  static validateAndConvertDate(timestamp: number | undefined | null): Date {
     if (!timestamp || typeof timestamp !== 'number' || timestamp <= 0) {
       console.warn(`Invalid timestamp: ${timestamp}, using current date`);
       return new Date();
@@ -1081,7 +778,7 @@ export class SubscriptionService {
    * =================================================================
    */
 
-  static async getRevenueSummary (dateRange?: {
+  static async getRevenueSummary(dateRange?: {
     startDate?: Date;
     endDate?: Date;
   }) {
@@ -1195,17 +892,17 @@ export class SubscriptionService {
       activePlans: mrrData?.activePlans || 0,
       conversionRate: revenueSummary?.totalSubscriptions
         ? Math.round(
-            (revenueSummary.activeSubscriptions /
-              revenueSummary.totalSubscriptions) *
-              100 *
-              100
-          ) / 100
+          (revenueSummary.activeSubscriptions /
+            revenueSummary.totalSubscriptions) *
+          100 *
+          100
+        ) / 100
         : 0
     };
   }
 
   // Get monthly revenue breakdown
-  static async getMonthlyRevenue (year?: number) {
+  static async getMonthlyRevenue(year?: number) {
     const targetYear = year || new Date().getFullYear();
     const startDate = new Date(targetYear, 0, 1); // January 1st
     const endDate = new Date(targetYear + 1, 0, 1); // January 1st next year
@@ -1293,10 +990,10 @@ export class SubscriptionService {
             ? 100
             : 0
           : Math.round(
-              ((current.revenue - previous.revenue) / previous.revenue) *
-                100 *
-                100
-            ) / 100;
+            ((current.revenue - previous.revenue) / previous.revenue) *
+            100 *
+            100
+          ) / 100;
 
       return { ...current, growthRate };
     });
@@ -1322,7 +1019,7 @@ export class SubscriptionService {
   }
 
   // Get revenue breakdown by subscription plan
-  static async getRevenueByPlan (dateRange?: {
+  static async getRevenueByPlan(dateRange?: {
     startDate?: Date;
     endDate?: Date;
   }) {
@@ -1384,7 +1081,7 @@ export class SubscriptionService {
       },
       { $sort: { totalRevenue: -1 } }
     ]);
- 
+
     const totalRevenue = planRevenue.reduce(
       (sum, plan) => sum + plan.totalRevenue,
       0
@@ -1410,7 +1107,7 @@ export class SubscriptionService {
   }
 
   // Get MRR analytics and growth trends
-  static async getMRRAnalytics () {
+  static async getMRRAnalytics() {
     // Current MRR
     const [currentMRR] = await Subscription.aggregate([
       {
@@ -1531,8 +1228,8 @@ export class SubscriptionService {
       averageRevenuePerUser:
         currentMRR?.activeSubscriptions > 0
           ? Math.round(
-              (currentMRRValue / currentMRR.activeSubscriptions) * 100
-            ) / 100
+            (currentMRRValue / currentMRR.activeSubscriptions) * 100
+          ) / 100
           : 0,
       monthlyChurnRate: Math.round(churnRate * 100) / 100,
       churnedMRR: Math.round(churnedMRRValue * 100) / 100,
@@ -1547,7 +1244,7 @@ export class SubscriptionService {
   }
 
   // Get revenue trends and forecasting
-  static async getRevenueTrends (months: number = 12) {
+  static async getRevenueTrends(months: number = 12) {
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - months);
 
@@ -1643,10 +1340,10 @@ export class SubscriptionService {
       averageMonthlyRevenue:
         trends.length > 0
           ? Math.round(
-              (trends.reduce((sum, trend) => sum + trend.monthlyRevenue, 0) /
-                trends.length) *
-                100
-            ) / 100
+            (trends.reduce((sum, trend) => sum + trend.monthlyRevenue, 0) /
+              trends.length) *
+            100
+          ) / 100
           : 0
     };
   }

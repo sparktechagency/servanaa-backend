@@ -5,11 +5,12 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.post(
-  '/create-payment-intent',
-  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
-  PaymentControllers.createStripePayment,
-);
+// router.post(
+//   '/create-payment-intent',
+//   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+//   PaymentControllers.createStripePayment,
+// );
+
 router.get(
   '/create-checkout-session',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
@@ -27,14 +28,15 @@ router.post(
   PaymentControllers.checkPaymentComplete,
 );
 router.post('/confirm-payment', PaymentControllers.confirmStripePayment);
-router.post('/webhook', PaymentControllers.webhook);
+
+// router.post('/webhook', PaymentControllers.webhook);
 router.get('/check-account-status', PaymentControllers.checkAccountStatus);
 router.get('/check-bank-and-transfer', PaymentControllers.checkBankStatusAndTransfer);
 
 router.post(
   '/withdrawal-process',
   auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
-//   validateRequest(processValidationSchema),
+  //   validateRequest(processValidationSchema),
   PaymentControllers.singleWithdrawalProcess,
 );
 

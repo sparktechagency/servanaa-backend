@@ -33,7 +33,7 @@ const bookingSchema = new Schema<TBooking>(
     },
     status: {
       type: String,
-      enum: ['pending', 'ongoing', 'completed', 'rejected'],
+      enum: ['pending', 'accepted', 'ongoing', 'completed', 'rejected', 'cancelled'],
       default: 'pending',
     },
     paymentStatus: {
@@ -55,7 +55,6 @@ const bookingSchema = new Schema<TBooking>(
         }
       }
     ],
-
     material: [
       {
         name: {
@@ -77,7 +76,6 @@ const bookingSchema = new Schema<TBooking>(
         }
       }
     ],
-
     // Time and date fields
     bookingDate: {
       type: Date,
@@ -121,7 +119,7 @@ const bookingSchema = new Schema<TBooking>(
 
     totalAmount: {
       type: Number,
-      required: [false, 'Total amount is required'],
+      required: [true, 'Total amount is required'],
       min: [0, 'Total amount cannot be negative']
     },
 

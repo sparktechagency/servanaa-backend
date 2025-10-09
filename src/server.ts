@@ -31,7 +31,7 @@ async function main() {
     initializeChatSocket(io);
 
     server.listen(port, () => {
-      console.log(`🚀 Server is running on http://192.168.0.114:${port}`);
+      console.log(`🚀 Server is running on http://10.10.20.11:${port}`);
     });
   } catch (err) {
     console.error('❌ Server startup error:', err);

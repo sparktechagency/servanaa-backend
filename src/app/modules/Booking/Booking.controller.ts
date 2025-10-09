@@ -73,7 +73,7 @@ const getAllBookingsByUser = catchAsync(async (req, res) => {
     success: true,
     message: 'Bookings are retrieved successfully',
     meta: result.meta,
-    data: result.result
+    data: result.data
   });
 });
 

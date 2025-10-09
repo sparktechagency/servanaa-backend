@@ -7,56 +7,51 @@ import config from '../../config';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { User } from '../User/user.model';
-import mongoose from 'mongoose';
 import { Transaction } from '../Transaction/transaction.model';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Booking } from '../Booking/Booking.model';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const stripe = new Stripe(config.stripe_secret_key as string);
 
-const createSingleStripePaymentIntoDB = async (
-  user: any,
-  paymentData: any,
-): Promise<string> => {
-  const { competitionId } = paymentData;
-  console.log('paymentData', paymentData)
+// const createSingleStripePaymentIntoDB = async (
+//   user: any,
+//   paymentData: any,
+// ): Promise<string> => {
+//   const { competitionId } = paymentData;
+//   console.log('paymentData', paymentData)
 
-  let actor = null;
-
-
-  if (user.role === 'customer') {
-    actor = await User.findOne({ email: user.userEmail });
-  } else {
-    throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized');
-  }
-
-  if (!actor) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized');
-  }
-  // const entryFeeInDollars = parseFloat(competition.entryFee); // Ensure the value is a number in USD
-  // const entryFeeInCents = Math.round(entryFeeInDollars * 100); // Convert USD to cents
-
-  const metadata: Stripe.MetadataParam = {
-    competitionId,
-    actorId: actor?._id as any,
-  };
+//   let actor = null;
 
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: 500,
-    // amount: entryFeeInCents,
-    currency: 'usd',
-    payment_method_types: ['card'],
-    metadata,
-    description: 'Competition Entry Fee',
-  });
+//   if (user.role === 'customer') {
+//     actor = await User.findOne({ email: user.userEmail });
+//   } else {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized');
+//   }
+
+//   if (!actor) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized');
+//   }
+//   // const entryFeeInDollars = parseFloat(competition.entryFee); // Ensure the value is a number in USD
+//   // const entryFeeInCents = Math.round(entryFeeInDollars * 100); // Convert USD to cents
+
+//   const metadata: Stripe.MetadataParam = {
+//     competitionId,
+//     actorId: actor?._id as any,
+//   };
 
 
+//   const paymentIntent = await stripe.paymentIntents.create({
+//     amount: 500,
+//     currency: 'usd',
+//     payment_method_types: ['card'],
+//     metadata,
+//     description: 'Competition Entry Fee',
+//   });
 
-  return paymentIntent.client_secret as string;
+//   return paymentIntent.client_secret as string;
 
-
-}
+// }
 
 const createStripeCheckoutSessionIntoDB = async (
   user: any,
@@ -65,12 +60,12 @@ const createStripeCheckoutSessionIntoDB = async (
 
   console.log('user', user);
 
-  const email = user?.email || 'ahmadmusa9805@gmail.com';
+  const email = user?.userEmail || 'ahmadmusa9805@gmail.com';
 
-  const { serviceId = 'ahmadmusa', amount = 50, currency = 'USD', bookingId } = paymentData;
+  const { amount = 50, bookingId } = paymentData;
 
   // Fetch the booking and populate contractor details
-  const booking = await Booking.findOne({ bookingId }).populate('contractorId fullName img');
+  const booking = await Booking.findOne({ bookingId }).populate('contractorId', 'fullName img');
 
   // @ts-ignore
   const contractorName = booking?.contractorId?.fullName || 'Contractor';
@@ -90,8 +85,8 @@ const createStripeCheckoutSessionIntoDB = async (
     line_items: [
       {
         price_data: {
-          currency: currency,
-          unit_amount: Math.round(Number(amount) * 100), // Stripe expects amount in cents
+          currency: "usd",
+          unit_amount: Math.round(Number(amount) * 100),
           product_data: {
             name: `Payment for ${contractorName}`,
             images: contractorImg,
@@ -105,43 +100,6 @@ const createStripeCheckoutSessionIntoDB = async (
 
   return session.url as string;
 }
-
-
-const verifyStripeSessionIntoDB = async (sessionId: any) => {
-
-  console.log('sessionId', sessionId)
-
-  if (!sessionId) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'sessionId is required');
-  }
-
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    //payment_status = "no_payment_required", "paid", "unpaid"
-    if (session.payment_status !== "paid") {
-      throw new AppError(httpStatus.BAD_REQUEST, "Payment Failled");
-    }
-
-    const metadata = session?.metadata;
-    if (!metadata) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Invalid Session Id");
-    }
-
-
-
-    //update database base on metadata = session.metadata
-    // const result = await OrderModel.updateOne({
-    //   _id: metadata.orderId,
-    //   userId: metadata.userId
-    // }, {
-    //   paymentStatus: "paid"
-    // })
-
-    return 'payment successfully';
-  } catch (err: any) {
-    throw new Error(err)
-  }
-};
 
 const confirmStripePaymentIntoDB = async (paymentIntentId: string) => {
   const confirmedPaymentIntent =
@@ -319,30 +277,26 @@ const checkPaymentCompletefromDB = async (user: any, payload: any) => {
   // const existingTransaction = await Transaction.findOne({ competitionId: payload.competitionId, actorId: actor?._id, paymentStatus: 'completed' });
   // return existingTransaction
 };
-const webhookToService = async (data: any, headers: any) => {
-  const event = stripe.webhooks.constructEvent(
-    data,
-    headers['stripe-signature'],
-    config.stripe_webhook_secret ?? ''
-  );
+
+// const webhookToService = async (data: any, headers: any) => {
+//   const event = stripe.webhooks.constructEvent(
+//     data,
+//     headers['stripe-signature'],
+//     config.stripe_webhook_secret ?? ''
+//   );
 
 
-  if (event.type === 'account.updated') {
-    const account = event.data.object;
+//   if (event.type === 'account.updated') {
+//     const account = event.data.object;
 
-    if (account.charges_enabled) {
-      // const actor = await Actor.findOne({ stripeAccountId: account.id });
-      // if (actor) {
-      //   await Transaction.updateMany(
-      //     { actorId: actor._id, type: 'withdrawal', status: 'pending' },
-      //     { status: 'ready' }
-      //   );
-      // }
-    }
-  }
+//     if (account.charges_enabled) {
 
-  return 'Webhook received.';
-};
+//     }
+//   }
+//   console.log("event", event)
+//   // ==========================
+//   return 'Webhook received.';
+// };
 
 const singleWithdrawalProcessIntoDB = async (
   payload: any,
@@ -482,13 +436,12 @@ const singleWithdrawalProcessIntoDB = async (
 
 export const PaymentServices = {
   checkPaymentCompletefromDB,
-  webhookToService,
+  // webhookToService,
   withdrawalProcessPaymentIntoDB,
-  createSingleStripePaymentIntoDB,
+  // createSingleStripePaymentIntoDB,
   confirmStripePaymentIntoDB,
   checkAccountStatusIntoDB,
   checkBankStatusAndTransferIntoDB,
   createStripeCheckoutSessionIntoDB,
-  verifyStripeSessionIntoDB,
   singleWithdrawalProcessIntoDB
 };

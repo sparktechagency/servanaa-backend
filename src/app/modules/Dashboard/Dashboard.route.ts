@@ -6,11 +6,7 @@ import {
   deleteSubscription,
   getAllAdminNotifications,
   getAllSubscriptionPlansTable,
-  getCategoryTable,
-  getContractorTableData,
   getDashboardData,
-  getServiceTable,
-  getSubCategoryTable,
   getTransactionHistoryTable,
   updateSubscription
 } from './Dashboard.controller';
