@@ -7,7 +7,7 @@ import httpStatus from 'http-status';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { BOOKING_SEARCHABLE_FIELDS } from './Booking.constant';
-import { DaySchedule, TBooking } from './Booking.interface';
+import { TBooking } from './Booking.interface';
 import { Booking } from './Booking.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import {
@@ -255,7 +255,7 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
 
 const getAllBookingsByUserFromDB = async (
   query: Record<string, any>,
-  user: any
+  user: any,
 ) => {
   const { status: stat, page = 1, limit = 10 } = query;
 
@@ -300,12 +300,28 @@ const getAllBookingsByUserFromDB = async (
   const totalPage = Math.ceil(total / Number(limit));
 
   const bookings = await Booking.find(filter)
-    .populate('customerId', 'fullName email')
-    .populate('contractorId', 'fullName img')
+    .populate({
+      path: 'customerId',
+      select: 'fullName email img customerId',
+      populate: {
+        path: 'customerId',
+        select: 'city',
+      },
+    })
+    .populate({
+      path: 'contractorId',
+      select: 'fullName img contractor',
+      populate: {
+        path: 'contractor',
+        select: 'ratings',
+      },
+    })
     .populate('subCategoryId')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(Number(limit));
+
+  console.log(bookings)
 
   return {
     success: true,
@@ -318,7 +334,6 @@ const getAllBookingsByUserFromDB = async (
     },
   };
 };
-
 
 const getSingleBookingFromDB = async (id: string) => {
   const result = await Booking.findById(id);
@@ -428,7 +443,6 @@ const deleteBookingFromDB = async (id: string) => {
 };
 
 // =============================added by rakib==========================
-
 export const BookingServices = {
   createBookingIntoDB,
   getAllBookingsFromDB,

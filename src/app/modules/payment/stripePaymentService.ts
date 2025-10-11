@@ -9,42 +9,57 @@ import { User } from '../User/user.model';
 import { Transaction } from '../Transaction/transaction.model';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Booking } from '../Booking/Booking.model';
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const stripe = new Stripe(config.stripe_secret_key as string);
 
-const createStripeCheckoutSessionIntoDB = async (
-  user: any,
-  paymentData: any,
-): Promise<string> => {
-
-  console.log('user', user);
-
-  const email = user?.userEmail || 'ahmadmusa9805@gmail.com';
-
+const createStripeCheckoutSessionIntoDB = async (user: any, paymentData: any): Promise<string> => {
+  const email = user?.userEmail;
   const { amount = 50, bookingId } = paymentData;
 
-  // Fetch the booking and populate contractor details
-  const booking = await Booking.findOne({ bookingId }).populate('contractorId', 'fullName img');
+  // Validate booking
+  const booking = await Booking.findOne({ bookingId }).populate(
+    'contractorId',
+    'fullName img'
+  );
+
+  if (!booking) {
+    throw new Error('Booking not found');
+  }
+
+  // Validate user
+  const userData = await User.findOne({ email });
+  if (!userData) {
+    throw new Error('User not found');
+  }
+
+  console.log('userData._id', userData._id)
 
   // @ts-ignore
   const contractorName = booking?.contractorId?.fullName || 'Contractor';
   // @ts-ignore
   const contractorImg = booking?.contractorId?.img ? [booking.contractorId.img] : [];
 
+  const metadata = {
+    payUser: userData._id.toString(),
+    bookingId,
+    type: 'booking_payment',
+    amount: String(amount),
+  };
+
   const session = await stripe.checkout.sessions.create({
+    // @ts-ignore
     payment_method_types: ['card'],
     mode: 'payment',
     success_url: `${config.frontend_url}/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.frontend_url}/cancel`,
-    customer_email: `${email}`,
-    metadata: {
-      payUser: `${user.fullName}`,
-      bookingId,
+    customer_email: email,
+    metadata,
+    payment_intent_data: {
+      metadata,
     },
     line_items: [
       {
         price_data: {
-          currency: "usd",
+          currency: 'usd',
           unit_amount: Math.round(Number(amount) * 100),
           product_data: {
             name: `Payment for ${contractorName}`,
@@ -58,7 +73,8 @@ const createStripeCheckoutSessionIntoDB = async (
   });
 
   return session.url as string;
-}
+};
+
 
 const confirmStripePaymentIntoDB = async (paymentIntentId: string) => {
   const confirmedPaymentIntent =

@@ -5,12 +5,6 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-// router.post(
-//   '/create-payment-intent',
-//   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
-//   PaymentControllers.createStripePayment,
-// );
-
 router.get(
   '/create-checkout-session',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),

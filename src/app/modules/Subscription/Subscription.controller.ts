@@ -254,7 +254,7 @@ const handleWebhook = catchAsync(async (req, res) => {
   let event: Stripe.Event;
 
   try {
-    // ⚠️ Stripe requires raw body, not parsed JSON
+
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err: any) {
     console.error('⚠️ Webhook signature verification failed:', err.message);
@@ -268,25 +268,17 @@ const handleWebhook = catchAsync(async (req, res) => {
 
   try {
     switch (event.type) {
-      // ✅ When checkout session completes (subscription or booking)
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        // Distinguish between booking payments and subscriptions
-        if (session.metadata?.type === 'booking_payment') {
-          // await BookingService.handleCheckoutCompleted(session);
-        } else {
-          await SubscriptionService.handleCheckoutCompleted(session);
-        }
-
-        break;
-      }
-
       // ✅ Payment succeeded
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const metadata = paymentIntent.metadata;
+        console.log('Checkout Session Metadata:', metadata);
+
         if (paymentIntent.metadata?.type === 'booking_payment') {
+          console.log('=====booking=======')
           // await BookingService.handlePaymentSuccess(paymentIntent);
         } else if (paymentIntent.metadata?.type === 'subscription') {
+          console.log('=====subscription=======')
           // await SubscriptionService.handlePaymentSuccess(paymentIntent);
         }
         break;

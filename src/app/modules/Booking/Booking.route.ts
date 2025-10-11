@@ -48,7 +48,6 @@ router.patch(
   BookingControllers.updateBooking
 );
 
-
 router.delete('/:id', BookingControllers.deleteBooking);
 
 router.get(
