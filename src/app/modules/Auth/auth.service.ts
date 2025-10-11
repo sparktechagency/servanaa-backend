@@ -44,22 +44,6 @@ const loginUser = async (payload: TLoginUser) => {
   if (!(await User.isPasswordMatched(payload?.password, user?.password)))
     throw new AppError(httpStatus.FORBIDDEN, 'Password do not matched');
 
-  // If OTP is not verified, send OTP and return a specific message
-  // if (!user.otpVerified) {
-  //   await OtpServices.generateAndSendOTP(user.email);
-
-  //   // Return a specific message for the controller
-  //   return {
-  //     message: 'OTP sent successfully!',
-  //     accessToken: null,
-  //     refreshToken: null,
-  //   };
-  // }
-
-  // if (user.approvalStatus === false) {
-  //   throw new AppError(httpStatus.FORBIDDEN, 'Admin Approval Pending !');
-  // }
-
   //create token and sent to the  client
   const jwtPayload: any = {
     userEmail: user.email,

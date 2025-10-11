@@ -1,11 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// import mongoose from 'mongoose';
-
 import httpStatus from 'http-status';
-import { TUser } from './user.interface';
 import { User } from './user.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import {
@@ -15,21 +8,12 @@ import {
   usersSearchableFields
 } from './user.constant';
 import AppError from '../../errors/AppError';
-
 import config from '../../config';
 import { OtpServices } from '../Otp/otp.service';
 import { createToken } from '../Auth/auth.utils';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
 import mongoose from 'mongoose';
-
-// export const addMobileNumberIntoDB = async (phoneNumber: any, user: any) => {
-//      if (!phoneNumber) {
-//         return 'Phone number is required.'
-//       }
-//     const result = await OtpServices.generateAndSendOTPToMobile(phoneNumber?.phone, user?.userEmail);
-//     return result;
-// };
 
 // create customer
 export const createCustomerIntoDB = async (payload: any) => {
@@ -220,7 +204,7 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
     User.find({ role: { $ne: 'superAdmin' } })
       .populate('contractor', 'location') // Populating location from contractor
       .populate('customer', 'location') // Populating location from customer
-      .populate( 'messageId', 'adminMessage clientMessage'), // Populating location from customer
+      .populate('messageId', 'adminMessage clientMessage'), // Populating location from customer
     query
   )
     .search(usersSearchableFields)
@@ -289,7 +273,6 @@ const updateUserIntoDB = async (
       'Subscription status cannot be updated directly. Please use subscription management endpoints.'
     );
   }
-
 
   const userDataToUpdate = extractFields(payload || {}, userFields);
 
@@ -449,38 +432,6 @@ const deleteUserFromDB = async (userId: string) => {
   // }
 };
 
-// const deleteUserFromDB = async (id: string) => {
-
-//   try {
-//     // Step 1: Soft-delete the user
-//     const deletedUser = await User.findByIdAndDelete(
-//       id,
-//       { new: true }
-//     );
-
-//     if (!deletedUser) {
-//       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete User');
-//     }
-
-//     // // Optional: Validate that a quote was found and updated
-//     // if (!deleted) {
-//     //   console.warn(`No quote found for user with ID ${id}`);
-//     // }
-
-//     // Commit the transaction if all operations succeed
-//     // await session.commitTransaction();
-//     // session.endSession();
-
-//     return deletedUser;
-//   } catch (error) {
-//     // Rollback the transaction if any operation fails
-//     // await session.abortTransaction();
-//     // session.endSession();
-//     // throw error; // Propagate the error to be handled by the caller
-
-//     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete User');
-//   }
-// };
 const getUsersMonthlyFromDB = async () => {
   const startOfYear = new Date(new Date().getFullYear(), 0, 1); // January 1st, current year
   const endOfYear = new Date(new Date().getFullYear() + 1, 0, 1); // January 1st, next year
@@ -514,6 +465,7 @@ const getUsersMonthlyFromDB = async () => {
 
   return formattedResult;
 };
+
 const getAllProvidersFromDB = async (query: Record<string, unknown>) => {
   const studentQuery = new QueryBuilder(User.find({ role: 'provider' }), query)
     .search(usersSearchableFields)
@@ -530,6 +482,7 @@ const getAllProvidersFromDB = async (query: Record<string, unknown>) => {
     result
   };
 };
+
 const getAllClientsFromDB = async (query: Record<string, unknown>) => {
   const studentQuery = new QueryBuilder(User.find({ role: 'admin' }), query)
     .search(usersSearchableFields)

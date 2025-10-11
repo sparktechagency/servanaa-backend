@@ -5,38 +5,10 @@ import AppError from '../../errors/AppError';
 import { CHATROOM_SEARCHABLE_FIELDS } from './ChatRoom.constant';
 import mongoose from 'mongoose';
 import { ChatRoom } from './ChatRoom.model';
-import { User } from '../User/user.model';
 import { Chat } from '../Chat/Chat.model';
-
-// const createChatRoomIntoDB = async (
-//   payload: any,
-// ) => {
-
-//     const { contractorId, customerId } = payload;
-// console.log('contractorId', contractorId)
-// console.log('customerId', customerId)
-//   let room = await ChatRoom.findOne({
-//     participants: { $all: [contractorId, customerId] },
-//   });
-
-//   if (!room) {
-//     room = await ChatRoom.create({ participants: [contractorId, customerId] });
-//   }
-
-
-//   if (!room) {
-//     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create ChatRoom');
-//   }
-//  console.log('room', room)
-//   return room;
-// };
-
-// import mongoose from 'mongoose';
 
 const createChatRoomIntoDB = async (payload: any) => {
   const { contractorId, customerId } = payload;
-
-
   const contractorObjId = new mongoose.Types.ObjectId(contractorId);
   const customerObjId = new mongoose.Types.ObjectId(customerId);
 
@@ -57,7 +29,6 @@ const createChatRoomIntoDB = async (payload: any) => {
   return room;
 };
 
-
 const getAllChatRoomsFromDB = async (query: Record<string, unknown>) => {
   const ChatRoomQuery = new QueryBuilder(
     ChatRoom.find().populate(''),
@@ -76,7 +47,6 @@ const getAllChatRoomsFromDB = async (query: Record<string, unknown>) => {
     meta,
   };
 };
-
 
 const getAllMyChatRoomsFromDB = async (
   userId: string,
@@ -131,51 +101,6 @@ const getAllMyChatRoomsFromDB = async (
     meta,
   };
 };
-
-
-
-// const getAllMyChatRoomsFromDB = async (userId: string, query: Record<string, unknown>) => {
-//   const ChatRoomQuery = new QueryBuilder(
-//     ChatRoom.find({ participants: userId }),
-//     query,
-//   )
-//     .search(CHATROOM_SEARCHABLE_FIELDS)
-//     .filter()
-//     .sort()
-//     .paginate()
-//     .fields();
-
-//   const rooms = await ChatRoomQuery.modelQuery;
-//   const meta = await ChatRoomQuery.countTotal();
-
-//   const enrichedRooms = await Promise.all(
-//     rooms.map(async (room) => {
-//       const otherUserId = room.participants.find((id: string) => id !== userId);
-
-
-
-//     const [otherUser, lastMessage] = await Promise.all([
-//   User.findById(otherUserId).select('fullName img').lean(),
-//   Chat.findOne({ chatRoomId: room._id }).sort({ createdAt: -1 }).select('message createdAt').lean(),
-// ]);
-
-// const lastMessageWithCreatedAt = lastMessage as any;
-
-// return {
-//   ...room.toObject(),
-//   otherUserName: otherUser?.fullName || null,
-//   otherUserImage: otherUser?.img || null,
-//   lastMessage: lastMessageWithCreatedAt.message || null,
-//   lastMessageTime: lastMessageWithCreatedAt.createdAt || null,
-// };
-//     })
-//   );
-
-//   return {
-//     result: enrichedRooms,
-//     meta,
-//   };
-// };
 
 const getSingleChatRoomFromDB = async (id: string) => {
   const result = await ChatRoom.findById(id);

@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 import Stripe from 'stripe';
-
 import config from '../../config';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
@@ -12,46 +11,6 @@ import { Contractor } from '../Contractor/Contractor.model';
 import { Booking } from '../Booking/Booking.model';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const stripe = new Stripe(config.stripe_secret_key as string);
-
-// const createSingleStripePaymentIntoDB = async (
-//   user: any,
-//   paymentData: any,
-// ): Promise<string> => {
-//   const { competitionId } = paymentData;
-//   console.log('paymentData', paymentData)
-
-//   let actor = null;
-
-
-//   if (user.role === 'customer') {
-//     actor = await User.findOne({ email: user.userEmail });
-//   } else {
-//     throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized');
-//   }
-
-//   if (!actor) {
-//     throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized');
-//   }
-//   // const entryFeeInDollars = parseFloat(competition.entryFee); // Ensure the value is a number in USD
-//   // const entryFeeInCents = Math.round(entryFeeInDollars * 100); // Convert USD to cents
-
-//   const metadata: Stripe.MetadataParam = {
-//     competitionId,
-//     actorId: actor?._id as any,
-//   };
-
-
-//   const paymentIntent = await stripe.paymentIntents.create({
-//     amount: 500,
-//     currency: 'usd',
-//     payment_method_types: ['card'],
-//     metadata,
-//     description: 'Competition Entry Fee',
-//   });
-
-//   return paymentIntent.client_secret as string;
-
-// }
 
 const createStripeCheckoutSessionIntoDB = async (
   user: any,
@@ -277,26 +236,6 @@ const checkPaymentCompletefromDB = async (user: any, payload: any) => {
   // const existingTransaction = await Transaction.findOne({ competitionId: payload.competitionId, actorId: actor?._id, paymentStatus: 'completed' });
   // return existingTransaction
 };
-
-// const webhookToService = async (data: any, headers: any) => {
-//   const event = stripe.webhooks.constructEvent(
-//     data,
-//     headers['stripe-signature'],
-//     config.stripe_webhook_secret ?? ''
-//   );
-
-
-//   if (event.type === 'account.updated') {
-//     const account = event.data.object;
-
-//     if (account.charges_enabled) {
-
-//     }
-//   }
-//   console.log("event", event)
-//   // ==========================
-//   return 'Webhook received.';
-// };
 
 const singleWithdrawalProcessIntoDB = async (
   payload: any,

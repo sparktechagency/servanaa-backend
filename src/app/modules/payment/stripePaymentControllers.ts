@@ -10,56 +10,6 @@ const stripe = new Stripe(config.stripe_secret_key as string, {
   apiVersion: '2024-06-20',
 });
 
-// const webhook = catchAsync(async (req, res) => {
-//   const sig = req.headers['stripe-signature'] as string;
-//   let event: Stripe.Event;
-
-
-//   try {
-//     event = stripe.webhooks.constructEvent(req.rawBody!, sig, endpointSecret!);
-//     console.log("event", event.type)
-//   } catch (err) {
-//     console.error('Webhook signature verification failed.', err);
-//     return res.status(400).send(`Webhook Error: ${err}`);
-//   }
-
-//   // Handle specific events
-
-//   console.log("event", event.type)
-//   switch (event.type) {
-//     case 'payment_intent.succeeded': {
-//       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-//       console.log('PaymentIntent was successful!', paymentIntent);
-//       break;
-//     }
-//     case 'transfer.created': {
-//       const transfer = event.data.object as Stripe.Transfer;
-//       console.log('Transfer created!', transfer);
-//       break;
-//     }
-//     default:
-//       console.log(`Unhandled event type: ${event.type}`);
-//   }
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Payment is created succesfully',
-//     data: { received: true },
-//   });
-// });
-
-// const createStripePayment = catchAsync(async (req, res) => {
-//   const result =
-//     await PaymentServices.createSingleStripePaymentIntoDB(req.user,req.body);
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Payment Intent is created succesfully',
-//     data: result,
-//   });
-// });
-
 const createStripeCheckoutSession = catchAsync(async (req, res) => {
   const result =
     await PaymentServices.createStripeCheckoutSessionIntoDB(req.user, req.body);

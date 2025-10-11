@@ -302,6 +302,7 @@ const getAllBookingsByUserFromDB = async (
   const bookings = await Booking.find(filter)
     .populate('customerId', 'fullName email')
     .populate('contractorId', 'fullName img')
+    .populate('subCategoryId')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(Number(limit));
