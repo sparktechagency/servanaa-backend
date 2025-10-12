@@ -41,7 +41,6 @@ const bookingSchema = new Schema<TBooking>(
       enum: ['pending', 'paid', 'failed', 'refunded'],
       default: 'pending',
     },
-
     // Add missing required fields
     questions: [
       {
@@ -99,7 +98,6 @@ const bookingSchema = new Schema<TBooking>(
       required: [true, 'Duration is required'],
       min: [1, 'Duration must be at least 1 hour']
     },
-
     timeSlots: [
       {
         type: String,
@@ -116,14 +114,11 @@ const bookingSchema = new Schema<TBooking>(
       required: [true, 'Hourly rate is required'],
       min: [0, 'Hourly rate cannot be negative']
     },
-
     totalAmount: {
       type: Number,
       required: [true, 'Total amount is required'],
       min: [0, 'Total amount cannot be negative']
     },
-
-    // Files
     files: [Schema.Types.Mixed],
     isDeleted: {
       type: Boolean,

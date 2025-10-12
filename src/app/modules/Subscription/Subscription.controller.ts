@@ -9,6 +9,7 @@ import Stripe from 'stripe';
 import config from '../../config';
 import { Booking } from '../Booking/Booking.model';
 import { User } from '../User/user.model';
+import { BookingServices } from '../Booking/Booking.service';
 
 const stripe = new Stripe(config.stripe_secret_key!);
 
@@ -242,19 +243,15 @@ const getSingleSubscription = catchAsync(async (req, res) => {
 
 const handleWebhook = catchAsync(async (req, res) => {
   const sig = req.headers['stripe-signature'] as string;
-  const endpointSecret = config.stripe_webhook_secret!;
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
   if (!sig) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'Missing Stripe signature header'
-    );
+    throw new AppError(httpStatus.BAD_REQUEST, 'Missing Stripe signature header');
   }
 
   let event: Stripe.Event;
 
   try {
-
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err: any) {
     console.error('⚠️ Webhook signature verification failed:', err.message);
@@ -264,56 +261,77 @@ const handleWebhook = catchAsync(async (req, res) => {
     );
   }
 
-  console.log(`🔔 Received webhook event: ${event.type} - ${event.id}`);
-
   try {
     switch (event.type) {
-      // ✅ Payment succeeded
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         const metadata = paymentIntent.metadata;
-        console.log('Checkout Session Metadata:', metadata);
 
-        if (paymentIntent.metadata?.type === 'booking_payment') {
-          console.log('=====booking=======')
-          // await BookingService.handlePaymentSuccess(paymentIntent);
-        } else if (paymentIntent.metadata?.type === 'subscription') {
-          console.log('=====subscription=======')
-          // await SubscriptionService.handlePaymentSuccess(paymentIntent);
+        const chargeId = paymentIntent.latest_charge as string | undefined;
+        let receipt_url: string | any;
+        let transactionId: string | any;
+
+        if (chargeId) {
+          const charge = await stripe.charges.retrieve(chargeId);
+          console.log(JSON.stringify(charge))
+          transactionId = charge.balance_transaction;
+          receipt_url = charge.receipt_url;
+        }
+
+        if (metadata?.type === 'booking_payment') {
+          const bookingObjId = metadata.bookingId;
+
+          console.log({
+            payUser: metadata.payUser,
+            bookingId: bookingObjId,
+            amount: metadata.amount,
+            stripeChargeId: chargeId,
+            stripePaymentIntentId: paymentIntent.id,
+          });
+
+          await BookingServices.handlePaymentSuccess({
+            payUser: metadata.payUser,
+            bookingId: bookingObjId,
+            amount: metadata.amount,
+            stripeChargeId: chargeId,
+            stripePaymentIntentId: paymentIntent.id,
+            receipt_url: receipt_url
+          });
         }
         break;
       }
 
-      // ✅ Payment failed
       case 'payment_intent.payment_failed':
       case 'invoice.payment_failed': {
         const failedPayment = event.data.object as Stripe.PaymentIntent;
 
         if (failedPayment.metadata?.type === 'booking_payment') {
           const { bookingId } = failedPayment.metadata;
-          await Booking.findByIdAndUpdate(bookingId, {
-            paymentStatus: 'failed',
-            failedAt: new Date()
-          });
-
-        } else if (failedPayment.metadata?.type === 'subscription') {
-          // await SubscriptionService.handlePaymentFailed(failedPayment);
+          if (bookingId) {
+            await Booking.findOneAndUpdate(
+              { bookingId },
+              {
+                paymentStatus: 'failed',
+                failedAt: new Date(),
+              }
+            );
+          }
         }
         break;
       }
 
       default:
-        console.log(`⚠️  Unhandled event type: ${event.type}`);
+        console.log(`⚠️ Unhandled Stripe event type: ${event.type}`);
     }
 
-    res.json({ received: true });
+    res.status(200).json({ received: true });
   } catch (error) {
     console.error('❌ Error handling webhook:', error);
     res.status(500).json({ success: false, message: 'Webhook processing failed' });
   }
 });
 
-// Admin revenue analytics controllers
+
 const getRevenueSummary = catchAsync(async (req, res) => {
   const { startDate, endDate } = req.query;
   console.log('Hitting URL');

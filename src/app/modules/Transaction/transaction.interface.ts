@@ -3,9 +3,10 @@ import { Model, Types } from 'mongoose';
 
 export type TTransaction = {
   transactionId?: string;
+  receipt_url: string;
   userId: Types.ObjectId;
-//   contractorId: Types.ObjectId;
-//   customerId?: string;
+  //   contractorId: Types.ObjectId;
+  //   customerId?: string;
   bookingId?: Types.ObjectId;
   type: 'booking' | 'withdraw' | 'subscription';
   date: Date;

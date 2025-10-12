@@ -15,10 +15,13 @@ const NotificationSchema = new Schema<TNotification, NotificationModel>(
       required: true
     },
     message: { type: String, required: true },
-    isRead: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Users who have read this notification
+    isRead: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    booking: { type: Number },
+    paymentIntentId: { type: String },
     bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' },
     amount: { type: Number },
-    isDeleted: { type: Boolean, default: false }
+    isDeleted: { type: Boolean, default: false },
+    receipt_url: { type: String, },
   },
   { timestamps: true }
 );

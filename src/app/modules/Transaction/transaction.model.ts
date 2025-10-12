@@ -3,12 +3,11 @@ import { TransactionModel, TTransaction } from './transaction.interface';
 
 
 const transactionSchema: Schema = new Schema<TTransaction>(
-   {
+  {
     transactionId: { type: String },
+    receipt_url: { type: String },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    // contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    // customerId: { type: String },
-    bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' },
+    bookingId: { type: Number },
     type: {
       type: String,
       enum: ['booking', 'withdraw', 'subscription'],
