@@ -58,16 +58,16 @@ const checkAccountStatus = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
 const checkBankStatusAndTransfer = catchAsync(async (req, res) => {
   const { actorId } = req.query;
 
-  const result =
-    await PaymentServices.checkBankStatusAndTransferIntoDB(actorId);
+  const result = await PaymentServices.checkBankStatusAndTransferIntoDB(actorId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: '"Bank setup complete, transfer successful"',
+    message: "Bank setup complete, transfer successful",
     data: result,
   });
 });

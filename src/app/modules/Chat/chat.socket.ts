@@ -15,7 +15,6 @@ export const initializeChatSocket = (io: Server) => {
     }
 
     socket.on('sendMessage', async (data) => {
-      console.log('after>>>>>', data)
 
       const message = await ChatServices.createChatIntoDB(data);
 

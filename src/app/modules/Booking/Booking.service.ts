@@ -344,9 +344,9 @@ const getSingleBookingFromDB = async (id: string) => {
 
 const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   const booking = await Booking.findById(id);
+
   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
-  if (booking.isDeleted)
-    throw new AppError(httpStatus.BAD_REQUEST, 'Cannot update a deleted booking');
+  if (booking.isDeleted) throw new AppError(httpStatus.BAD_REQUEST, 'Cannot update a deleted booking');
   console.log('payload', id);
 
   const updateData: any = { ...payload };
@@ -372,8 +372,9 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
 
   if (updatedBooking.status === 'completed') {
-    const contractorData = await Contractor.findById(updatedBooking.contractorId);
-    const customerData = await Customer.findById(updatedBooking.customerId);
+    console.log('updatedBooking.contractorId', updatedBooking.contractorId, updatedBooking.customerId)
+    const contractorData = await Contractor.findById(updatedBooking.contractorId.toString());
+    const customerData = await Customer.findById(updatedBooking.customerId.toString());
 
     if (!contractorData) throw new Error('No contractor found');
     if (!customerData) throw new Error('No customer found');
