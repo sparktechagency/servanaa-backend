@@ -10,6 +10,13 @@ router.get(
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   PaymentControllers.createStripeCheckoutSession,
 );
+
+router.get(
+  '/create-checkout-subscriptions',
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  PaymentControllers.createStripeSubscriptionSessionIntoDB,
+);
+
 router.get(
   '/stripe/success',
   // auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),

@@ -8,6 +8,7 @@ const transactionSchema: Schema = new Schema<TTransaction>(
     receipt_url: { type: String },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     bookingId: { type: Number },
+    subscriptionId: { type: Schema.Types.ObjectId },
     type: {
       type: String,
       enum: ['booking', 'withdraw', 'subscription'],

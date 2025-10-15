@@ -3,6 +3,7 @@ import { Model, Types } from 'mongoose';
 
 export type TTransaction = {
   transactionId?: string;
+  subscriptionId: Types.ObjectId;
   receipt_url: string;
   userId: Types.ObjectId;
   //   contractorId: Types.ObjectId;

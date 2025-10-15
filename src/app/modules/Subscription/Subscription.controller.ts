@@ -37,7 +37,7 @@ const initializeDefaultPlans = catchAsync(async (req, res) => {
     });
   }
 });
-//----------------
+//=========================================
 
 // Subscription Plan Controllers
 const createSubscriptionPlan = catchAsync(async (req, res) => {
@@ -51,33 +51,43 @@ const createSubscriptionPlan = catchAsync(async (req, res) => {
   });
 });
 
-const changeSubscriptionPlan = catchAsync(async (req, res) => {
-  const { userEmail } = req.user;
-  const { planType, prorate = true } = req.body;
+// Get All Plans
+const getAllPlans = catchAsync(async (req, res) => {
+  const result = await SubscriptionService.getAllPlans();
 
-  const userDoc = await User.findOne({ email: userEmail }).populate(
-    'contractor'
-  );
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Plans retrieved successfully',
+    data: result,
+  });
+});
 
-  if (!userDoc?.contractor) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Contractor profile not found');
-  }
 
-  const contractorId = (userDoc.contractor as any)._id.toString();
-
-  const result = await SubscriptionService.changeSubscriptionPlan(
-    contractorId,
-    planType,
-    prorate
-  );
+// Update Plan
+const updatePlan = catchAsync(async (req, res) => {
+  const result = await SubscriptionService.updatePlan(req.params.id, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Subscription plan updated successfully',
-    data: result
+    data: result,
   });
 });
+
+// Delete Plan
+const deletePlan = catchAsync(async (req, res) => {
+  const result = await SubscriptionService.deletePlan(req.params.id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Subscription plan deleted successfully',
+    data: result,
+  });
+});
+// =======================================================
 
 const getAllSubscriptionPlans = catchAsync(async (req, res) => {
   const result = await SubscriptionService.getAllSubscriptionPlans(req.query);
@@ -281,14 +291,6 @@ const handleWebhook = catchAsync(async (req, res) => {
         if (metadata?.type === 'booking_payment') {
           const bookingObjId = metadata.bookingId;
 
-          console.log({
-            payUser: metadata.payUser,
-            bookingId: bookingObjId,
-            amount: metadata.amount,
-            stripeChargeId: chargeId,
-            stripePaymentIntentId: paymentIntent.id,
-          });
-
           await BookingServices.handlePaymentSuccess({
             payUser: metadata.payUser,
             bookingId: bookingObjId,
@@ -298,6 +300,42 @@ const handleWebhook = catchAsync(async (req, res) => {
             receipt_url: receipt_url
           });
         }
+        break;
+      }
+
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const metadata = session.metadata || {};
+
+        if (metadata.type === 'subscription') {
+          const subscriptionId = metadata.subscriptionId;
+          const payUser = metadata.payUser;
+          const amount = metadata.amount;
+
+          // Retrieve subscription to get charge info
+          const stripeSub = await stripe.subscriptions.retrieve(session.subscription as string, {
+            expand: ['latest_invoice.payment_intent'],
+          });
+
+          // @ts-ignore
+          const paymentIntent = stripeSub.latest_invoice?.payment_intent as Stripe.PaymentIntent;
+          const chargeId = paymentIntent?.latest_charge as string | undefined;
+          let receipt_url = '';
+          if (chargeId) {
+            const charge = await stripe.charges.retrieve(chargeId);
+            receipt_url = charge.receipt_url || '';
+          }
+
+          await SubscriptionService.handleSubscriptionCreated({
+            payUser,
+            subscriptionId,
+            amount,
+            stripeChargeId: chargeId || '',
+            stripePaymentIntentId: paymentIntent?.id || '',
+            receipt_url,
+          });
+        }
+
         break;
       }
 
@@ -420,7 +458,11 @@ export const SubscriptionControllers = {
   getSingleSubscription,
   handleWebhook,
   initializeDefaultPlans,
-  changeSubscriptionPlan,
+  // ====
+  getAllPlans,
+  updatePlan,
+  deletePlan,
+  // ======
   getRevenueSummary,
   getMonthlyRevenue,
   getRevenueByPlan,

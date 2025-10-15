@@ -7,7 +7,6 @@ import {
   createSubscriptionPlanSchema,
   updateSubscriptionPlanSchema,
   createCheckoutSessionSchema,
-  changeSubscriptionPlanSchema,
   revenueAnalyticsSchema
 } from './Subscription.validation';
 
@@ -22,29 +21,26 @@ router.post(
 // Subscription Plan Routes (Admin only)
 router.post(
   '/plans',
-  auth(USER_ROLE.superAdmin),
-  validateRequest(createSubscriptionPlanSchema),
+  // auth(USER_ROLE.superAdmin), 
   SubscriptionControllers.createSubscriptionPlan
 );
 
 router.get('/plans',
   //  auth(USER_ROLE.superAdmin,  USER_ROLE.customer, USER_ROLE.contractor),
-  SubscriptionControllers.getAllSubscriptionPlans
+  SubscriptionControllers.getAllPlans
 );
 
 router.get('/plans/:id', SubscriptionControllers.getSingleSubscriptionPlan);
 
 router.patch(
   '/plans/:id',
-  auth(USER_ROLE.superAdmin),
-  validateRequest(updateSubscriptionPlanSchema),
-  SubscriptionControllers.updateSubscriptionPlan
+  SubscriptionControllers.updatePlan
 );
 
 router.delete(
   '/plans/:id',
   auth(USER_ROLE.superAdmin),
-  SubscriptionControllers.deleteSubscriptionPlan
+  SubscriptionControllers.deletePlan
 );
 
 // Contractor Subscription Routes
@@ -80,12 +76,12 @@ router.get(
   SubscriptionControllers.getSingleSubscription
 );
 
-router.patch(
-  '/change-plan',
-  auth(USER_ROLE.contractor),
-  validateRequest(changeSubscriptionPlanSchema),
-  SubscriptionControllers.changeSubscriptionPlan
-);
+// router.patch(
+//   '/change-plan',
+//   auth(USER_ROLE.contractor),
+//   validateRequest(changeSubscriptionPlanSchema),
+//   SubscriptionControllers.changeSubscriptionPlan
+// );
 
 //  validateRequest(revenueAnalyticsSchema),
 

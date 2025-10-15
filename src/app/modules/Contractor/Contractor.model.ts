@@ -55,6 +55,12 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
       ref: 'Subscription',
       default: null
     },
+    subscriptionEndDate: {
+      type: Date,
+    },
+    subscriptionStartDate: {
+      type: Date,
+    },
     hasActiveSubscription: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false }
   },

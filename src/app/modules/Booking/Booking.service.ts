@@ -171,7 +171,6 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
           );
         }
       }
-
       await Promise.allSettled(notifPromises);
     } catch (err) {
       console.error("❌ Error sending notifications:", err);
@@ -494,7 +493,7 @@ const handlePaymentSuccess = async (metadata: {
       amount: Number(amount),
       receipt_url
     });
-    console.log('===transaction', transaction)
+
     if (!transaction) {
       return await createDynamicNotification({
         payUser,
@@ -538,7 +537,6 @@ const handlePaymentSuccess = async (metadata: {
       data: { transaction, booking },
     };
   } catch (error: any) {
-    console.error('❌ handlePaymentSuccess error:', error);
 
     await createDynamicNotification({
       payUser: metadata.payUser,

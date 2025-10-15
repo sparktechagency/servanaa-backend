@@ -6,17 +6,24 @@ export interface TSubscription {
   stripeCustomerId: string;
   stripeSubscriptionId: string;
   status:
-    | 'active'
-    | 'inactive'
-    | 'cancelled'
-    | 'expired'
-    | 'failed'
-    | 'pending'
-    | 'processing';
+  | 'active'
+  | 'inactive'
+  | 'cancelled'
+  | 'expired'
+  | 'failed'
+  | 'pending'
+  | 'processing';
   startDate: Date;
   endDate: Date;
   paymentMethodId?: string;
   isDeleted: boolean;
+}
+
+export interface TPlan {
+  planType: 'basic' | 'premium';
+  price: number;
+  duration: string;
+  details: string[];
 }
 
 export interface TSubscriptionPlan {
@@ -138,6 +145,29 @@ const subscriptionPlanSchema = new Schema<TSubscriptionPlan>(
   }
 );
 subscriptionPlanSchema.index({ type: 1, isActive: 1 });
+
+
+
+const plansSchema = new Schema<TPlan>(
+  {
+    planType: {
+      type: String,
+      enum: ['basic', 'premium'],
+      required: true
+    },
+    price: { type: Number, required: true },
+    duration: { type: String, required: true, enum: ['Monthly', 'Yearly'] },
+    details: { type: [String] },
+  },
+  {
+    timestamps: true
+  }
+);
+
+export const Plans = model<TPlan>(
+  'Plans',
+  plansSchema
+);
 
 export const Subscription = model<TSubscription>(
   'Subscription',

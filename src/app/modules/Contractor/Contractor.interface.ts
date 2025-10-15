@@ -3,6 +3,8 @@ import { Model, Types } from 'mongoose';
 
 export type TContractor = {
   subCategory: Types.ObjectId;
+  subscriptionEndDate: Date;
+  subscriptionStartDate: Date;
   category: Types.ObjectId;
   userId: Types.ObjectId;
   rateHourly: number;

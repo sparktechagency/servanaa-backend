@@ -20,6 +20,19 @@ const createStripeCheckoutSession = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+const createStripeSubscriptionSessionIntoDB = catchAsync(async (req, res) => {
+  const result =
+    await PaymentServices.createStripeSubscriptionSessionIntoDB(req.user, req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment checkout is created successfully',
+    data: result,
+  });
+});
+
+
 const verifyStripeSession = catchAsync(async (req, res) => {
 
   // const result =
@@ -109,7 +122,8 @@ export const PaymentControllers = {
   checkBankStatusAndTransfer,
   createStripeCheckoutSession,
   verifyStripeSession,
-  singleWithdrawalProcess
+  singleWithdrawalProcess,
+  createStripeSubscriptionSessionIntoDB
 };
 
 
