@@ -100,26 +100,36 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
     })
   );
   const bookingId = generateBookingId();
-  const createdBookings =
-    bookingType === "weekly" && requestedDays.length > 1
-      ? await Booking.insertMany(
-        requestedDays.map((d) => ({
-          ...payload,
-          bookingDate: d,
-          bookingId,
-          status: "pending",
-          paymentStatus: "pending",
-        }))
-      )
-      : [
-        await Booking.create({
-          ...payload,
-          bookingDate: requestedDays[0],
-          bookingId,
-          status: "pending",
-          paymentStatus: "pending",
-        }),
-      ];
+  // const createdBookings =
+  //   bookingType === "weekly" && requestedDays.length > 1
+  //     ? await Booking.insertMany(
+  //       requestedDays.map((d) => ({
+  //         ...payload,
+  //         bookingDate: d,
+  //         bookingId,
+  //         status: "pending",
+  //         paymentStatus: "pending",
+  //       }))
+  //     )
+  //     : [
+  //       await Booking.create({
+  //         ...payload,
+  //         bookingDate: requestedDays[0],
+  //         bookingId,
+  //         status: "pending",
+  //         paymentStatus: "pending",
+  //       }),
+  //     ];
+
+  const createdBookings = [
+    await Booking.create({
+      ...payload,
+      bookingDate: requestedDays[0],
+      bookingId,
+      status: "pending",
+      paymentStatus: "pending",
+    }),
+  ];
 
   // 🔔 Send notifications asynchronously (non-blocking)
   (async () => {
@@ -343,14 +353,15 @@ const getSingleBookingFromDB = async (id: string) => {
 };
 
 const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
+  // 1️⃣ Find the booking
   const booking = await Booking.findById(id);
-
   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
   if (booking.isDeleted) throw new AppError(httpStatus.BAD_REQUEST, 'Cannot update a deleted booking');
-  console.log('payload', id);
 
+  // 2️⃣ Prepare update data
   const updateData: any = { ...payload };
 
+  // 3️⃣ Handle file uploads
   if (files && Array.isArray(files) && files.length > 0) {
     const uploadedFiles = files.map((file: any) => ({
       name: file.originalname || file.filename,
@@ -362,34 +373,33 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     updateData.files = [...(booking.files || []), ...uploadedFiles];
   }
 
+  // 4️⃣ Update booking
   const updatedBooking = await Booking.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true
   });
 
-  if (!updatedBooking)
+  if (!updatedBooking) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Booking could not be updated');
+  }
 
-
+  // 5️⃣ Handle completed status (transfer balance)
   if (updatedBooking.status === 'completed') {
-    console.log('updatedBooking.contractorId', updatedBooking.contractorId, updatedBooking.customerId)
-    const contractorData = await Contractor.findById(updatedBooking.contractorId.toString());
-    const customerData = await Customer.findById(updatedBooking.customerId.toString());
+    console.log('Booking completed:');
 
-    if (!contractorData) throw new Error('No contractor found');
-    if (!customerData) throw new Error('No customer found');
+    const contractorData = await Contractor.findOne({ userId: updatedBooking.contractorId });
+    const customerData = await Customer.findOne({ userId: updatedBooking.customerId });
 
+    if (!contractorData) throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
+    if (!customerData) throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
 
-    customerData.balance =
-      (customerData?.balance ?? 0) - (updatedBooking.price || 0);
-    await customerData.save();
-    contractorData.balance =
-      (contractorData.balance || 0) + (updatedBooking.price || 0);
-    customerData.balance =
-      (customerData.balance ?? 0) - (updatedBooking.price || 0);
+    // Balance calculation (avoid duplication)
+    const price = updatedBooking.price || 0;
 
-    await contractorData.save();
-    await customerData.save();
+    customerData.balance = (customerData.balance ?? 0) - price;
+    contractorData.balance = (contractorData.balance ?? 0) + price;
+
+    await Promise.all([contractorData.save(), customerData.save()]);
 
     await NotificationServices.createNotificationIntoDB({
       userId: updatedBooking.customerId,
@@ -401,6 +411,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     });
   }
 
+  // 6️⃣ Handle ongoing status
   if (updatedBooking.status === 'ongoing') {
     await NotificationServices.createNotificationIntoDB({
       userId: updatedBooking.customerId,
@@ -414,6 +425,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
   return updatedBooking;
 };
+
 
 const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
   const booking = await Booking.findOne({
