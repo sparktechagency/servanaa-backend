@@ -43,7 +43,8 @@ app.use(
       'http://34.233.41.57:3000',
       'http://localhost:3000',
       'http://localhost:5174',
-      'http://localhost:5173'
+      'http://localhost:4173',
+      "http://10.10.20.24:4173"
     ],
     // origin:"*",
     credentials: true,

@@ -100,6 +100,7 @@ const checkPaymentComplete = catchAsync(async (req, res) => {
 
 const singleWithdrawalProcess = catchAsync(async (req, res) => {
   const transactionData = req.body;
+
   const result = await PaymentServices.singleWithdrawalProcessIntoDB(
     transactionData,
     req.user,
@@ -108,7 +109,7 @@ const singleWithdrawalProcess = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Withdrawal Process is created succesfully',
+    message: 'Withdrawal Process is created successfully',
     data: result,
   });
 });

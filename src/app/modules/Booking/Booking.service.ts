@@ -384,10 +384,10 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
   // 5️⃣ Handle completed status (transfer balance)
   if (updatedBooking.status === 'completed') {
-    console.log('Booking completed:');
+    console.log('Booking completed:', updatedBooking.customerId);
 
-    const contractorData = await Contractor.findOne({ userId: updatedBooking.contractorId });
-    const customerData = await Customer.findOne({ userId: updatedBooking.customerId });
+    const contractorData = await Contractor.findOne({ userId: updatedBooking.contractorId.toString() });
+    const customerData = await Customer.findOne({ userId: updatedBooking.customerId.toString() });
 
     if (!contractorData) throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
     if (!customerData) throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
