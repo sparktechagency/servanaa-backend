@@ -133,9 +133,7 @@ const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any
     line_items: [{ price: price.id, quantity: 1 }],
     metadata,
     subscription_data: { metadata },
-    payment_intent_data: {
-      metadata,
-    },
+
     success_url: `${config.frontend_url}/payments/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.frontend_url}/payments/subscription/cancel`,
   });
