@@ -12,21 +12,83 @@ import { Booking } from '../Booking/Booking.model';
 import { Plans } from '../Subscription/Subscription.model';
 const stripe = new Stripe(config.stripe_secret_key as string);
 
+// const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any) => {
+//   const email = user?.userEmail;
+//   const { planId } = paymentData;
+
+//   // Validate plan
+//   const plan = await Plans.findById(planId);
+//   if (!plan) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'Subscription plan not found');
+//   }
+
+//   // Validate user
+//   const userData = await User.findOne({ email });
+//   if (!userData?.contractor) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+//   }
+
+//   const metadata = {
+//     payUser: userData?.contractor.toString(),
+//     subscriptionId: plan._id.toString(),
+//     type: 'subscription',
+//     amount: String(plan.price),
+//   };
+
+//   // 1️⃣ Create Stripe Product (optional, but good for clarity)
+//   const product = await stripe.products.create({
+//     name: `${plan.planType.toUpperCase()} Plan (${plan.duration})`,
+//     description: `Includes: ${plan.details?.join(', ') || 'Standard features'}`,
+//   });
+
+
+//   const interval =
+//     plan.duration === 'Yearly'
+//       ? 'year'
+//       : plan.duration === 'Monthly'
+//         ? 'month'
+//         : 'month';
+
+//   const price = await stripe.prices.create({
+//     product: product.id,
+//     unit_amount: Math.round(Number(plan.price) * 100),
+//     currency: 'usd',
+//     recurring: { interval },
+//   });
+
+
+//   const session = await stripe.checkout.sessions.create({
+//     mode: 'subscription',
+//     success_url: `${config.frontend_url}/payments/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+//     cancel_url: `${config.frontend_url}/payments/subscription/cancel`,
+//     customer_email: email,
+//     metadata,
+//     subscription_data: {
+//       metadata,
+//     },
+//     line_items: [
+//       {
+//         price: price.id,
+//         quantity: 1,
+//       },
+//     ],
+//   });
+
+//   return session.url as string;
+// };
+
+
 const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any) => {
   const email = user?.userEmail;
   const { planId } = paymentData;
 
   // Validate plan
   const plan = await Plans.findById(planId);
-  if (!plan) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Subscription plan not found');
-  }
+  if (!plan) throw new AppError(httpStatus.NOT_FOUND, 'Subscription plan not found');
 
   // Validate user
   const userData = await User.findOne({ email });
-  if (!userData?.contractor) {
-    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
-  }
+  if (!userData?.contractor) throw new AppError(httpStatus.NOT_FOUND, 'User not found');
 
   const metadata = {
     payUser: userData?.contractor.toString(),
@@ -35,19 +97,13 @@ const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any
     amount: String(plan.price),
   };
 
-  // 1️⃣ Create Stripe Product (optional, but good for clarity)
+  // 1️⃣ Create Stripe Product
   const product = await stripe.products.create({
     name: `${plan.planType.toUpperCase()} Plan (${plan.duration})`,
     description: `Includes: ${plan.details?.join(', ') || 'Standard features'}`,
   });
 
-
-  const interval =
-    plan.duration === 'Yearly'
-      ? 'year'
-      : plan.duration === 'Monthly'
-        ? 'month'
-        : 'month';
+  const interval = plan.duration === 'Yearly' ? 'year' : 'month';
 
   const price = await stripe.prices.create({
     product: product.id,
@@ -56,13 +112,18 @@ const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any
     recurring: { interval },
   });
 
+  // 2️⃣ Create a Stripe Customer (required for testmode with Accounts V2)
+  const customer = await stripe.customers.create({
+    email,
+    metadata,
+  });
 
+  // 3️⃣ Create Checkout Session
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
+    customer: customer.id, // Use the customer ID here
     success_url: `${config.frontend_url}/payments/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.frontend_url}/payments/subscription/cancel`,
-    customer_email: email,
-    metadata,
     subscription_data: {
       metadata,
     },
