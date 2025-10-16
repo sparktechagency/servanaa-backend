@@ -309,6 +309,8 @@ const handleWebhook = catchAsync(async (req, res) => {
         const session = event.data.object as Stripe.Checkout.Session;
         const metadata = session.metadata || {};
 
+        console.log('Checkout Session Metadata:', metadata);
+
         if (metadata.type === 'subscription') {
           const subscriptionId = metadata.subscriptionId;
           const payUser = metadata.payUser;
