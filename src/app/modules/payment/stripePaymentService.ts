@@ -82,57 +82,58 @@ const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any
   const email = user?.userEmail;
   const { planId } = paymentData;
 
-  // Validate plan
+  // 1️⃣ Validate plan
   const plan = await Plans.findById(planId);
-  if (!plan) throw new AppError(httpStatus.NOT_FOUND, 'Subscription plan not found');
+  if (!plan) throw new AppError(httpStatus.NOT_FOUND, "Subscription plan not found");
 
-  // Validate user
+  // 2️⃣ Validate user
   const userData = await User.findOne({ email });
-  if (!userData?.contractor) throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  if (!userData?.contractor) throw new AppError(httpStatus.NOT_FOUND, "User not found");
 
+  // 3️⃣ Prepare metadata
   const metadata = {
-    payUser: userData?.contractor.toString(),
+    payUser: userData.contractor.toString(),
     subscriptionId: plan._id.toString(),
-    type: 'subscription',
+    type: "subscription",
     amount: String(plan.price),
   };
 
-  // 1️⃣ Create Stripe Product
+  // 4️⃣ Create Stripe Product (optional, good for clarity)
   const product = await stripe.products.create({
     name: `${plan.planType.toUpperCase()} Plan (${plan.duration})`,
-    description: `Includes: ${plan.details?.join(', ') || 'Standard features'}`,
+    description: `Includes: ${plan.details?.join(", ") || "Standard features"}`,
   });
 
-  const interval = plan.duration === 'Yearly' ? 'year' : 'month';
+  const interval = plan.duration === "Yearly" ? "year" : "month";
 
+  // 5️⃣ Create Stripe Price
   const price = await stripe.prices.create({
     product: product.id,
-    unit_amount: Math.round(Number(plan.price) * 100),
-    currency: 'usd',
+    unit_amount: Math.round(Number(plan.price) * 100), // price in cents
+    currency: "usd",
     recurring: { interval },
   });
 
-  // 2️⃣ Create a Stripe Customer (required for testmode with Accounts V2)
-  const customer = await stripe.customers.create({
-    email,
-    metadata,
-  });
+  // 6️⃣ Create or retrieve customer (required for Accounts V2)
+  let customer;
+  const existingCustomers = await stripe.customers.list({ email, limit: 1 });
+  if (existingCustomers.data.length > 0) {
+    customer = existingCustomers.data[0];
+  } else {
+    customer = await stripe.customers.create({
+      email,
+      metadata,
+    });
+  }
 
-  // 3️⃣ Create Checkout Session
+  // 7️⃣ Create Stripe Checkout Session
   const session = await stripe.checkout.sessions.create({
-    mode: 'subscription',
-    customer: customer.id, // Use the customer ID here
+    mode: "subscription",
+    customer: customer.id, // use the Stripe customer ID
+    line_items: [{ price: price.id, quantity: 1 }],
+    subscription_data: { metadata },
     success_url: `${config.frontend_url}/payments/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.frontend_url}/payments/subscription/cancel`,
-    subscription_data: {
-      metadata,
-    },
-    line_items: [
-      {
-        price: price.id,
-        quantity: 1,
-      },
-    ],
   });
 
   return session.url as string;
