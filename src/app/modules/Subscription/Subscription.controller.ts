@@ -304,7 +304,8 @@ const handleWebhook = catchAsync(async (req, res) => {
         break;
       }
 
-      case 'checkout.session.completed': {
+      case 'checkout.session.completed':
+      case 'invoice.payment_succeeded': {
         const session = event.data.object as Stripe.Checkout.Session;
         const metadata = session.metadata || {};
 
