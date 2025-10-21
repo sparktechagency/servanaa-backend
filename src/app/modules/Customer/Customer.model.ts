@@ -1,6 +1,31 @@
 import { Schema, model } from 'mongoose';
 import { TCustomer, CustomerModel } from './Customer.interface';
 
+const locationSchema = new Schema({
+  type: {
+    type: String,
+    enum: ["Point"],
+    default: "Point",
+  },
+  coordinates: {
+    type: [Number],
+    required: true,
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    enum: ["Default", 'Home', 'Work', 'Other'],
+    required: true,
+  },
+  isSelect: {
+    type: Boolean,
+    default: false,
+  }
+});
+
 const CustomerSchema = new Schema<TCustomer, CustomerModel>({
   userId: { type: Schema.Types.ObjectId, ref: 'User' },
   dob: { type: String, default: '' },
@@ -8,7 +33,7 @@ const CustomerSchema = new Schema<TCustomer, CustomerModel>({
   city: { type: String, default: '' },
   language: { type: String, default: '' },
   balance: { type: Number, default: 0 },
-  location: { type: String, default: '' },
+  location: { type: [locationSchema], required: true },
   isDeleted: { type: Boolean, default: false }
 });
 

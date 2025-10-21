@@ -1,15 +1,20 @@
 // src/app/modules/Dashboard/Dashboard.route.ts
 
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import {
+  createBannerIntoDB,
   createSubscription,
+  deleteBannerFromDB,
   deleteSubscription,
   getAllAdminNotifications,
+  getAllBannersFromDB,
   getAllSubscriptionPlansTable,
   getDashboardData,
   getTransactionHistoryTable,
+  updateBannerIntoDB,
   updateSubscription
 } from './Dashboard.controller';
+import { uploadFileS3 } from '../../utils/UploaderS3';
 
 const router = express.Router();
 
@@ -21,11 +26,51 @@ router.get('/transaction-history', getTransactionHistoryTable);
 router.get('/subscription-plan', createSubscription);
 router.patch('/subscription-plan/:id', updateSubscription);
 router.delete('/subscription-plan/:id', deleteSubscription);
+// =================================
+router.post(
+  '/create_banner',
+  uploadFileS3(true).single('image'),
+  (req: Request, res: Response, next: NextFunction) => {
+    if (req.body.data) {
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (error) {
+        return next(error);
+      }
+    }
 
-// router.get('/contractor-manage', getContractorTableData);
-// router.get('/customer-manage', getCustomerTableData);
-// router.get('/category', getCategoryTable);
-// router.get('/sub-category', getSubCategoryTable);
-// router.get('/service', getServiceTable);
+    if (req.file && (req.file as any).location) {
+      req.body.image = (req.file as any).location;
+    }
+
+    next();
+  },
+  createBannerIntoDB
+);
+
+router.get('/banners', getAllBannersFromDB);
+
+router.patch(
+  '/update_banner/:id',
+  uploadFileS3(true).single('image'),
+  (req: Request, res: Response, next: NextFunction) => {
+    if (req.body.data) {
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (error) {
+        return next(error);
+      }
+    }
+
+    if (req.file && (req.file as any).location) {
+      req.body.image = (req.file as any).location;
+    }
+
+    next();
+  },
+  updateBannerIntoDB
+);
+
+router.delete('/delete_banner/:id', deleteBannerFromDB);
 
 export const DashboardRoutes = router;

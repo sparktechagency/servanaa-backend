@@ -4,9 +4,9 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { CUSTOMER_SEARCHABLE_FIELDS } from './Customer.constant';
 import mongoose from 'mongoose';
-// import { TCustomer } from './Customer.interface';
 import { Customer } from './Customer.model';
 import { TCustomer } from './Customer.interface';
+import { User } from '../User/user.model';
 
 const createCustomerIntoDB = async (payload: TCustomer) => {
   const result = await Customer.create(payload);
@@ -82,7 +82,36 @@ const deleteCustomerFromDB = async (id: string) => {
   return deletedService;
 };
 
+const changeLocation = async (customerId: any, payload: any) => {
+
+  const { name, isSelect } = payload;
+
+  if (!isSelect || !name) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Invalid payload for changing location');
+  }
+
+  const customer = await Customer.findById(customerId) as any;
+  if (!customer) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
+  }
+
+  customer.location.forEach((loc: any) => {
+    loc.isSelect = false;
+  });
+
+  const targetLocation = customer.location.find((loc: any) => loc.name === name);
+  if (!targetLocation) {
+    throw new AppError(httpStatus.NOT_FOUND, `Location '${name}' not found`);
+  }
+  targetLocation.isSelect = true;
+
+  const updatedCustomer = await customer.save();
+
+  return updatedCustomer;
+};
+
 export const CustomerServices = {
+  changeLocation,
   createCustomerIntoDB,
   getAllCustomersFromDB,
   getSingleCustomerFromDB,

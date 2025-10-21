@@ -6,6 +6,7 @@ import auth from '../../middlewares/auth';
 import { uploadFileS3 } from '../../utils/UploaderS3';
 import validateRequest from '../../middlewares/validateRequest';
 import { statusSchema } from './user.validation';
+import { CustomerControllers } from '../Customer/Customer.controller';
 
 const router = express.Router();
 router.post('/create-customer', UserControllers.createCustomer);
@@ -52,5 +53,9 @@ router.get(
 );
 
 router.get('/:id', auth(USER_ROLE.superAdmin), UserControllers.getSingleUser);
+
+router.patch('/change_location/:customerId',
+  auth(USER_ROLE.customer),
+  CustomerControllers.changeLocation);
 
 export const UserRoutes = router;

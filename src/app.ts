@@ -13,24 +13,7 @@ app.post(
   SubscriptionControllers.handleWebhook
 );
 
-// app.post(
-//   '/api/v1/subscriptions/webhook',
-//   (req, res, next) => {
-//     console.log('🎯 Direct webhook route hit!');
-//     console.log('Method:', req.method);
-//     console.log('URL:', req.url);
-//     console.log('Headers:', req.headers);
-//     next();
-//   },
-//   express.raw({ type: 'application/json' }),
-//   SubscriptionControllers.handleWebhook
-// );
 
-// app.post(
-//   '/api/v1/payments/webhook',
-//   express.raw({ type: 'application/json' }),
-//   PaymentControllers.webhook
-// );
 
 // Middleware
 app.use(helmet()); // Security headers

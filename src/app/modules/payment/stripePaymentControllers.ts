@@ -72,38 +72,19 @@ const checkAccountStatus = catchAsync(async (req, res) => {
   });
 });
 
-const checkBankStatusAndTransfer = catchAsync(async (req, res) => {
-  const { actorId } = req.query;
+const withdrawalBalanceProcess = catchAsync(async (req, res) => {
+  const { amount } = req.body;
 
-  const result = await PaymentServices.checkBankStatusAndTransferIntoDB(actorId);
+  if (!amount || amount <= 0) {
+    throw new Error('Invalid amount for withdrawal');
+  }
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Bank setup complete, transfer successful",
-    data: result,
-  });
-});
-
-const checkPaymentComplete = catchAsync(async (req, res) => {
-  const { payment: paymentData } = req.body;
-  const result =
-    await PaymentServices.checkPaymentCompletefromDB(req.user, paymentData);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Payment have already been made',
-    data: result,
-  });
-});
-
-const singleWithdrawalProcess = catchAsync(async (req, res) => {
-  const transactionData = req.body;
-
-  const result = await PaymentServices.singleWithdrawalProcessIntoDB(
-    transactionData,
-    req.user,
+  console.log('Initiating withdrawal process for amount:', amount);
+  const email = "xopox97635@gta5hx.com" as any;
+  const result = await PaymentServices.withdrawalBalanceProcess(
+    amount,
+    // req.user.userEmail
+    email,
   );
 
   sendResponse(res, {
@@ -114,16 +95,13 @@ const singleWithdrawalProcess = catchAsync(async (req, res) => {
   });
 });
 
+
 export const PaymentControllers = {
-  checkPaymentComplete,
-  // webhook,
-  // createStripePayment,
+  withdrawalBalanceProcess,
   confirmStripePayment,
   checkAccountStatus,
-  checkBankStatusAndTransfer,
   createStripeCheckoutSession,
   verifyStripeSession,
-  singleWithdrawalProcess,
   createStripeSubscriptionSessionIntoDB
 };
 

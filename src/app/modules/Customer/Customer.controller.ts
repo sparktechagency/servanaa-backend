@@ -64,7 +64,22 @@ const deleteCustomer = catchAsync(async (req, res) => {
   });
 });
 
+const changeLocation = catchAsync(async (req, res) => {
+  const payload = req.body;
+  const customerId = req.params.customerId;
+  const result = await CustomerServices.changeLocation(customerId, payload);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'change location successfully',
+    data: result
+  });
+});
+
+
 export const CustomerControllers = {
+  changeLocation,
   createCustomer,
   getSingleCustomer,
   getAllCustomers,

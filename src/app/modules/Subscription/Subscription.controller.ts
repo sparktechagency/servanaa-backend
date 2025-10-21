@@ -343,6 +343,13 @@ const handleWebhook = catchAsync(async (req, res) => {
         break;
       }
 
+      case 'payout.paid': {
+        const payout = event.data.object;
+        console.log('Payout successful:', payout.id);
+
+        break;
+      }
+
       case 'payment_intent.payment_failed':
       case 'invoice.payment_failed': {
         const failedPayment = event.data.object as Stripe.PaymentIntent;
@@ -362,6 +369,8 @@ const handleWebhook = catchAsync(async (req, res) => {
         break;
       }
 
+
+
       default:
         console.log(`⚠️ Unhandled Stripe event type: ${event.type}`);
     }
@@ -376,7 +385,7 @@ const handleWebhook = catchAsync(async (req, res) => {
 
 const getRevenueSummary = catchAsync(async (req, res) => {
   const { startDate, endDate } = req.query;
-  console.log('Hitting URL');
+
   const dateRange = {
     startDate: startDate ? new Date(startDate as string) : undefined,
     endDate: endDate ? new Date(endDate as string) : undefined

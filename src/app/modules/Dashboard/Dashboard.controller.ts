@@ -19,6 +19,7 @@ import { SubCategory } from '../SubCategory/SubCategory.model';
 import { Service } from 'aws-sdk';
 import { Notification } from '../Notification/Notification.model';
 import moment from 'moment';
+import { Banner } from './Dashboard.model';
 
 export const getDashboardData = catchAsync(async (req, res) => {
   const totalUser = await User.countDocuments({ isDeleted: false });
@@ -529,3 +530,90 @@ export const deleteSubscription = catchAsync(async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
+
+
+// =======================
+// CREATE BANNER
+// =======================
+export const createBannerIntoDB = catchAsync(async (req, res) => {
+  try {
+
+    const newBanner = await Banner.create(req.body);
+
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      success: true,
+      message: 'Banner created successfully.',
+      data: newBanner,
+    });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// =======================
+// GET ALL BANNERS
+// =======================
+export const getAllBannersFromDB = catchAsync(async (req, res) => {
+  const banners = await Banner.find()
+    .populate('category', 'name')
+    .populate('subCategory', 'name')
+    .sort({ createdAt: -1 });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Banners retrieved successfully.',
+    data: banners,
+  });
+});
+
+// =======================
+// UPDATE BANNER
+// =======================
+export const updateBannerIntoDB = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const updatedBanner = await Banner.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updatedBanner) {
+    return res.status(404).json({
+      success: false,
+      message: 'Banner not found.',
+    });
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Banner updated successfully.',
+    data: updatedBanner,
+  });
+});
+
+// =======================
+// DELETE BANNER
+// =======================
+export const deleteBannerFromDB = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const deletedBanner = await Banner.findByIdAndDelete(id);
+
+  if (!deletedBanner) {
+    return res.status(404).json({
+      success: false,
+      message: 'Banner not found.',
+    });
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Banner deleted successfully.',
+    data: deletedBanner,
+  });
+});
+
