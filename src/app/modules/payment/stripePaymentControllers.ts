@@ -5,6 +5,8 @@ import sendResponse from '../../utils/sendResponse';
 import { PaymentServices } from './stripePaymentService';
 import config from '../../config';
 import { Stripe } from 'stripe';
+import { User } from '../User/user.model';
+import AppError from '../../errors/AppError';
 const endpointSecret = config.stripe_webhook_secret; // Ensure this is set in your config
 const stripe = new Stripe(config.stripe_secret_key as string, {
   apiVersion: '2024-06-20',
@@ -80,11 +82,11 @@ const withdrawalBalanceProcess = catchAsync(async (req, res) => {
   }
 
   console.log('Initiating withdrawal process for amount:', amount);
-  const email = "xopox97635@gta5hx.com" as any;
+  // const email = "xopox97635@gta5hx.com" as any;
   const result = await PaymentServices.withdrawalBalanceProcess(
     amount,
-    // req.user.userEmail
-    email,
+    req.user.userEmail
+    // email,
   );
 
   sendResponse(res, {
@@ -95,8 +97,33 @@ const withdrawalBalanceProcess = catchAsync(async (req, res) => {
   });
 });
 
+const getWithdrawalList = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+  const { page, limit, status } = req.query;
+
+  const user = await User.findOne({ email: userEmail });
+  if (!user) {
+    throw new AppError(404, 'User not found.');
+  }
+
+  const result = await PaymentServices.getWithdrawalList(user._id.toString(), {
+    page: Number(page) || 1,
+    limit: Number(limit) || 10,
+    status: status as string,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Withdrawal list fetched successfully',
+    data: result,
+  });
+});
+
+
 
 export const PaymentControllers = {
+  getWithdrawalList,
   withdrawalBalanceProcess,
   confirmStripePayment,
   checkAccountStatus,

@@ -8,7 +8,7 @@ import { ServiceRoutes } from '../modules/Service/Service.route';
 import { AboutRoutes } from '../modules/About/About.route';
 import { TermRoutes } from '../modules/Term/Term.route';
 import { PrivacyRoutes } from '../modules/Privacy/Privacy.route';
-import {  QuestionRoutes } from '../modules/Question/Question.route';
+import { QuestionRoutes } from '../modules/Question/Question.route';
 import { CardRoutes } from '../modules/Card/Card.route';
 import { ReviewRoutes } from '../modules/Review/Review.route';
 import { BookingRoutes } from '../modules/Booking/Booking.route';

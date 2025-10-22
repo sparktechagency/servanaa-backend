@@ -19,30 +19,20 @@ router.post(
 
 router.get(
   '/stripe/success',
-  // auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   PaymentControllers.verifyStripeSession,
 );
 
 router.post('/confirm-payment', PaymentControllers.confirmStripePayment);
 router.get('/check-account-status', PaymentControllers.checkAccountStatus);
 
-router.patch('/withdraw', PaymentControllers.withdrawalBalanceProcess);
+router.patch('/withdraw',
+  auth(USER_ROLE.contractor),
+  PaymentControllers.withdrawalBalanceProcess);
 
-// router.post(
-// '/check-payment-complete',
-// auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
-// PaymentControllers.checkPaymentComplete,
-// );
+router.get('/withdraw',
+  auth(USER_ROLE.contractor),
+  PaymentControllers.getWithdrawalList);
 
-
-// router.get('/check-bank-and-transfer', PaymentControllers.checkBankStatusAndTransfer);
-
-// router.post(
-//   '/withdrawal-process',
-//   auth(USER_ROLE.superAdmin, USER_ROLE.contractor, USER_ROLE.customer),
-//   //   validateRequest(processValidationSchema),
-//   PaymentControllers.singleWithdrawalProcess,
-// );
 
 export const PaymentRoutes = router;
 export const handleStripeWebhook = router;
