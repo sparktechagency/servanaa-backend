@@ -255,8 +255,8 @@ const withdrawalBalanceProcess = async (amount: number, email: string) => {
     if (account.details_submitted === false) {
       const accountLink = await stripe.accountLinks.create({
         account: stripeAccountId,
-        refresh_url: 'https://yourapp.com/reauth',
-        return_url: 'https://yourapp.com/complete',
+        refresh_url: 'https://servana.com.au/reauth',
+        return_url: 'https://servana.com.au/complete',
         type: 'account_onboarding',
       });
       return { success: true, url: accountLink.url };
