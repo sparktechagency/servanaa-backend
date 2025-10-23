@@ -81,8 +81,8 @@ const withdrawalBalanceProcess = catchAsync(async (req, res) => {
   const email = "amaahmadmusa71@gmail.com" as any;
   const result = await PaymentServices.withdrawalBalanceProcess(
     amount,
-    // req.user.userEmail
-    email,
+    req.user.userEmail
+    // email,
   );
 
   sendResponse(res, {
@@ -117,8 +117,30 @@ const getWithdrawalList = catchAsync(async (req, res) => {
 });
 
 
+const getWithdrawalListAdmin = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+  const { page, limit, status } = req.query;
 
+  const user = await User.findOne({ email: userEmail });
+  if (!user) {
+    throw new AppError(404, 'User not found.');
+  }
+
+  const result = await PaymentServices.getWithdrawalListAdmin({
+    page: Number(page) || 1,
+    limit: Number(limit) || 10,
+    status: status as string,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Withdrawal list fetched successfully',
+    data: result,
+  });
+});
 export const PaymentControllers = {
+  getWithdrawalListAdmin,
   getWithdrawalList,
   withdrawalBalanceProcess,
   confirmStripePayment,

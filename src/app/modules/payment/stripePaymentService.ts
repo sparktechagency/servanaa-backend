@@ -282,7 +282,7 @@ const withdrawalBalanceProcess = async (amount: number, email: string) => {
       payoutId: transfer.id,
       amount,
       date: new Date(),
-      status: 'requested',
+      status: 'received',
     });
 
     return {
@@ -333,7 +333,41 @@ const getWithdrawalList = async (
 };
 
 
+const getWithdrawalListAdmin = async (query: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}
+) => {
+
+  const { page = 1, limit = 10, status } = query;
+
+  const filter: any = {};
+  if (status) {
+    filter.status = status;
+  } else {
+    filter.status = 'received';
+  }
+
+  const skip = (page - 1) * limit;
+
+  const withdrawals = await Withdraw.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Withdraw.countDocuments(filter);
+
+  return {
+    total,
+    page,
+    limit,
+    withdrawals,
+  };
+};
+
 export const PaymentServices = {
+  getWithdrawalListAdmin,
   getWithdrawalList,
   withdrawalBalanceProcess,
   confirmStripePaymentIntoDB,

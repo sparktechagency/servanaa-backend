@@ -26,12 +26,16 @@ router.post('/confirm-payment', PaymentControllers.confirmStripePayment);
 router.get('/check-account-status', PaymentControllers.checkAccountStatus);
 
 router.patch('/withdraw',
-  // auth(USER_ROLE.contractor),
+  auth(USER_ROLE.contractor),
   PaymentControllers.withdrawalBalanceProcess);
 
 router.get('/withdraw',
   auth(USER_ROLE.contractor),
   PaymentControllers.getWithdrawalList);
+// ======================================
+router.get('/withdraw_list',
+  auth(USER_ROLE.superAdmin),
+  PaymentControllers.getWithdrawalListAdmin);
 
 
 export const PaymentRoutes = router;
