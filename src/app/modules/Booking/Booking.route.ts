@@ -7,6 +7,13 @@ import { uploadFileS3 } from '../../utils/UploaderS3';
 
 const router = express.Router();
 
+
+router.post(
+  '/booking-availability',
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer),
+  BookingControllers.checkBookingAvailability
+);
+
 router.post(
   '/create-booking',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer),

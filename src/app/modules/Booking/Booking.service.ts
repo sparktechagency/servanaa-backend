@@ -26,8 +26,87 @@ const generateBookingId = () => {
   return Math.floor(10000000 + Math.random() * 90000000).toString();
 };
 
+const checkBookingAvailability = async (payload: any, user: any) => {
+  const { contractorId, day, startTime, duration } = payload;
+
+  const [usr, contractor] = await Promise.all([
+    User.findOne({ email: user.userEmail }),
+    User.findById(contractorId),
+  ]);
+
+  if (!usr) throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  if (!contractor) throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
+
+  const mySchedule = await MySchedule.findOne({ contractorId: contractor?.contractor?.toString() }).lean();
+  if (!mySchedule) { throw new AppError(httpStatus.NOT_FOUND, 'Contractor schedule not found'); }
+
+  // Calculate end time from start + duration
+  const [startHour, startMinute] = startTime.split(':').map(Number);
+  const endTime = new Date(0, 0, 0, startHour + duration, startMinute)
+    .toTimeString()
+    .slice(0, 5);
+
+  const requestedDays = Array.isArray(day) ? day : [day];
+
+  const unavailableDays: string[] = [];
+
+  for (const d of requestedDays) {
+    const weekday = new Date(d).toLocaleDateString('en-US', { weekday: 'long' });
+
+    const scheduleForDay = mySchedule.schedules.find((s: any) => s.days === weekday);
+    if (!scheduleForDay) {
+      unavailableDays.push(`${weekday} (no schedule)`);
+      continue;
+    }
+
+    const slotAvailable = scheduleForDay.timeSlots.some((slot: string) => {
+      const [slotStart, slotEnd] = slot.split('-');
+      return startTime >= slotStart && endTime <= slotEnd;
+    });
+
+    if (!slotAvailable) {
+      unavailableDays.push(`${weekday} (time ${startTime}-${endTime} unavailable)`);
+      continue;
+    }
+
+    const overlappingBooking = await Booking.findOne({
+      contractorId,
+      bookingDate: new Date(d),
+      isDeleted: false,
+      $or: [
+        {
+          $and: [
+            { startTime: { $lt: endTime } },
+            { endTime: { $gt: startTime } },
+          ],
+        },
+      ],
+    }).lean();
+
+    if (overlappingBooking) {
+      unavailableDays.push(
+        `${weekday} (conflict with ${overlappingBooking.startTime}-${overlappingBooking.endTime})`
+      );
+    }
+  }
+
+  if (unavailableDays.length > 0) {
+    return {
+      success: false,
+      message: 'Some requested slots are unavailable.',
+      unavailableDays,
+    };
+  }
+
+  return {
+    success: true,
+    message: 'All requested slots are available for booking.',
+  };
+};
+
 const createBookingIntoDB = async (payload: TBooking, user: any) => {
-  const { bookingType, contractorId, day, startTime, duration } = payload;
+  const { bookingType, contractorId, day, startTime, duration, bookingId } = payload;
+  // console.log('payload in service:', contractorId);
 
   const [usr, contractor] = await Promise.all([
     User.findOne({ email: user.userEmail }),
@@ -38,9 +117,13 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   if (!contractor)
     throw new AppError(httpStatus.NOT_FOUND, "Contractor not found");
 
+  if (!bookingId) {
+    throw new AppError(httpStatus.NOT_FOUND, "bookingId not found");
+  }
+
   payload.customerId = usr._id;
 
-  const mySchedule = await MySchedule.findOne({ contractorId: contractor.contractor?.toString() }).lean();
+  const mySchedule = await MySchedule.findOne({ contractorId: contractorId?.toString() }).lean();
   if (!mySchedule)
     throw new AppError(httpStatus.NOT_FOUND, "Contractor schedule not found");
 
@@ -99,7 +182,8 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
         );
     })
   );
-  const bookingId = generateBookingId();
+
+  // const bookingId = generateBookingId();
   // const createdBookings =
   //   bookingType === "weekly" && requestedDays.length > 1
   //     ? await Booking.insertMany(
@@ -125,7 +209,6 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
     await Booking.create({
       ...payload,
       bookingDate: requestedDays[0],
-      bookingId,
       status: "pending",
       paymentStatus: "pending",
     }),
@@ -290,7 +373,7 @@ const getAllBookingsByUserFromDB = async (
 
   } else if (user.role === 'contractor') {
     if (stat === 'pending') {
-      status = ['pending', 'accepted'];
+      status = ['pending'];
     }
     if (stat === 'home') {
       status = ['pending', 'accepted', 'ongoing'];
@@ -357,7 +440,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
   if (booking.isDeleted) throw new AppError(httpStatus.BAD_REQUEST, 'Cannot update a deleted booking');
 
-  // 2️⃣ Prepare update data
   const updateData: any = { ...payload };
 
   // 3️⃣ Handle file uploads
@@ -422,7 +504,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
   return updatedBooking;
 };
-
 
 const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
   const booking = await Booking.findOne({
@@ -503,9 +584,107 @@ const handlePaymentSuccess = async (metadata: {
       });
     }
 
+    // const booking = await Booking.findOneAndUpdate(
+    //   { bookingId },
+    //   { paymentStatus: 'paid', status: 'ongoing' },
+    //   { new: true }
+    // );
+
+    // if (!booking) {
+    //   return await createDynamicNotification({
+    //     payUser,
+    //     bookingId,
+    //     amount: Number(amount),
+    //     issue: 'booking_update_failed',
+    //     paymentIntentId: stripePaymentIntentId,
+    //     receipt_url
+    //   });
+    // }
+
+    await createDynamicNotification({
+      payUser,
+      bookingId,
+      amount: Number(amount),
+      issue: 'booking_successful',
+      paymentIntentId: stripePaymentIntentId,
+      receipt_url
+    });
+
+    return {
+      success: true,
+      message: 'Payment processed and booking updated successfully.',
+      data: { transaction },
+    };
+  } catch (error: any) {
+
+    await createDynamicNotification({
+      payUser: metadata.payUser,
+      issue: 'internal_error',
+      bookingId: metadata.bookingId,
+      amount: Number(metadata.amount),
+      paymentIntentId: metadata.stripePaymentIntentId,
+      receipt_url: metadata?.receipt_url
+    });
+
+    return { success: false, error: error.message };
+  }
+};
+
+const handlePaymentSuccessUpdateBooking = async (metadata: {
+  payUser: string;
+  bookingId: string;
+  amount: string | number;
+  stripePaymentIntentId?: string;
+  stripeTransactionId?: string;
+  stripeChargeId?: string;
+  receipt_url: string
+}) => {
+  try {
+    const {
+      payUser,
+      bookingId,
+      amount,
+      stripePaymentIntentId,
+      receipt_url,
+    } = metadata;
+
+    if (!payUser || !bookingId || !amount) {
+      return await createDynamicNotification({
+        payUser,
+        bookingId,
+        amount: Number(amount),
+        issue: 'missing_metadata',
+        receipt_url
+      });
+    }
+
+    const transaction = await Transaction.create({
+      paymentIntentId: stripePaymentIntentId,
+      userId: payUser,
+      bookingId,
+      type: 'booking',
+      paymentStatus: 'paid',
+      amount: Number(amount),
+      receipt_url
+    });
+
+    if (!transaction) {
+      return await createDynamicNotification({
+        payUser,
+        bookingId,
+        amount: Number(amount),
+        issue: 'transaction_failed',
+        paymentIntentId: stripePaymentIntentId,
+        receipt_url
+      });
+    }
+
     const booking = await Booking.findOneAndUpdate(
       { bookingId },
-      { paymentStatus: 'paid', status: 'ongoing' },
+      {
+        $inc: { totalAmount: amount },
+        $set: { paymentStatus: 'paid', status: 'ongoing' },
+      },
       { new: true }
     );
 
@@ -524,7 +703,7 @@ const handlePaymentSuccess = async (metadata: {
       payUser,
       bookingId,
       amount: Number(amount),
-      issue: 'booking_successful',
+      issue: 'booking_update_successful',
       paymentIntentId: stripePaymentIntentId,
       receipt_url
     });
@@ -535,7 +714,6 @@ const handlePaymentSuccess = async (metadata: {
       data: { transaction, booking },
     };
   } catch (error: any) {
-
     await createDynamicNotification({
       payUser: metadata.payUser,
       issue: 'internal_error',
@@ -549,8 +727,7 @@ const handlePaymentSuccess = async (metadata: {
   }
 };
 
-// =============================
-
+// ============================= Helper Function ===========================
 const createDynamicNotification = async ({
   payUser,
   issue,
@@ -577,6 +754,8 @@ const createDynamicNotification = async ({
       'Your payment was successful, but an internal error occurred. Please contact support.',
     booking_successful:
       'Your payment was successfully processed and your booking is now confirmed to ongoing.',
+    booking_update_successful:
+      'Your payment was successfully processed and your booking has been updated.',
   };
 
   const notificationType =
@@ -615,6 +794,8 @@ const createDynamicNotification = async ({
 
 // =============================added by rakib==========================
 export const BookingServices = {
+  checkBookingAvailability,
+  handlePaymentSuccessUpdateBooking,
   createBookingIntoDB,
   getAllBookingsFromDB,
   getSingleBookingFromDB,

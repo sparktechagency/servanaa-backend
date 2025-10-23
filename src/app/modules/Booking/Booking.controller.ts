@@ -2,7 +2,20 @@ import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { BookingServices } from './Booking.service';
+// checkBookingAvailability
 
+const checkBookingAvailability = catchAsync(async (req, res) => {
+  const booking = req.body;
+  console.log('Booking: ', booking);
+  const result = await BookingServices.checkBookingAvailability(booking, req.user);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Booking is created successfully',
+    data: result
+  });
+});
 const createBooking = catchAsync(async (req, res) => {
   const booking = req.body;
   console.log('Booking: ', booking);
@@ -175,6 +188,7 @@ const deleteBooking = catchAsync(async (req, res) => {
 // });
 
 export const BookingControllers = {
+  checkBookingAvailability,
   createBooking,
   getSingleBooking,
   getAllBookings,

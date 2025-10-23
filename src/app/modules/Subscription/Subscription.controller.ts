@@ -302,9 +302,26 @@ const handleWebhook = catchAsync(async (req, res) => {
             receipt_url: receipt_url
           });
         }
+
+        if (metadata?.type === 'booking_update') {
+          const bookingObjId = metadata.bookingId;
+
+          await BookingServices.handlePaymentSuccessUpdateBooking({
+            payUser: metadata.payUser,
+            bookingId: bookingObjId,
+            amount: metadata.amount,
+            stripeChargeId: chargeId,
+            stripePaymentIntentId: paymentIntent.id,
+            receipt_url: receipt_url
+          });
+        }
+
+
         break;
       }
 
+
+      // booking_update
       case 'checkout.session.completed':
       case 'invoice.payment_succeeded': {
         const session = event.data.object as Stripe.Checkout.Session;

@@ -68,18 +68,25 @@ const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any
   return session.url as string;
 };
 
+// ======================
+const generateBookingId = () => {
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
+};
+
 const createStripeCheckoutSessionIntoDB = async (user: any, paymentData: any): Promise<string> => {
   const email = user?.userEmail;
-  const { amount = 50, bookingId } = paymentData;
-
+  const { amount = 50, contractorId, id, booking_update } = paymentData;
+  console.log('contractorDb:', paymentData);
   // Validate booking
-  const booking = await Booking.findOne({ bookingId }).populate(
-    'contractorId',
-    'fullName img'
-  );
-
-  if (!booking) {
-    throw new Error('Booking not found');
+  const contractorDb = await User.findById(contractorId);
+  console.log('contractorDb:', contractorDb);
+  if (!contractorDb?.contractor) {
+    throw new Error('Contractor not found');
+  }
+  const contractor = await Contractor.findById(contractorDb?.contractor.toString()).select('fullName img');
+  console.log('contractor:', contractor);
+  if (!contractor) {
+    throw new Error('Contractor not found');
   }
 
   // Validate user
@@ -88,17 +95,28 @@ const createStripeCheckoutSessionIntoDB = async (user: any, paymentData: any): P
     throw new Error('User not found');
   }
 
-  console.log('userData._id', userData._id)
+  // @ts-ignore
+  const contractorName = contractor?.fullName || 'Contractor';
 
   // @ts-ignore
-  const contractorName = booking?.contractorId?.fullName || 'Contractor';
-  // @ts-ignore
-  const contractorImg = booking?.contractorId?.img ? [booking.contractorId.img] : [];
+  const contractorImg = contractor?.img ? [contractor.img] : [];
+  const booking = generateBookingId();
+
+  let type = booking_update ? 'booking_update' : 'booking_payment';
+  let bookingId = booking;
+
+  if (booking_update) {
+    type = 'booking_update';
+    bookingId = id;
+  }
+
+  console.log('Generated Booking ID ============================:', userData._id.toString());
 
   const metadata = {
     payUser: userData._id.toString(),
     bookingId,
-    type: 'booking_payment',
+    contractorId,
+    type: type,
     amount: String(amount),
   };
 
@@ -106,7 +124,7 @@ const createStripeCheckoutSessionIntoDB = async (user: any, paymentData: any): P
     // @ts-ignore
     payment_method_types: ['card'],
     mode: 'payment',
-    success_url: `${config.frontend_url}/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${config.frontend_url}/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}?bookingId=${bookingId}}`,
     cancel_url: `${config.frontend_url}/cancel`,
     customer_email: email,
     metadata,
@@ -221,6 +239,9 @@ const checkAccountStatusIntoDB = async (id: any) => {
 
 };
 
+// ==========================================================
+// Withdrawal process for contractors
+// ==========================================================
 const withdrawalBalanceProcess = async (amount: number, email: string) => {
   try {
     if (!amount || amount <= 0) throw new Error('Invalid withdrawal amount.');
@@ -233,9 +254,8 @@ const withdrawalBalanceProcess = async (amount: number, email: string) => {
 
     let stripeAccountId = user.stripeAccountId;
 
-    // ✅ Step 1: Create account if not exists
+
     if (!stripeAccountId) {
-      console.log('==========================================================================================:', user.email);
       const account = await stripe.accounts.create({
         type: 'express',
         country: 'AU',
@@ -272,8 +292,6 @@ const withdrawalBalanceProcess = async (amount: number, email: string) => {
       destination: stripeAccountId,
       description: `Withdrawal for ${user.email}`,
     });
-
-    console.log('✅ Transfer successful:', transfer.id);
 
     await Contractor.findByIdAndUpdate(contractor._id, { $inc: { balance: -amount } });
 
@@ -331,7 +349,6 @@ const getWithdrawalList = async (
     withdrawals,
   };
 };
-
 
 const getWithdrawalListAdmin = async (query: {
   page?: number;
