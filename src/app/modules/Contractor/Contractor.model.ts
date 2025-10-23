@@ -31,7 +31,6 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
       required: true,
       default: 'inactive'
     },
-
     // Stripe integration
     stripeCustomerId: { type: String },
     customerId: { type: String, default: '' },

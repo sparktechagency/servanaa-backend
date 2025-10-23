@@ -9,6 +9,7 @@ import { User } from '../User/user.model';
 import { Booking } from '../Booking/Booking.model';
 import { Plans } from '../Subscription/Subscription.model';
 import { Withdraw } from './stripe.model';
+import { Contractor } from '../Contractor/Contractor.model';
 const stripe = new Stripe(config.stripe_secret_key as string);
 
 const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any) => {
@@ -38,7 +39,7 @@ const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any
   const price = await stripe.prices.create({
     product: product.id,
     unit_amount: Math.round(Number(plan.price) * 100),
-    currency: "usd",
+    currency: "aud",
     recurring: { interval },
   });
 
@@ -115,7 +116,7 @@ const createStripeCheckoutSessionIntoDB = async (user: any, paymentData: any): P
     line_items: [
       {
         price_data: {
-          currency: 'usd',
+          currency: 'aud',
           unit_amount: Math.round(Number(amount) * 100),
           product_data: {
             name: `Payment for ${contractorName}`,
@@ -220,57 +221,81 @@ const checkAccountStatusIntoDB = async (id: any) => {
 
 };
 
-const withdrawalBalanceProcess = async (
-  amount: number,
-  email: string,
-) => {
-
+const withdrawalBalanceProcess = async (amount: number, email: string) => {
   try {
-    if (!amount || amount <= 0) {
-      throw new Error('Invalid withdrawal amount.');
-    }
-
-    if (!email) {
-      throw new Error('User email is required.');
-    }
+    if (!amount || amount <= 0) throw new Error('Invalid withdrawal amount.');
+    if (!email) throw new Error('User email is required.');
 
     const user = await User.findOne({ email }) as any;
+    if (!user || user.role !== 'contractor') throw new Error('User not found.');
+    const contractor = await Contractor.findOne({ _id: user.contractor }) as any;
+    if (!contractor) throw new Error('Contractor profile not found.');
 
-    if (user?.role !== "contractor") throw new Error('User not found.');
+    let stripeAccountId = user.stripeAccountId;
+
+    // ✅ Step 1: Create account if not exists
+    if (!stripeAccountId) {
+      console.log('==========================================================================================:', user.email);
+      const account = await stripe.accounts.create({
+        type: 'express',
+        country: 'AU',
+        capabilities: {
+          transfers: { requested: true },
+          card_payments: { requested: true },
+        },
+        business_type: 'individual',
+      });
+
+      console.log('✅ Created new Stripe account:', account.id);
+      await User.findByIdAndUpdate(user._id, { stripeAccountId: account.id });
+      stripeAccountId = account.id;
+    }
+
+    const account = await stripe.accounts.retrieve(stripeAccountId);
+    if (account.details_submitted === false) {
+      const accountLink = await stripe.accountLinks.create({
+        account: stripeAccountId,
+        refresh_url: 'https://yourapp.com/reauth',
+        return_url: 'https://yourapp.com/complete',
+        type: 'account_onboarding',
+      });
+      return { success: true, url: accountLink.url };
+    }
 
     if (user.balance < amount) {
       throw new Error('Insufficient balance.');
     }
 
-    let stripeAccountId = user.stripeAccountId;
-
-    if (!stripeAccountId) {
-      const account = await stripe.accounts.create({
-        type: 'express',
-        country: 'US',
-        capabilities: { transfers: { requested: true } },
-      });
-
-      stripeAccountId = account.id;
-      user.stripeAccountId = stripeAccountId;
-      await user.save();
-    }
-
-
-    const accountLink = await stripe.accountLinks.create({
-      account: stripeAccountId,
-      refresh_url: 'https://yourapp.com/reauth',
-      return_url: 'https://yourapp.com/complete',
-      type: 'account_onboarding',
+    const transfer = await stripe.transfers.create({
+      amount: Math.round(amount * 100),
+      currency: 'aud',
+      destination: stripeAccountId,
+      description: `Withdrawal for ${user.email}`,
     });
 
-    return { success: true, url: accountLink.url };
+    console.log('✅ Transfer successful:', transfer.id);
+
+    await Contractor.findByIdAndUpdate(contractor._id, { $inc: { balance: -amount } });
+
+    const withdrawal = await Withdraw.create({
+      userId: user._id,
+      payoutId: transfer.id,
+      amount,
+      date: new Date(),
+      status: 'requested',
+    });
+
+    return {
+      success: true,
+      message: 'Withdrawal successful.',
+      transferId: transfer.id,
+      withdrawalId: withdrawal._id,
+    };
 
   } catch (error: any) {
     console.error('❌ Withdrawal process failed:', error);
     return { success: false, message: error.message || 'Unknown error' };
   }
-
 };
 
 const getWithdrawalList = async (

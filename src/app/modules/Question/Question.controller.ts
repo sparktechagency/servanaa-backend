@@ -29,8 +29,6 @@ const getSingleFaq = catchAsync(async (req, res) => {
 
 const getAllFaqs = catchAsync(async (req, res) => {
 
-  
-
   const result = await FaqServices.getAllFaqsFromDB(req.query);
 
   sendResponse(res, {

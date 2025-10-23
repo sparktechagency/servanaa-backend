@@ -372,7 +372,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     updateData.files = [...(booking.files || []), ...uploadedFiles];
   }
 
-  // 4️⃣ Update booking
   const updatedBooking = await Booking.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true
@@ -382,7 +381,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     throw new AppError(httpStatus.BAD_REQUEST, 'Booking could not be updated');
   }
 
-  // 5️⃣ Handle completed status (transfer balance)
   if (updatedBooking.status === 'completed') {
     console.log('Booking completed:', updatedBooking.customerId);
 

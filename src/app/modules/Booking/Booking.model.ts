@@ -22,7 +22,6 @@ const bookingSchema = new Schema<TBooking>(
       type: Number,
       required: true,
     },
-    // Fix enum values to match your service
     bookingType: {
       type: String,
       enum: {
@@ -41,7 +40,6 @@ const bookingSchema = new Schema<TBooking>(
       enum: ['pending', 'paid', 'failed', 'refunded'],
       default: 'pending',
     },
-    // Add missing required fields
     questions: [
       {
         question: {
@@ -75,7 +73,6 @@ const bookingSchema = new Schema<TBooking>(
         }
       }
     ],
-    // Time and date fields
     bookingDate: {
       type: Date,
       required: [true, 'Booking date is required']

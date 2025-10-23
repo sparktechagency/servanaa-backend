@@ -7,16 +7,13 @@ import mongoose from 'mongoose';
 import { TFaq } from './Question.interface';
 import { Faq } from './Question.model';
 
-const createFaqIntoDB = async (
-  payload: TFaq,
-) => {
+const createFaqIntoDB = async (payload: TFaq) => {
 
-  // Ensure the 'question' array has only unique questions
-  const exist =  await Faq.findOne({subCategoryId:payload.subCategoryId})
-  if(exist){
-      payload.question = [...new Set(payload.question)];
+  const exist = await Faq.findOne({ subCategoryId: payload.subCategoryId })
+  if (exist) {
+    payload.question = [...new Set(payload.question)];
     const updatedFaq = await Faq.findByIdAndUpdate(exist._id, payload, { new: true });
-    return updatedFaq;  // Return the updated term
+    return updatedFaq;
   }
 
   payload.question = [...new Set(payload.question)];
@@ -29,8 +26,6 @@ const createFaqIntoDB = async (
 };
 
 const getAllFaqsFromDB = async (query: Record<string, unknown>) => {
-
-
 
   const FaqQuery = new QueryBuilder(
     Faq.find().populate('subCategoryId', 'name img'),

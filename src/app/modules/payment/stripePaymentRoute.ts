@@ -26,7 +26,7 @@ router.post('/confirm-payment', PaymentControllers.confirmStripePayment);
 router.get('/check-account-status', PaymentControllers.checkAccountStatus);
 
 router.patch('/withdraw',
-  auth(USER_ROLE.contractor),
+  // auth(USER_ROLE.contractor),
   PaymentControllers.withdrawalBalanceProcess);
 
 router.get('/withdraw',

@@ -77,16 +77,12 @@ const checkAccountStatus = catchAsync(async (req, res) => {
 const withdrawalBalanceProcess = catchAsync(async (req, res) => {
   const { amount } = req.body;
 
-  if (!amount || amount <= 0) {
-    throw new Error('Invalid amount for withdrawal');
-  }
-
   console.log('Initiating withdrawal process for amount:', amount);
-  // const email = "xopox97635@gta5hx.com" as any;
+  const email = "amaahmadmusa71@gmail.com" as any;
   const result = await PaymentServices.withdrawalBalanceProcess(
     amount,
-    req.user.userEmail
-    // email,
+    // req.user.userEmail
+    email,
   );
 
   sendResponse(res, {

@@ -307,6 +307,8 @@ export const update${capitalize(moduleName)}ValidationSchema = z.object({
 `,
     },
   ];
+
+
   // Create files with default content
   files.forEach((file) => {
     const filePath = path.join(modulePath, file.name);

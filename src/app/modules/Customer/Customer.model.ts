@@ -15,6 +15,15 @@ const locationSchema = new Schema({
     type: String,
     required: true,
   },
+  street: {
+    type: String,
+  },
+  detraction: {
+    type: String,
+  },
+  unit: {
+    type: String,
+  },
   name: {
     type: String,
     enum: ["Default", 'Home', 'Work', 'Other'],

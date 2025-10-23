@@ -10,6 +10,7 @@ import config from '../../config';
 import { Booking } from '../Booking/Booking.model';
 import { User } from '../User/user.model';
 import { BookingServices } from '../Booking/Booking.service';
+import { Withdraw } from '../payment/stripe.model';
 
 const stripe = new Stripe(config.stripe_secret_key!);
 
@@ -271,7 +272,7 @@ const handleWebhook = catchAsync(async (req, res) => {
     );
   }
 
-  console.log('✅ Webhook verified:', event.type);
+  console.log('✅ Webhook verified ==================================================================:', event);
   try {
     switch (event.type) {
       case 'payment_intent.succeeded': {
@@ -343,10 +344,39 @@ const handleWebhook = catchAsync(async (req, res) => {
         break;
       }
 
+      // ------------------- Payout Paid (Withdrawal Success) -------------------
       case 'payout.paid': {
-        const payout = event.data.object;
-        console.log('Payout successful:', payout.id);
+        const payout = event.data.object as Stripe.Payout;
 
+        const withdrawal = await Withdraw.findOneAndUpdate(
+          { payoutId: payout.id },
+          { status: 'received', date: new Date() },
+          { new: true }
+        );
+
+        if (withdrawal) {
+          console.log(`✅ Withdrawal ${withdrawal._id} marked as received.`);
+        } else {
+          console.warn(`⚠️ No matching withdrawal found for payout ${payout.id}`);
+        }
+        break;
+      }
+
+      // ------------------- Payout Failed (Withdrawal Failed) -------------------
+      case 'payout.failed': {
+        const payout = event.data.object as Stripe.Payout;
+
+        const withdrawal = await Withdraw.findOneAndUpdate(
+          { payoutId: payout.id },
+          { status: 'rejected', date: new Date() },
+          { new: true }
+        );
+
+        if (withdrawal) {
+          console.log(`❌ Withdrawal ${withdrawal._id} failed.`);
+        } else {
+          console.warn(`⚠️ No matching withdrawal found for payout ${payout.id}`);
+        }
         break;
       }
 
