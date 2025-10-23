@@ -26,81 +26,82 @@ const generateBookingId = () => {
   return Math.floor(10000000 + Math.random() * 90000000).toString();
 };
 
-const checkBookingAvailability = async (payload: any, user: any) => {
-  const { contractorId, day, startTime, duration } = payload;
 
-  const [usr, contractor] = await Promise.all([
-    User.findOne({ email: user.userEmail }),
-    User.findById(contractorId),
-  ]);
+// Utility to convert "HH:mm" → minutes
+const toMinutes = (time: string) => {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+};
 
-  if (!usr) throw new AppError(httpStatus.NOT_FOUND, 'User not found');
-  if (!contractor) throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
+// Utility to convert minutes → "HH:mm"
+const toTime = (mins: number) => {
+  const h = Math.floor(mins / 60)
+    .toString()
+    .padStart(2, "0");
+  const m = (mins % 60).toString().padStart(2, "0");
+  return `${h}:${m}`;
+};
 
-  const mySchedule = await MySchedule.findOne({ contractorId: contractor?.contractor?.toString() }).lean();
-  if (!mySchedule) { throw new AppError(httpStatus.NOT_FOUND, 'Contractor schedule not found'); }
+const getAvailableTimesForDate = async (contractorId: string, date: string) => {
+  // Get contractor schedule
+  const mySchedule = await MySchedule.findOne({ contractorId }).lean();
+  if (!mySchedule)
+    throw new AppError(httpStatus.NOT_FOUND, "Contractor schedule not found");
 
-  // Calculate end time from start + duration
-  const [startHour, startMinute] = startTime.split(':').map(Number);
-  const endTime = new Date(0, 0, 0, startHour + duration, startMinute)
-    .toTimeString()
-    .slice(0, 5);
+  const weekday = new Date(date).toLocaleDateString("en-US", { weekday: "long" });
 
-  const requestedDays = Array.isArray(day) ? day : [day];
+  const scheduleForDay = mySchedule.schedules.find((s: any) => s.days === weekday);
+  if (!scheduleForDay)
+    throw new AppError(httpStatus.BAD_REQUEST, `No schedule found for ${weekday}`);
 
-  const unavailableDays: string[] = [];
+  const daySlots = scheduleForDay.timeSlots; // e.g., ["09:00-23:00"]
 
-  for (const d of requestedDays) {
-    const weekday = new Date(d).toLocaleDateString('en-US', { weekday: 'long' });
+  // Get existing bookings for that date
+  const existingBookings = await Booking.find({
+    contractorId,
+    bookingDate: new Date(date),
+    isDeleted: false,
+  }).lean();
 
-    const scheduleForDay = mySchedule.schedules.find((s: any) => s.days === weekday);
-    if (!scheduleForDay) {
-      unavailableDays.push(`${weekday} (no schedule)`);
-      continue;
+  // Convert schedule into ranges (in minutes)
+  let freeRanges = daySlots.map((slot: string) => {
+    const [start, end] = slot.split("-");
+    return [toMinutes(start), toMinutes(end)];
+  });
+
+  // Subtract booked times
+  for (const booking of existingBookings) {
+    const start = toMinutes(booking.startTime);
+    const end = toMinutes(booking.endTime);
+
+    const updatedRanges: [number, number][] = [];
+
+    for (const [freeStart, freeEnd] of freeRanges) {
+      if (end <= freeStart || start >= freeEnd) {
+        // No overlap
+        updatedRanges.push([freeStart, freeEnd]);
+      } else {
+        // Overlap — cut booked portion out
+        if (start > freeStart) updatedRanges.push([freeStart, start]);
+        if (end < freeEnd) updatedRanges.push([end, freeEnd]);
+      }
     }
 
-    const slotAvailable = scheduleForDay.timeSlots.some((slot: string) => {
-      const [slotStart, slotEnd] = slot.split('-');
-      return startTime >= slotStart && endTime <= slotEnd;
-    });
-
-    if (!slotAvailable) {
-      unavailableDays.push(`${weekday} (time ${startTime}-${endTime} unavailable)`);
-      continue;
-    }
-
-    const overlappingBooking = await Booking.findOne({
-      contractorId,
-      bookingDate: new Date(d),
-      isDeleted: false,
-      $or: [
-        {
-          $and: [
-            { startTime: { $lt: endTime } },
-            { endTime: { $gt: startTime } },
-          ],
-        },
-      ],
-    }).lean();
-
-    if (overlappingBooking) {
-      unavailableDays.push(
-        `${weekday} (conflict with ${overlappingBooking.startTime}-${overlappingBooking.endTime})`
-      );
-    }
+    freeRanges = updatedRanges;
   }
 
-  if (unavailableDays.length > 0) {
-    return {
-      success: false,
-      message: 'Some requested slots are unavailable.',
-      unavailableDays,
-    };
-  }
+  // Convert back to "HH:mm-HH:mm" format
+  const availableSlots = freeRanges
+    .filter(([s, e]) => e - s >= 30) // Only slots >= 30 mins
+    .map(([s, e]) => `${toTime(s)}-${toTime(e)}`);
 
   return {
     success: true,
-    message: 'All requested slots are available for booking.',
+    message:
+      availableSlots.length > 0
+        ? `Available time slots for ${weekday}`
+        : `No available slots for ${weekday}`,
+    availableSlots,
   };
 };
 
@@ -134,54 +135,6 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   payload.endTime = endTime;
 
   const requestedDays = Array.isArray(day) ? day : [day];
-
-  await Promise.all(
-    requestedDays.map(async (d) => {
-      const weekday = new Date(d).toLocaleDateString("en-US", {
-        weekday: "long",
-      });
-
-      const scheduleForDay = mySchedule.schedules.find(
-        (s: any) => s.days === weekday
-      );
-      if (!scheduleForDay)
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          `Contractor has no schedule for ${weekday}`
-        );
-
-      const slotAvailable = scheduleForDay.timeSlots.some((slot: string) => {
-        const [slotStart, slotEnd] = slot.split("-");
-        return startTime >= slotStart && endTime <= slotEnd;
-      });
-
-      if (!slotAvailable)
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          `Time ${startTime}-${endTime} unavailable on ${weekday}`
-        );
-
-      const overlappingBooking = await Booking.findOne({
-        contractorId,
-        bookingDate: new Date(d),
-        isDeleted: false,
-        $or: [
-          {
-            $and: [
-              { startTime: { $lt: endTime } },
-              { endTime: { $gt: startTime } },
-            ],
-          },
-        ],
-      }).lean();
-
-      if (overlappingBooking)
-        throw new AppError(
-          httpStatus.CONFLICT,
-          `A booking already exists between ${overlappingBooking.startTime} and ${overlappingBooking.endTime} on ${d}`
-        );
-    })
-  );
 
   // const bookingId = generateBookingId();
   // const createdBookings =
@@ -789,12 +742,9 @@ const createDynamicNotification = async ({
 };
 
 
-
-
-
 // =============================added by rakib==========================
 export const BookingServices = {
-  checkBookingAvailability,
+  getAvailableTimesForDate,
   handlePaymentSuccessUpdateBooking,
   createBookingIntoDB,
   getAllBookingsFromDB,

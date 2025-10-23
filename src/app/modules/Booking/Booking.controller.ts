@@ -5,9 +5,9 @@ import { BookingServices } from './Booking.service';
 // checkBookingAvailability
 
 const checkBookingAvailability = catchAsync(async (req, res) => {
-  const booking = req.body;
-  console.log('Booking: ', booking);
-  const result = await BookingServices.checkBookingAvailability(booking, req.user);
+  const query = req.query;
+  const { contractorId, day } = query;
+  const result = await BookingServices.getAvailableTimesForDate(contractorId as any, day as any);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
