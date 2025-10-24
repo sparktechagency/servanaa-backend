@@ -19,7 +19,7 @@ import { SubCategory } from '../SubCategory/SubCategory.model';
 import { Service } from 'aws-sdk';
 import { Notification } from '../Notification/Notification.model';
 import moment from 'moment';
-import { Banner } from './Dashboard.model';
+import { Banner, CostAdmin } from './Dashboard.model';
 import { Transaction } from '../Transaction/transaction.model';
 
 export const getDashboardData = catchAsync(async (req, res) => {
@@ -704,6 +704,7 @@ export const getDailyBooking = catchAsync(async (req, res) => {
     { $sort: { _id: 1 } } // Sort by date ascending
   ]);
 
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -712,3 +713,48 @@ export const getDailyBooking = catchAsync(async (req, res) => {
   });
 });
 
+
+
+export const createUpdateCost = catchAsync(async (req, res) => {
+  const { cost } = req.body;
+
+  if (!cost && cost !== 0) {
+    throw new Error('Cost is required.');
+  }
+
+  // Find the latest cost record
+  let costRecord = await CostAdmin.findOne();
+
+  if (costRecord) {
+    // Update existing record
+    costRecord.cost = cost;
+    await costRecord.save();
+  } else {
+    // Create a new record
+    costRecord = await CostAdmin.create({ cost });
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Cost updated successfully.',
+    data: costRecord,
+  });
+});
+
+
+// Get Cost or Percentage
+export const getPercent = catchAsync(async (req, res) => {
+  const costRecord = await CostAdmin.findOne().sort({ createdAt: -1 });
+
+  if (!costRecord) {
+    throw new Error('No cost record found.');
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Cost fetched successfully.',
+    data: { cost: costRecord.cost },
+  });
+});
