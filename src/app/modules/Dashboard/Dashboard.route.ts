@@ -82,7 +82,7 @@ router.get('/get_booking_stats_by_category', getBookingStatsByCategory);
 router.get('/get_daily_booking', getDailyBooking);
 
 router.get('/getPercent', getPercent);
-router.patch('/createUpdateCost', createUpdateCost);
+router.post('/createUpdateCost', createUpdateCost);
 
 
 
