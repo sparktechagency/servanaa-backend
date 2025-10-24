@@ -691,7 +691,7 @@ export const getBookingStatsByCategory = catchAsync(async (req, res) => {
 });
 
 export const getDailyBooking = catchAsync(async (req, res) => {
-  // Aggregate bookings by day
+
   const dailyBookings = await Booking.aggregate([
     {
       $group: {

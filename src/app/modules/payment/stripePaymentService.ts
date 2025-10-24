@@ -369,16 +369,21 @@ const getWithdrawalListAdmin = async (query: {
   const skip = (page - 1) * limit;
 
   const withdrawals = await Withdraw.find(filter)
+    .populate('userId', 'fullName img email')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
 
   const total = await Withdraw.countDocuments(filter);
+  const totalPages = Math.ceil(total / limit);
 
   return {
-    total,
-    page,
-    limit,
+    meta: {
+      total,
+      totalPages,
+      page,
+      limit,
+    },
     withdrawals,
   };
 };
