@@ -4,8 +4,13 @@ import { AuthValidation } from './auth.validation';
 import { AuthControllers } from './auth.controller';
 import { USER_ROLE } from '../User/user.constant';
 import auth from '../../middlewares/auth';
+import { createUpdateCost, getPercent } from '../Dashboard/Dashboard.controller';
 
 const router = express.Router();
+
+router.post('/create_update_cost', createUpdateCost);
+router.get('/getPercent', getPercent);
+
 
 router.post(
   '/login',

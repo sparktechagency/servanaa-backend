@@ -4,7 +4,6 @@ import express, { NextFunction, Request, Response } from 'express';
 import {
   createBannerIntoDB,
   createSubscription,
-  createUpdateCost,
   deleteBannerFromDB,
   deleteSubscription,
   getAllAdminNotifications,
@@ -13,7 +12,6 @@ import {
   getBookingStatsByCategory,
   getDailyBooking,
   getDashboardData,
-  getPercent,
   getTransactionHistoryTable,
   totalCounts,
   updateBannerIntoDB,
@@ -22,9 +20,6 @@ import {
 import { uploadFileS3 } from '../../utils/UploaderS3';
 
 const router = express.Router();
-
-router.post('/create_update_cost', createUpdateCost);
-router.get('/getPercent', getPercent);
 
 router.get('/', getDashboardData);
 router.get('/admin-notification', getAllAdminNotifications);

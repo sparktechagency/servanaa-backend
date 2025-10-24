@@ -6,34 +6,33 @@ import { TUser, UserModel } from './user.interface';
 import { UserStatus } from './user.constant';
 import config from '../../config/index';
 
-const userSchema = new Schema<TUser, UserModel>(
-  {
-    fullName: { type: String, required: true },
-    email: { type: String, required: true },
-    password: { type: String, required: true, select: false },
-    stripeAccountId: { type: String },
-    customerId: { type: String, ref: "Customer" },
-    contactNo: { type: String, required: true },
-    otpVerified: { type: Boolean, default: false },
-    img: { type: String, default: '' },
-    role: {
-      type: String,
-      enum: ['customer', 'superAdmin', 'contractor'],
-      required: true,
-      default: 'customer'
-    },
-    status: {
-      type: String,
-      enum: Object.values(UserStatus),
-      // enum: ['active', 'blocked'],
-      default: 'active'
-    },
-    passwordChangedAt: { type: Date, required: true, default: Date.now },
-    contractor: { type: Schema.Types.ObjectId, ref: 'Contractor' },
-    messageId: { type: Schema.Types.ObjectId, ref: 'Help' },
-    customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
-    isDeleted: { type: Boolean, default: false }
+const userSchema = new Schema<TUser, UserModel>({
+  fullName: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true, select: false },
+  stripeAccountId: { type: String },
+  customerId: { type: String, ref: "Customer" },
+  contactNo: { type: String, required: true },
+  otpVerified: { type: Boolean, default: false },
+  img: { type: String, default: '' },
+  role: {
+    type: String,
+    enum: ['customer', 'superAdmin', 'contractor'],
+    required: true,
+    default: 'customer'
   },
+  status: {
+    type: String,
+    enum: Object.values(UserStatus),
+    // enum: ['active', 'blocked'],
+    default: 'active'
+  },
+  passwordChangedAt: { type: Date, required: true, default: Date.now },
+  contractor: { type: Schema.Types.ObjectId, ref: 'Contractor' },
+  messageId: { type: Schema.Types.ObjectId, ref: 'Help' },
+  customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
+  isDeleted: { type: Boolean, default: false }
+},
   {
     timestamps: true
   }
