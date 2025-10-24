@@ -272,7 +272,6 @@ const handleWebhook = catchAsync(async (req, res) => {
     );
   }
 
-  console.log('✅ Webhook verified ==================================================================:', event);
   try {
     switch (event.type) {
       case 'payment_intent.succeeded': {

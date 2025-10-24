@@ -22,6 +22,7 @@ import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
 import { Transaction } from '../Transaction/transaction.model';
 import { Notification } from '../Notification/Notification.model';
+import { CostAdmin } from '../Dashboard/Dashboard.model';
 const generateBookingId = () => {
   return Math.floor(10000000 + Math.random() * 90000000).toString();
 };
@@ -366,7 +367,7 @@ const getSingleBookingFromDB = async (id: string) => {
 };
 
 const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
-  // 1️⃣ Find the booking
+
   const booking = await Booking.findById(id);
   if (!booking) throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
   if (booking.isDeleted) throw new AppError(httpStatus.BAD_REQUEST, 'Cannot update a deleted booking');
@@ -380,7 +381,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
       mimetype: file.mimetype,
       size: file.size
     }));
-
     updateData.files = [...(booking.files || []), ...uploadedFiles];
   }
 
@@ -401,11 +401,16 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     if (!contractorData) throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
     if (!customerData) throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
 
-    // Balance calculation (avoid duplication)
-    const price = updatedBooking.price || 0;
+    const charge = await CostAdmin.findOne({});
+    const adminCostPercent = charge?.cost || 0;
+
+    const price = Number(updatedBooking.price || 0);
+    const adminChargeAmount = (price * adminCostPercent) / 100;
+    const contractorNetIncome = price - adminChargeAmount;
 
     customerData.balance = (customerData.balance ?? 0) - price;
-    contractorData.balance = (contractorData.balance ?? 0) + price;
+    contractorData.balance = (contractorData.balance ?? 0) + contractorNetIncome;
+
 
     await Promise.all([contractorData.save(), customerData.save()]);
 
@@ -491,6 +496,7 @@ const handlePaymentSuccess = async (metadata: {
         receipt_url
       });
     }
+
 
     const transaction = await Transaction.create({
       paymentIntentId: stripePaymentIntentId,

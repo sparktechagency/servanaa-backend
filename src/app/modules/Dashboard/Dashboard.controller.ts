@@ -203,73 +203,13 @@ export const getContractorTableData = catchAsync(async (req, res) => {
   });
 });
 
-// export const getCustomerTableData = catchAsync(async (req, res) => {
-//   // Support pagination/search
-//   const page = Number(req.query.page) || 1;
-//   const limit = Number(req.query.limit) || 10;
-//   const skip = (page - 1) * limit;
-//   const search = (req.query.search as string) || '';
-
-//   const testCustomer = await User.find({}).populate('customerId').lean();
-
-//   console.log('Test customer: ', testCustomer);
-
-//   // Find customers and their user profiles
-//   const customers = await Customer.find({})
-//     .populate({
-//       path: 'userId',
-//       select: 'fullName email contactNo img status'
-//     })
-//     .skip(skip)
-//     .limit(limit)
-//     .lean();
-
-//   console.log('Customers table data: ', customers);
-
-//   const total = await Customer.countDocuments();
-
-//   // Format table rows
-//   const table = customers.map((customer: any, idx: number) => {
-//     // Defensive check: only access if userId is an object (populated)
-//     const user =
-//       typeof customer.userId === 'object' && customer.userId !== null
-//         ? customer.userId
-//         : {};
-//     return {
-//       serial: `#${customer._id.toString().substring(0, 5)}`,
-//       photo: user.img ?? '',
-//       name: user.fullName ?? '',
-//       email: user.email ?? '',
-//       contactNumber: user.contactNo ?? '',
-//       location: customer.location ?? '',
-//       status: user.status ?? '',
-//       message: 'Message',
-//       action: user.status === 'active' ? '✔' : '✗'
-//     };
-//   });
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Customer management table loaded',
-//     data: {
-//       table,
-//       pagination: {
-//         page,
-//         limit,
-//         total,
-//         totalPages: Math.ceil(total / limit)
-//       }
-//     }
-//   });
-// });
 
 export const getCategoryTable = catchAsync(async (req, res) => {
   const categories = await Category.find({});
   const data = categories.map((cat, idx) => ({
     serial: idx + 1,
     name: cat.name,
-    image: cat.img, // assumes your model has img/url
+    image: cat.img,
     action: 'edit'
   }));
   sendResponse(res, {
@@ -473,8 +413,6 @@ export const getTransactionHistoryTable = catchAsync(async (req, res) => {
   });
 });
 
-
-
 // ✅ Create a new subscription
 export const createSubscription = catchAsync(async (req, res) => {
   try {
@@ -532,7 +470,6 @@ export const deleteSubscription = catchAsync(async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
-
 
 // =======================
 // CREATE BANNER
@@ -648,7 +585,6 @@ export const totalCounts = catchAsync(async (req, res) => {
   });
 });
 
-
 export const getBookingStatsByCategory = catchAsync(async (req, res) => {
   const bookings = await Booking.aggregate([
     { $match: { isDeleted: false } },
@@ -737,7 +673,6 @@ export const createUpdateCost = catchAsync(async (req, res) => {
     data: costRecord,
   });
 });
-
 
 // Get Cost or Percentage
 export const getPercent = catchAsync(async (req, res) => {
