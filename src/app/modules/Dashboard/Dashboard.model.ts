@@ -7,6 +7,13 @@ type TBanner = {
     type: string;
 };
 
+type TCost = {
+    cost: number;
+    category: Types.ObjectId;
+    subCategory?: Types.ObjectId;
+    type: string;
+};
+
 const BannerSchema = new Schema<TBanner>(
     {
         image: { type: String, required: true },
@@ -17,4 +24,12 @@ const BannerSchema = new Schema<TBanner>(
     { timestamps: true }
 );
 
+const costAdminSchema = new Schema<TCost>(
+    {
+        cost: { type: Number, required: true },
+    },
+    { timestamps: true }
+);
+
+export const CostAdmin = model<TCost>('CostAdmin', costAdminSchema);
 export const Banner = model<TBanner>('Banner', BannerSchema);

@@ -110,8 +110,6 @@ const createStripeCheckoutSessionIntoDB = async (user: any, paymentData: any): P
     bookingId = id;
   }
 
-  console.log('Generated Booking ID ============================:', userData._id.toString());
-
   const metadata = {
     payUser: userData._id.toString(),
     bookingId,
