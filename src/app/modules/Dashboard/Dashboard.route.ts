@@ -81,8 +81,8 @@ router.get('/total_counts', totalCounts);
 router.get('/get_booking_stats_by_category', getBookingStatsByCategory);
 router.get('/get_daily_booking', getDailyBooking);
 
-router.get('/getPercent', getPercent);
 router.post('/createUpdateCost', createUpdateCost);
+router.get('/getPercent', getPercent);
 
 
 
