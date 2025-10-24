@@ -21,6 +21,7 @@ import { Notification } from '../Notification/Notification.model';
 import moment from 'moment';
 import { Banner, CostAdmin } from './Dashboard.model';
 import { Transaction } from '../Transaction/transaction.model';
+import AppError from '../../errors/AppError';
 
 export const getDashboardData = catchAsync(async (req, res) => {
   const totalUser = await User.countDocuments({ isDeleted: false });
@@ -717,18 +718,15 @@ export const createUpdateCost = catchAsync(async (req, res) => {
   const { cost } = req.body;
 
   if (!cost && cost !== 0) {
-    throw new Error('Cost is required.');
+    throw new AppError(400, 'Cost is required.');
   }
 
-  // Find the latest cost record
   let costRecord = await CostAdmin.findOne();
 
   if (costRecord) {
-    // Update existing record
     costRecord.cost = cost;
     await costRecord.save();
   } else {
-    // Create a new record
     costRecord = await CostAdmin.create({ cost });
   }
 
