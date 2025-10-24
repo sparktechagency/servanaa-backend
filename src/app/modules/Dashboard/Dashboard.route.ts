@@ -23,6 +23,9 @@ import { uploadFileS3 } from '../../utils/UploaderS3';
 
 const router = express.Router();
 
+router.post('/create_update_cost', createUpdateCost);
+router.get('/getPercent', getPercent);
+
 router.get('/', getDashboardData);
 router.get('/admin-notification', getAllAdminNotifications);
 router.get('/subscription-plans', getAllSubscriptionPlansTable);
@@ -80,9 +83,6 @@ router.delete('/delete_banner/:id', deleteBannerFromDB);
 router.get('/total_counts', totalCounts);
 router.get('/get_booking_stats_by_category', getBookingStatsByCategory);
 router.get('/get_daily_booking', getDailyBooking);
-
-router.post('/createUpdateCost', createUpdateCost);
-router.get('/getPercent', getPercent);
 
 
 

@@ -9,9 +9,6 @@ type TBanner = {
 
 type TCost = {
     cost: number;
-    category: Types.ObjectId;
-    subCategory?: Types.ObjectId;
-    type: string;
 };
 
 const BannerSchema = new Schema<TBanner>(
