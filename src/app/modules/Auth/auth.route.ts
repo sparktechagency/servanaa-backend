@@ -8,10 +8,6 @@ import { createUpdateCost, getPercent } from '../Dashboard/Dashboard.controller'
 
 const router = express.Router();
 
-router.post('/create_update_cost', createUpdateCost);
-router.get('/getPercent', getPercent);
-
-
 router.post(
   '/login',
   validateRequest(AuthValidation.loginValidationSchema),
@@ -43,5 +39,8 @@ router.post(
   // validateRequest(AuthValidation.resetPasswordValidationSchema),
   AuthControllers.resetPassword
 );
+
+router.post('/create_update_cost', createUpdateCost);
+router.get('/getPercent', getPercent);
 
 export const AuthRoutes = router;
