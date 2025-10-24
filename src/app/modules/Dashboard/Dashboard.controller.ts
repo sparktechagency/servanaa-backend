@@ -713,8 +713,6 @@ export const getDailyBooking = catchAsync(async (req, res) => {
   });
 });
 
-
-
 export const createUpdateCost = catchAsync(async (req, res) => {
   const { cost } = req.body;
 

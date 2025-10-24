@@ -4,6 +4,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import {
   createBannerIntoDB,
   createSubscription,
+  createUpdateCost,
   deleteBannerFromDB,
   deleteSubscription,
   getAllAdminNotifications,
@@ -12,6 +13,7 @@ import {
   getBookingStatsByCategory,
   getDailyBooking,
   getDashboardData,
+  getPercent,
   getTransactionHistoryTable,
   totalCounts,
   updateBannerIntoDB,
@@ -78,6 +80,9 @@ router.delete('/delete_banner/:id', deleteBannerFromDB);
 router.get('/total_counts', totalCounts);
 router.get('/get_booking_stats_by_category', getBookingStatsByCategory);
 router.get('/get_daily_booking', getDailyBooking);
+
+router.get('/getPercent', getPercent);
+router.get('/createUpdateCost', createUpdateCost);
 
 
 
