@@ -362,8 +362,6 @@ const getWithdrawalListAdmin = async (query: {
   const filter: any = {};
   if (status) {
     filter.status = status;
-  } else {
-    filter.status = 'received';
   }
 
   const skip = (page - 1) * limit;
