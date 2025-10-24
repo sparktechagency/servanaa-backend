@@ -9,8 +9,11 @@ import {
   getAllAdminNotifications,
   getAllBannersFromDB,
   getAllSubscriptionPlansTable,
+  getBookingStatsByCategory,
+  getDailyBooking,
   getDashboardData,
   getTransactionHistoryTable,
+  totalCounts,
   updateBannerIntoDB,
   updateSubscription
 } from './Dashboard.controller';
@@ -72,5 +75,11 @@ router.patch(
 );
 
 router.delete('/delete_banner/:id', deleteBannerFromDB);
+router.get('/total_counts', totalCounts);
+router.get('/get_booking_stats_by_category', getBookingStatsByCategory);
+router.get('/get_daily_booking', getDailyBooking);
+
+
+
 
 export const DashboardRoutes = router;

@@ -107,7 +107,8 @@ const getAvailableTimesForDate = async (contractorId: string, date: string) => {
 
 const createBookingIntoDB = async (payload: TBooking, user: any) => {
   const { bookingType, contractorId, day, startTime, duration, bookingId } = payload;
-  // console.log('payload in service:', contractorId);
+
+  console.log('createBookingIntoDB payload:', payload);
 
   const [usr, contractor] = await Promise.all([
     User.findOne({ email: user.userEmail }),
@@ -124,9 +125,9 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
 
   payload.customerId = usr._id;
 
-  const mySchedule = await MySchedule.findOne({ contractorId: contractorId?.toString() }).lean();
-  if (!mySchedule)
-    throw new AppError(httpStatus.NOT_FOUND, "Contractor schedule not found");
+  // const mySchedule = await MySchedule.findOne({ contractorId: contractorId?.toString() }).lean();
+  // if (!mySchedule)
+  //   throw new AppError(httpStatus.NOT_FOUND, "Contractor schedule not found");
 
   const [startHour, startMinute] = startTime.split(":").map(Number);
   const endTime = new Date(0, 0, 0, startHour + duration, startMinute)
@@ -135,28 +136,6 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   payload.endTime = endTime;
 
   const requestedDays = Array.isArray(day) ? day : [day];
-
-  // const bookingId = generateBookingId();
-  // const createdBookings =
-  //   bookingType === "weekly" && requestedDays.length > 1
-  //     ? await Booking.insertMany(
-  //       requestedDays.map((d) => ({
-  //         ...payload,
-  //         bookingDate: d,
-  //         bookingId,
-  //         status: "pending",
-  //         paymentStatus: "pending",
-  //       }))
-  //     )
-  //     : [
-  //       await Booking.create({
-  //         ...payload,
-  //         bookingDate: requestedDays[0],
-  //         bookingId,
-  //         status: "pending",
-  //         paymentStatus: "pending",
-  //       }),
-  //     ];
 
   const createdBookings = [
     await Booking.create({
@@ -167,7 +146,6 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
     }),
   ];
 
-  // 🔔 Send notifications asynchronously (non-blocking)
   (async () => {
     try {
       const admins = await User.find({ role: "superAdmin" }).lean();
@@ -395,7 +373,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
 
   const updateData: any = { ...payload };
 
-  // 3️⃣ Handle file uploads
   if (files && Array.isArray(files) && files.length > 0) {
     const uploadedFiles = files.map((file: any) => ({
       name: file.originalname || file.filename,
@@ -417,7 +394,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   }
 
   if (updatedBooking.status === 'completed') {
-    console.log('Booking completed:', updatedBooking.customerId);
 
     const contractorData = await Contractor.findOne({ userId: updatedBooking.contractorId.toString() });
     const customerData = await Customer.findOne({ userId: updatedBooking.customerId.toString() });

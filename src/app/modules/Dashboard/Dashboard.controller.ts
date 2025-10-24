@@ -20,6 +20,7 @@ import { Service } from 'aws-sdk';
 import { Notification } from '../Notification/Notification.model';
 import moment from 'moment';
 import { Banner } from './Dashboard.model';
+import { Transaction } from '../Transaction/transaction.model';
 
 export const getDashboardData = catchAsync(async (req, res) => {
   const totalUser = await User.countDocuments({ isDeleted: false });
@@ -614,6 +615,100 @@ export const deleteBannerFromDB = catchAsync(async (req, res) => {
     success: true,
     message: 'Banner deleted successfully.',
     data: deletedBanner,
+  });
+});
+
+// =======================
+// DELETE BANNER
+// =======================
+export const totalCounts = catchAsync(async (req, res) => {
+
+  const totalContractor = await Contractor.countDocuments();
+  const totalCustomer = await Customer.countDocuments();
+  const totalBooking = await Booking.countDocuments();
+  const totalIncome = await Transaction.aggregate([
+    { $match: { isDeleted: false, paymentStatus: 'paid' } },
+    { $group: { _id: null, total: { $sum: '$amount' } } },
+  ]);
+  const totalActiveBooking = await Booking.countDocuments({ status: 'ongoing' });
+
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Totals fetched successfully.',
+    data: {
+      totalContractor,
+      totalCustomer,
+      totalBooking,
+      totalActiveBooking,
+      totalIncome: totalIncome[0]?.total || 0,
+    },
+  });
+});
+
+
+export const getBookingStatsByCategory = catchAsync(async (req, res) => {
+  const bookings = await Booking.aggregate([
+    { $match: { isDeleted: false } },
+    {
+      $group: {
+        _id: '$subCategoryId',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $lookup: {
+        from: 'subcategories',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'category',
+      },
+    },
+    { $unwind: '$category' },
+    {
+      $project: {
+        _id: 0,
+        categoryName: '$category.name',
+        count: 1,
+      },
+    },
+  ]);
+
+  const totalBookings = bookings.reduce((sum, b) => sum + b.count, 0);
+
+  const result = bookings.map((b) => ({
+    categoryName: b.categoryName,
+    count: b.count,
+    percentage: ((b.count / totalBookings) * 100).toFixed(2),
+  }));
+
+  res.status(200).json({
+    success: true,
+    message: 'Category-wise booking stats',
+    data: result,
+  });
+});
+
+export const getDailyBooking = catchAsync(async (req, res) => {
+  // Aggregate bookings by day
+  const dailyBookings = await Booking.aggregate([
+    {
+      $group: {
+        _id: {
+          $dateToString: { format: '%Y-%m-%d', date: '$bookingDate' }
+        },
+        total: { $sum: 1 }
+      }
+    },
+    { $sort: { _id: 1 } } // Sort by date ascending
+  ]);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Daily bookings fetched successfully.',
+    data: dailyBookings
   });
 });
 
