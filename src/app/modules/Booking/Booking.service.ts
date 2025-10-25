@@ -23,10 +23,13 @@ import { Customer } from '../Customer/Customer.model';
 import { Transaction } from '../Transaction/transaction.model';
 import { Notification } from '../Notification/Notification.model';
 import { CostAdmin } from '../Dashboard/Dashboard.model';
+import config from '../../config';
+import Stripe from 'stripe';
 const generateBookingId = () => {
   return Math.floor(10000000 + Math.random() * 90000000).toString();
 };
 
+const stripe = new Stripe(config.stripe_secret_key as string);
 
 // Utility to convert "HH:mm" → minutes
 const toMinutes = (time: string) => {
@@ -402,7 +405,7 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     if (!customerData) throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
 
     const charge = await CostAdmin.findOne({});
-    const adminCostPercent = charge?.cost || 0;
+    const adminCostPercent = charge?.cost || 1;
 
     const price = Number(updatedBooking.price || 0);
     const adminChargeAmount = (price * adminCostPercent) / 100;
@@ -423,6 +426,42 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
       isRead: []
     });
   }
+
+  if (updatedBooking.status === 'cancelled' || updatedBooking.status === 'rejected') {
+    try {
+      const transaction = await Transaction.findOne({
+        bookingId: updatedBooking.bookingId
+      });
+
+      if (transaction) {
+        const refund = await stripe.refunds.create({
+          payment_intent: transaction.transactionId,
+        });
+
+        console.log('✅ Refund successful:', refund.id);
+
+        transaction.paymentStatus = 'refunded';
+        transaction.refundId = refund.id;
+        await transaction.save();
+
+        await updatedBooking.save();
+
+        await NotificationServices.createNotificationIntoDB({
+          userId: updatedBooking.customerId,
+          type: NOTIFICATION_TYPES.PAYMENT_REFUND,
+          title: 'Payment Refunded',
+          message: 'Your payment has been refunded due to booking cancellation.',
+          bookingId: updatedBooking._id,
+          isRead: []
+        });
+      } else {
+        console.warn('⚠️ No transaction found for refund');
+      }
+    } catch (refundError) {
+      console.error('❌ Refund failed:', refundError);
+    }
+  }
+
 
   // 6️⃣ Handle ongoing status
   if (updatedBooking.status === 'ongoing') {

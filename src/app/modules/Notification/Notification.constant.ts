@@ -7,6 +7,7 @@ export const NOTIFICATION_TYPES = {
 
   // Payment system notifications
   PAYMENT_RECEIVED: 'paymentReceived',
+  PAYMENT_REFUND: 'paymentRefund',
   PAYMENT_FAILED: 'paymentFailed',
   REFUND_PROCESSED: 'refundProcessed',
   SESSION_STARTED: 'sessionStarted',

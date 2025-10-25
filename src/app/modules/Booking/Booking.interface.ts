@@ -39,7 +39,7 @@ export type TBooking = {
   duration: number;
   rateHourly: number;
   files?: any[];
-  status: 'pending' | 'ongoing' | 'completed' | 'rejected';
+  status: 'pending' | 'ongoing' | 'completed' | 'cancelled' | 'rejected';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   totalAmount: number;
   isDeleted: boolean;

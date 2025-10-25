@@ -16,10 +16,11 @@ const transactionSchema: Schema = new Schema<TTransaction>(
     },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'paid', 'rejected'],
+      enum: ['pending', 'paid', 'rejected', 'refunded'],
       default: 'pending',
     },
     amount: { type: Number, required: true },
+    refundId: { type: String },
     date: { type: Date, default: Date.now },
     isDeleted: { type: Boolean, required: true, default: false },
   },
