@@ -691,20 +691,22 @@ export const getPercent = catchAsync(async (req, res) => {
 
 export const approvedContactor = catchAsync(async (req, res) => {
   const { userId, status } = req.query as { userId: string; status: "approved" | "rejected" };
-  const user = await User.findById(userId)
 
-  if (!user) {
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { adminAccept: status },
+    { new: true }
+  );
+
+  if (!updatedUser) {
     throw new AppError(404, 'User not found.');
   }
-
-  user.adminAccept = status;
-  await user.save();
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Cost fetched successfully.',
-    data: { cost: user },
+    message: 'User status updated successfully.',
+    data: { user: updatedUser },
   });
 });
 
