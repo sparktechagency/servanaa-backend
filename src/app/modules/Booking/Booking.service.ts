@@ -260,8 +260,8 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
       .populate({
         path: 'contractorId',
         populate: {
-          path: 'contractor',
-          select: 'ratings rateHourly'
+          path: 'contractor ',
+          select: 'ratings rateHourly location'
         }
       })
       .populate('subCategoryId', 'name')

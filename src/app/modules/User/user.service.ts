@@ -14,6 +14,7 @@ import { createToken } from '../Auth/auth.utils';
 import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
 import mongoose from 'mongoose';
+import { TContractor } from '../Contractor/Contractor.interface';
 
 // create customer
 export const createCustomerIntoDB = async (payload: any) => {
@@ -167,25 +168,48 @@ export const createContractorIntoDB = async (payload: any) => {
 };
 
 const getMe = async (userEmail: string) => {
-  // const result = await User.findOne({ email: userEmail });
   const user = await User.findOne({ email: userEmail }).select('-password');
 
-  if (user?.status === 'blocked') {
+  if (!user) throw new Error('User not found');
+
+  if (user.status === 'blocked') {
     throw new Error('User is Blocked');
-  } else {
-    if (user?.role === 'contractor') {
-      await user.populate({
-        path: 'contractor',
-        populate: {
-          path: 'myScheduleId'
-        }
-      }); // Populating contractor data
-    } else if (user?.role === 'customer') {
-      await user.populate('customer'); // Populating customer data
-    }
-    return user;
   }
+
+  if (user.role === 'contractor') {
+    await user.populate({
+      path: 'contractor',
+      populate: {
+        path: 'myScheduleId'
+      }
+    });
+
+    const contractor = user.contractor as any;
+    const totalFields = 7;
+    let filledFields = 0;
+
+    if (contractor.experience) filledFields++;
+    if (contractor.bio) filledFields++;
+    if (contractor.city) filledFields++;
+    if (contractor.location) filledFields++;
+    if (contractor.rateHourly && contractor.rateHourly > 0) filledFields++;
+    if (contractor.skills && contractor.skills.length > 0) filledFields++;
+    if (contractor.certificates && contractor.certificates.length > 0) filledFields++;
+
+    const profileCompletion = Math.round((filledFields / totalFields) * 100);
+
+    return {
+      ...user.toObject(),
+      profileCompletion,
+    };
+
+  } else if (user.role === 'customer') {
+    await user.populate('customer');
+  }
+
+  return user;
 };
+
 
 // get single user into db
 const getSingleUserIntoDB = async (id: string) => {
@@ -209,9 +233,16 @@ const getSingleUserIntoDB = async (id: string) => {
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const studentQuery = new QueryBuilder(
     User.find({ role: { $ne: 'superAdmin' } })
-      .populate('contractor', 'location') // Populating location from contractor
-      .populate('customer', 'location') // Populating location from customer
-      .populate('messageId', 'adminMessage clientMessage'), // Populating location from customer
+      .select('fullName email contactNo role status adminAccept img otpVerified createdAt')
+      .populate({
+        path: 'contractor',
+        select:
+          'dob gender experience bio city language location rateHourly balance category subCategory subscriptionStatus hasActiveSubscription certificates materials myScheduleId subscriptionStartDate subscriptionEndDate',
+        populate: {
+          path: 'myScheduleId',
+          select: 'schedules',
+        },
+      }),
     query
   )
     .search(usersSearchableFields)

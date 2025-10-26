@@ -27,6 +27,7 @@ export type TBooking = {
   subCategoryId: Types.ObjectId;
   bookingDate: Date;
   timeSlots: string[];
+  location: string;
   price: number;
   bookingType: 'oneTime' | 'weekly';
   periodInDays?: number;

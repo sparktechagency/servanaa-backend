@@ -13,6 +13,10 @@ const bookingSchema = new Schema<TBooking>(
       ref: 'User',
       required: [true, 'Contractor ID is required']
     },
+    location: {
+      type: String,
+      default: null,
+    },
     subCategoryId: {
       type: Schema.Types.ObjectId,
       ref: 'SubCategory',

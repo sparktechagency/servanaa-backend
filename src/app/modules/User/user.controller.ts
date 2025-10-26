@@ -65,6 +65,7 @@ const createContractor = catchAsync(async (req, res) => {
 });
 
 const getMe = catchAsync(async (req, res) => {
+
   const { userEmail } = req.user;
 
   const result = await UserServices.getMe(userEmail);
@@ -76,6 +77,7 @@ const getMe = catchAsync(async (req, res) => {
     data: result
   });
 });
+
 const getSingleUser = catchAsync(async (req, res) => {
   const { id } = req.params;
 
