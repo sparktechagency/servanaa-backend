@@ -13,8 +13,7 @@ app.post(
   SubscriptionControllers.handleWebhook
 );
 
-// Middleware
-app.use(helmet()); // Security headers
+app.use(helmet());
 app.use(cookieParser());
 app.use(
   cors({

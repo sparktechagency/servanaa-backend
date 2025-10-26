@@ -103,6 +103,13 @@ export const createContractorIntoDB = async (payload: any) => {
       );
     }
 
+    try {
+      payload.skills = JSON.parse(payload.skills || '[]');
+    } catch {
+      payload.skills = [];
+    }
+
+
     const contractor = await Contractor.create(payload);
     if (!contractor) throw new Error('Failed to create contractor');
 

@@ -2,6 +2,7 @@
 
 import express, { NextFunction, Request, Response } from 'express';
 import {
+  approvedContactor,
   createBannerIntoDB,
   createSubscription,
   deleteBannerFromDB,
@@ -78,7 +79,9 @@ router.delete('/delete_banner/:id', deleteBannerFromDB);
 router.get('/total_counts', totalCounts);
 router.get('/get_booking_stats_by_category', getBookingStatsByCategory);
 router.get('/get_daily_booking', getDailyBooking);
+// ============================
 
+router.get('/approved_contactor', approvedContactor);
 
 
 

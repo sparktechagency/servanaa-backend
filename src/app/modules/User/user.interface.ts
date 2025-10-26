@@ -15,6 +15,7 @@ export type TUser = {
   otpVerified: boolean;
   img?: string;
   role: 'customer' | 'superAdmin' | 'contractor';
+  adminAccept: 'approved' | 'pending' | 'rejected';
   status: 'active' | 'blocked';
   passwordChangedAt: Date;
   isDeleted: boolean;

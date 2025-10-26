@@ -27,6 +27,20 @@ const loginUser = async (payload: TLoginUser) => {
     );
   }
 
+  if (user.role === 'contractor' && user?.adminAccept === 'rejected') {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'Your contractor application has been rejected by the admin.'
+    );
+  }
+
+  if (user.role === 'contractor' && user?.adminAccept === 'pending') {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'Your contractor application is still pending approval from the admin.'
+    );
+  }
+
   // checking if the user is already deleted
   const isDeleted = user.isDeleted;
 

@@ -203,7 +203,6 @@ export const getContractorTableData = catchAsync(async (req, res) => {
   });
 });
 
-
 export const getCategoryTable = catchAsync(async (req, res) => {
   const categories = await Category.find({});
   const data = categories.map((cat, idx) => ({
@@ -689,3 +688,23 @@ export const getPercent = catchAsync(async (req, res) => {
     data: { cost: costRecord.cost },
   });
 });
+
+export const approvedContactor = catchAsync(async (req, res) => {
+  const { userId, status } = req.query as { userId: string; status: "approved" | "rejected" };
+  const user = await User.findById(userId)
+
+  if (!user) {
+    throw new AppError(404, 'User not found.');
+  }
+
+  user.adminAccept = status;
+  await user.save();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Cost fetched successfully.',
+    data: { cost: user },
+  });
+});
+

@@ -27,6 +27,11 @@ const userSchema = new Schema<TUser, UserModel>({
     // enum: ['active', 'blocked'],
     default: 'active'
   },
+  adminAccept: {
+    type: String,
+    default: 'pending',
+    enum: ['approved', 'pending', 'rejected']
+  },
   passwordChangedAt: { type: Date, required: true, default: Date.now },
   contractor: { type: Schema.Types.ObjectId, ref: 'Contractor' },
   messageId: { type: Schema.Types.ObjectId, ref: 'Help' },
