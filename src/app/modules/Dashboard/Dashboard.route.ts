@@ -81,7 +81,7 @@ router.get('/get_booking_stats_by_category', getBookingStatsByCategory);
 router.get('/get_daily_booking', getDailyBooking);
 // ============================
 
-router.get('/approved_contactor', approvedContactor);
+router.post('/approved_contactor', approvedContactor);
 
 
 
