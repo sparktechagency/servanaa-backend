@@ -115,7 +115,10 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   console.log('createBookingIntoDB payload:', payload);
 
   const [usr, contractor] = await Promise.all([
-    User.findOne({ email: user.userEmail }),
+    User.findOne({ email: user.userEmail }).populate({
+      path: "customer",
+      select: "location",
+    }),
     User.findById(contractorId),
   ]);
 
@@ -128,6 +131,21 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   }
 
   payload.customerId = usr._id;
+
+
+  let selectedLocation = null;
+  // @ts-ignore
+  if (usr.customer?.location && Array.isArray(usr.customer.location)) {
+    // @ts-ignore
+    selectedLocation = usr.customer.location.find((loc: any) => loc.isSelect === true);
+  }
+
+  if (selectedLocation) {
+    const { address, street, detraction, unit } = selectedLocation;
+    payload.location = `${address}${street ? `, ${street}` : ''}${unit ? `, ${unit}` : ''}${detraction ? `, ${detraction}` : ''}`;
+  } else {
+    payload.location = "No location selected";
+  }
 
   // const mySchedule = await MySchedule.findOne({ contractorId: contractorId?.toString() }).lean();
   // if (!mySchedule)
