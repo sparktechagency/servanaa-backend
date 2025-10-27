@@ -28,4 +28,9 @@ router.delete('/:id', CustomerControllers.deleteCustomer);
 
 router.get('/', CustomerControllers.getAllCustomers);
 
+router.patch('/:customerId/locations/:locationId', CustomerControllers.updateLocation);
+router.delete('/:customerId/locations/:locationId', CustomerControllers.deleteLocation);
+
+router.get('/', CustomerControllers.getAllCustomers);
+
 export const CustomerRoutes = router;

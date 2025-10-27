@@ -5,7 +5,6 @@ import { CUSTOMER_SEARCHABLE_FIELDS } from './Customer.constant';
 import mongoose from 'mongoose';
 import { Customer } from './Customer.model';
 import { TCustomer } from './Customer.interface';
-import { User } from '../User/user.model';
 
 const createCustomerIntoDB = async (payload: TCustomer) => {
   const result = await Customer.create(payload);
@@ -109,7 +108,67 @@ const changeLocation = async (customerId: any, payload: any) => {
   return updatedCustomer;
 };
 
+const updateLocation = async (
+  customerId: string,
+  locationId: string,
+  updatePayload: any
+) => {
+  const allowedFields = ['address', 'street', 'detraction', 'unit', 'coordinates', 'name'];
+
+  const filteredPayload: any = {};
+  allowedFields.forEach((field) => {
+    if (updatePayload[field] !== undefined) {
+      filteredPayload[`location.$.${field}`] = updatePayload[field];
+    }
+  });
+
+  const updatedCustomer = await Customer.findOneAndUpdate(
+    { _id: customerId, 'location._id': locationId },
+    { $set: filteredPayload },
+    { new: true }
+  );
+
+  if (!updatedCustomer) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Customer or location not found');
+  }
+
+  // @ts-ignore
+  const updatedLocation = updatedCustomer.location.find(
+    (loc: any) => loc._id.toString() === locationId
+  );
+
+  return updatedLocation;
+};
+
+const deleteLocation = async (customerId: string, locationId: string) => {
+  const customer = await Customer.findById(customerId);
+  if (!customer) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
+  }
+
+  // @ts-ignore
+  if (customer.location.length <= 1) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Customer must have at least one location');
+  }
+  console.log(locationId);
+  // @ts-ignore
+  const location = customer.location.find(
+    (loc: any) => loc._id.toString() === locationId.toString()
+  );
+  console.log(location);
+  if (!location) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Location not found');
+  }
+
+  location.deleteOne();
+
+  await customer.save();
+  return { message: 'Location deleted successfully' };
+};
+
 export const CustomerServices = {
+  deleteLocation,
+  updateLocation,
   changeLocation,
   createCustomerIntoDB,
   getAllCustomersFromDB,

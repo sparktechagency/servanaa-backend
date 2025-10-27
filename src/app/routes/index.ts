@@ -28,6 +28,7 @@ import { PaymentRoutes } from '../modules/payment/stripePaymentRoute';
 import { SubscriptionRoutes } from '../modules/Subscription/Subscription.route';
 import { TransactionRoutes } from '../modules/Transaction/transaction.route';
 import { DashboardRoutes } from '../modules/Dashboard/Dashboard.route';
+import { CustomerRoutes } from '../modules/Customer/Customer.route';
 
 const router = Router();
 
@@ -124,6 +125,11 @@ const moduleRoutes = [
     path: '/contractors',
     route: ContractorRoutes,
   },
+  {
+    path: '/customers',
+    route: CustomerRoutes,
+  },
+
   {
     path: '/availabilities',
     route: MyScheduleRoutes,
