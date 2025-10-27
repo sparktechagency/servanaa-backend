@@ -185,12 +185,11 @@ const getMe = async (userEmail: string) => {
     });
 
     const contractor = user.contractor as any;
-    const totalFields = 7;
+    const totalFields = 6;
     let filledFields = 0;
 
-    if (contractor.experience) filledFields++;
-    if (contractor.bio) filledFields++;
-    if (contractor.city) filledFields++;
+    if (contractor.subCategory) filledFields++;
+    if (contractor.category) filledFields++;
     if (contractor.location) filledFields++;
     if (contractor.rateHourly && contractor.rateHourly > 0) filledFields++;
     if (contractor.skills && contractor.skills.length > 0) filledFields++;
@@ -209,7 +208,6 @@ const getMe = async (userEmail: string) => {
 
   return user;
 };
-
 
 // get single user into db
 const getSingleUserIntoDB = async (id: string) => {
