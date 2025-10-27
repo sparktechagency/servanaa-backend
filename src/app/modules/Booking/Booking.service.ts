@@ -132,6 +132,13 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
 
   payload.customerId = usr._id;
 
+  const charge = await CostAdmin.findOne({});
+  const adminCostPercent = charge?.cost || 1;
+  const price = Number(payload.totalAmount || 0);
+  const adminChargeAmount = (price * adminCostPercent) / 100;
+  const contractorNetIncome = price - adminChargeAmount;
+  payload.totalAmount = contractorNetIncome;
+
 
   let selectedLocation = null;
   // @ts-ignore
@@ -417,23 +424,12 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   if (updatedBooking.status === 'completed') {
 
     const contractorData = await Contractor.findOne({ userId: updatedBooking.contractorId.toString() });
-    const customerData = await Customer.findOne({ userId: updatedBooking.customerId.toString() });
-
     if (!contractorData) throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
-    if (!customerData) throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
 
-    const charge = await CostAdmin.findOne({});
-    const adminCostPercent = charge?.cost || 1;
+    const price = Number(updatedBooking.totalAmount || 0)
+    contractorData.balance = (contractorData.balance ?? 0) + price;
 
-    const price = Number(updatedBooking.price || 0);
-    const adminChargeAmount = (price * adminCostPercent) / 100;
-    const contractorNetIncome = price - adminChargeAmount;
-
-    customerData.balance = (customerData.balance ?? 0) - price;
-    contractorData.balance = (contractorData.balance ?? 0) + contractorNetIncome;
-
-
-    await Promise.all([contractorData.save(), customerData.save()]);
+    await Promise.all([contractorData.save()]);
 
     await NotificationServices.createNotificationIntoDB({
       userId: updatedBooking.customerId,
@@ -671,10 +667,18 @@ const handlePaymentSuccessUpdateBooking = async (metadata: {
       });
     }
 
+    const charge = await CostAdmin.findOne({});
+    const adminCostPercent = charge?.cost || 1;
+    const price = Number(amount || 0);
+    const adminChargeAmount = (price * adminCostPercent) / 100;
+    const addAmount = price - adminChargeAmount;
+
+    const total = Number(addAmount);
+
     const booking = await Booking.findOneAndUpdate(
       { bookingId },
       {
-        $inc: { totalAmount: amount },
+        $inc: { totalAmount: total },
         $set: { paymentStatus: 'paid', status: 'ongoing' },
       },
       { new: true }

@@ -253,6 +253,7 @@ const getSingleSubscription = catchAsync(async (req, res) => {
 });
 
 const handleWebhook = catchAsync(async (req, res) => {
+
   const sig = req.headers['stripe-signature'] as string;
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
