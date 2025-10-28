@@ -235,7 +235,7 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
       .populate({
         path: 'contractor',
         select:
-          'dob gender experience bio city language location rateHourly balance category subCategory subscriptionStatus hasActiveSubscription certificates materials myScheduleId subscriptionStartDate subscriptionEndDate',
+          'dob gender experience bio city language location rateHourly balance category subCategory subscriptionStatus hasActiveSubscription certificates materials myScheduleId subscriptionStartDate subscriptionEndDate isHomeSelect',
         populate: {
           path: 'myScheduleId',
           select: 'schedules',
