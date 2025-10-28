@@ -115,7 +115,7 @@ const updateLocation = async (
   locationId: string,
   updatePayload: any
 ) => {
-  const allowedFields = ['address', 'street', 'detraction', 'unit', 'coordinates', 'name'];
+  const allowedFields = ['address', 'street', 'direction', 'unit', 'coordinates', 'name'];
 
   const filteredPayload: any = {};
   allowedFields.forEach((field) => {

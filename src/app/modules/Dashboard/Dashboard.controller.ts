@@ -753,21 +753,24 @@ export const getContractorFeedback = catchAsync(async (req, res) => {
   });
 });
 
-export const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
+export const getAllBookingsFromDB = catchAsync(async (req, res) => {
   try {
-    console.log('getAllBookingsFromDB query:', query);
 
-    const { status, contractorId } = query as {
+    const { status, contractorId } = req.query as {
       status?: string;
       contractorId?: string;
     };
 
+    const query = req.query;
+
     // Check if contractorId is provided
+
+    console.log('Contractor ID:', contractorId);
     if (!contractorId) {
-      throw new AppError(400, 'Contractor ID is required');
+      throw new AppError(httpStatus.BAD_REQUEST, 'Contractor ID is required.');
     }
 
-    const filter: Record<string, unknown> = { contractorId };
+    const filter: any = { contractorId };
 
     if (status) {
       filter.status = status;
@@ -817,7 +820,7 @@ export const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
       error.message || 'An error occurred while fetching bookings'
     );
   }
-};
+});
 
 export const addRemoveHome = catchAsync(async (req, res) => {
   const { contractorId, isHomeSelect } = req.query as {
