@@ -754,55 +754,69 @@ export const getContractorFeedback = catchAsync(async (req, res) => {
 });
 
 export const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
-  console.log('getAllBookingsFromDB query:', query);
+  try {
+    console.log('getAllBookingsFromDB query:', query);
 
-  const { status, contractorId } = query as {
-    status?: string;
-    contractorId?: string;
-  };
+    const { status, contractorId } = query as {
+      status?: string;
+      contractorId?: string;
+    };
 
-  const filter: Record<string, unknown> = {};
+    // Check if contractorId is provided
+    if (!contractorId) {
+      throw new AppError(400, 'Contractor ID is required');
+    }
 
-  if (status) {
-    filter.status = status;
+    const filter: Record<string, unknown> = { contractorId };
+
+    if (status) {
+      filter.status = status;
+    }
+
+    const BookingQuery = new QueryBuilder(
+      Booking.find(filter)
+        .populate({
+          path: 'contractorId',
+          populate: {
+            path: 'contractor',
+            select: 'ratings rateHourly location',
+          },
+        })
+        .populate('subCategoryId', 'name')
+        .populate('customerId', 'fullName img'),
+      query
+    )
+      // .search(BOOKING_SEARCHABLE_FIELDS) // Uncomment if needed
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+
+    const result = await BookingQuery.modelQuery;
+    const meta = await BookingQuery.countTotal();
+
+    return {
+      success: true,
+      message: 'Bookings fetched successfully.',
+      data: {
+        result,
+        meta,
+      },
+    };
+  } catch (error: any) {
+    console.error('Error fetching bookings:', error);
+
+    // If it's a custom AppError, throw it directly
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    // Otherwise, wrap in AppError for consistency
+    throw new AppError(
+      500,
+      error.message || 'An error occurred while fetching bookings'
+    );
   }
-
-  if (contractorId) {
-    filter.contractorId = contractorId;
-  } else {
-    throw new AppError(404, "Contactor Id not Found")
-  }
-
-  const BookingQuery = new QueryBuilder(
-    Booking.find(filter)
-      .populate({
-        path: 'contractorId',
-        populate: {
-          path: 'contractor',
-          select: 'ratings rateHourly location',
-        },
-      })
-      .populate('subCategoryId', 'name')
-      .populate('customerId', 'fullName img'),
-    query
-  )
-    // .search(BOOKING_SEARCHABLE_FIELDS)
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
-
-  const result = await BookingQuery.modelQuery;
-  const meta = await BookingQuery.countTotal();
-
-  return {
-    success: true,
-    message: 'Bookings fetched successfully.',
-    data: {
-      result,
-      meta,
-    },
-  };
 };
 
 export const addRemoveHome = catchAsync(async (req, res) => {
