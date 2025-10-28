@@ -798,14 +798,14 @@ export const getAllBookingsFromDB = catchAsync(async (req, res) => {
     const result = await BookingQuery.modelQuery;
     const meta = await BookingQuery.countTotal();
 
-    return {
+    res.status(200).json({
       success: true,
       message: 'Bookings fetched successfully.',
       data: {
         result,
         meta,
       },
-    };
+    });
   } catch (error: any) {
     console.error('Error fetching bookings:', error);
 
