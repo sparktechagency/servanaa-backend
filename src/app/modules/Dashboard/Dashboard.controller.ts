@@ -22,6 +22,8 @@ import moment from 'moment';
 import { Banner, CostAdmin } from './Dashboard.model';
 import { Transaction } from '../Transaction/transaction.model';
 import AppError from '../../errors/AppError';
+import { Review } from '../Review/Review.model';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 export const getDashboardData = catchAsync(async (req, res) => {
   const totalUser = await User.countDocuments({ isDeleted: false });
@@ -710,3 +712,127 @@ export const approvedContactor = catchAsync(async (req, res) => {
   });
 });
 
+// ======================================
+export const getContractorFeedback = catchAsync(async (req, res) => {
+  const { contractorId, page = 1, limit = 10 } = req.query as {
+    contractorId: string;
+    page?: string;
+    limit?: string;
+  };
+
+  if (!contractorId) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Contractor ID is required.');
+  }
+
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const [reviews, total] = await Promise.all([
+    Review.find({ contractor: contractorId })
+      .populate('customerId', 'fullName img')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit)),
+    Review.countDocuments({ contractor: contractorId }),
+  ]);
+
+  const totalPages = Math.ceil(total / Number(limit));
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Contractor feedback fetched successfully.',
+    data: {
+      reviews,
+      pagination: {
+        total,
+        totalPages,
+        currentPage: Number(page),
+        limit: Number(limit),
+      },
+    },
+  });
+});
+
+export const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
+  console.log('getAllBookingsFromDB query:', query);
+
+  const { status, contractorId } = query as {
+    status?: string;
+    contractorId?: string;
+  };
+
+  const filter: Record<string, unknown> = {};
+
+  if (status) {
+    filter.status = status;
+  }
+
+  if (contractorId) {
+    filter.contractorId = contractorId;
+  } else {
+    throw new AppError(404, "Contactor Id not Found")
+  }
+
+  const BookingQuery = new QueryBuilder(
+    Booking.find(filter)
+      .populate({
+        path: 'contractorId',
+        populate: {
+          path: 'contractor',
+          select: 'ratings rateHourly location',
+        },
+      })
+      .populate('subCategoryId', 'name')
+      .populate('customerId', 'fullName img'),
+    query
+  )
+    // .search(BOOKING_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await BookingQuery.modelQuery;
+  const meta = await BookingQuery.countTotal();
+
+  return {
+    success: true,
+    message: 'Bookings fetched successfully.',
+    data: {
+      result,
+      meta,
+    },
+  };
+};
+
+export const addRemoveHome = catchAsync(async (req, res) => {
+  const { contractorId, isHomeSelect } = req.query as {
+    contractorId: string;
+    isHomeSelect: string;
+  };
+
+  if (!contractorId) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Contractor ID is required.');
+  }
+
+  // Convert string to boolean
+  const homeStatus = isHomeSelect === 'true';
+
+  const updatedContractor = await Contractor.findByIdAndUpdate(
+    contractorId,
+    { isHomeSelect: homeStatus },
+    { new: true }
+  ).populate('userId', 'fullName email');
+
+  if (!updatedContractor) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found.');
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: `Contractor ${homeStatus ? 'added to' : 'removed from'
+      } homepage successfully.`,
+    data: updatedContractor,
+  });
+});

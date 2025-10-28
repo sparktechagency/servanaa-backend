@@ -18,8 +18,8 @@ router.patch(
 );
 
 router.delete('/:id', ContractorControllers.deleteContractor);
-
 router.get('/', ContractorControllers.getAllContractors);
+
 // ===============
 router.post('/materials',
   auth(USER_ROLE.contractor),
@@ -30,6 +30,7 @@ router.put('/materials',
 router.delete('/materials/:id',
   auth(USER_ROLE.contractor),
   ContractorControllers.deleteMaterials);
+
 // =================================
 router.post('/get_all_supports', ContractorControllers.getAllSupport);
 router.post('/create_support', auth(USER_ROLE.contractor, USER_ROLE.customer), ContractorControllers.createSupport);

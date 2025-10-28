@@ -5,6 +5,9 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
     dob: { type: String, default: '' },
+    isHomeSelect: {
+      type: Boolean
+    },
     gender: { type: String, default: '' },
     experience: { type: String, default: '' },
     bio: { type: String, default: '' },
@@ -19,7 +22,7 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
       required: false
     },
     subCategory: {
-      type: Schema.Types.ObjectId,
+      type: [Schema.Types.ObjectId],
       ref: 'SubCategory',
     },
     skillsCategory: { type: String, default: '' },
@@ -35,6 +38,7 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     customerId: { type: String, default: '' },
     paymentMethodId: { type: String, default: '' },
     certificates: { type: [String], required: true, default: [] },
+
     materials: [
       {
         name: { type: String, default: '' },

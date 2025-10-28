@@ -9,7 +9,6 @@ import { Contractor } from './Contractor.model';
 import { MySchedule } from '../MySchedule/MySchedule.model';
 import { Booking } from '../Booking/Booking.model';
 import { Review } from '../Review/Review.model';
-import { TContractor } from './Contractor.interface';
 import { User } from '../User/user.model';
 import { Support } from './Support.model';
 // import { ObjectId } from 'mongoose';
@@ -27,6 +26,7 @@ const generateTimeSlots = (startTime: string, endTime: string): string[] => {
 
   return timeSlots;
 };
+
 const addOneHour = (time: string): string => {
   const [hours, minutes] = time.split(':').map(Number);
   const date = new Date(0, 0, 0, hours, minutes);
@@ -317,6 +317,7 @@ const getSingleContractorFromDB = async (id: string) => {
 
   return result;
 };
+
 const updateContractorIntoDB = async (id: string, payload: any) => {
   const isDeletedService = await mongoose.connection
     .collection('contractors')
@@ -344,6 +345,7 @@ const updateContractorIntoDB = async (id: string, payload: any) => {
 
   return updatedData;
 };
+
 const deleteContractorFromDB = async (id: string) => {
   const deletedService = await Contractor.findByIdAndUpdate(
     id,
@@ -418,7 +420,6 @@ const updateMaterials = async (email: string, payload: any) => {
   return contractor.materials;
 };
 
-
 const deleteMaterials = async (_id: string) => {
   console.log('deleteMaterials called with id:', _id);
 
@@ -456,7 +457,6 @@ const createSupport = async (email: string, payload: any) => {
   }
   return support;
 }
-
 const getAllSupport = async (query: any) => {
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;

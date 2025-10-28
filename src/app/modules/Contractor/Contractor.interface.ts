@@ -2,7 +2,8 @@
 import { Model, Types } from 'mongoose';
 
 export type TContractor = {
-  subCategory: Types.ObjectId;
+  subCategory: [Types.ObjectId];
+  isHomeSelect: Boolean;
   subscriptionEndDate: Date;
   subscriptionStartDate: Date;
   category: Types.ObjectId;

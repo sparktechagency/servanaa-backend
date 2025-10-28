@@ -2,6 +2,7 @@
 
 import express, { NextFunction, Request, Response } from 'express';
 import {
+  addRemoveHome,
   approvedContactor,
   createBannerIntoDB,
   createSubscription,
@@ -11,6 +12,7 @@ import {
   getAllBannersFromDB,
   getAllSubscriptionPlansTable,
   getBookingStatsByCategory,
+  getContractorFeedback,
   getDailyBooking,
   getDashboardData,
   getTransactionHistoryTable,
@@ -83,6 +85,9 @@ router.get('/get_daily_booking', getDailyBooking);
 
 router.post('/approved_contactor', approvedContactor);
 
+router.get('/bookings_contractor', getContractorFeedback);
+router.patch('/contractor_home', addRemoveHome);
+router.get('/contractor_feedback', getContractorFeedback);
 
 
 export const DashboardRoutes = router;

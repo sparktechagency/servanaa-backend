@@ -7,6 +7,8 @@ import { Customer } from './Customer.model';
 import { TCustomer } from './Customer.interface';
 
 const createCustomerIntoDB = async (payload: TCustomer) => {
+
+  console.log('Creating customer with payload:', payload);
   const result = await Customer.create(payload);
 
   if (!result) {

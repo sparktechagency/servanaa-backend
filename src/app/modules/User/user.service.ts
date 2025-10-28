@@ -421,6 +421,7 @@ const updateUserIntoDB = async (
   }
 
   if (user?.role === 'customer') {
+    console.log('Updating customer with payload:', payload.location);
     roleDataToUpdate = extractFields(payload || {}, customerFields);
     updatedRoleData = await Customer.findOneAndUpdate(
       { _id: updatedUser.customer },

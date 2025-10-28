@@ -476,7 +476,6 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
     }
   }
 
-
   // 6️⃣ Handle ongoing status
   if (updatedBooking.status === 'ongoing') {
     await NotificationServices.createNotificationIntoDB({

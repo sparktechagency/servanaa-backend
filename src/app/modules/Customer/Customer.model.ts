@@ -18,7 +18,7 @@ const locationSchema = new Schema({
   street: {
     type: String,
   },
-  detraction: {
+  direction: {
     type: String,
   },
   unit: {
