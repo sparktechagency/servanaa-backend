@@ -333,6 +333,12 @@ const updateContractorIntoDB = async (id: string, payload: any) => {
   if (isDeletedService.isDeleted) {
     throw new Error('Cannot update a deleted Contractor');
   }
+  try {
+    payload.skills = JSON.parse(payload.skills || '[]');
+  } catch {
+    payload.skills = [];
+  }
+
 
   const updatedData = await Contractor.findByIdAndUpdate({ _id: id }, payload, {
     new: true,
@@ -385,7 +391,6 @@ const createMaterials = async (email: string, payload: any) => {
   await contractor.save();
   return contractor.materials;
 };
-
 
 const updateMaterials = async (email: string, payload: any) => {
   console.log("==", payload)

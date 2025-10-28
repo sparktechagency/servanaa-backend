@@ -22,7 +22,7 @@ export type TContractor = {
   language?: string;
   location: string;
   ratings: number;
-  skills: string | string[];
+  skills: string[];
   subscriptionStatus:
   | 'active'
   | 'inactive'

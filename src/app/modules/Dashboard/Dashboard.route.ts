@@ -10,6 +10,7 @@ import {
   deleteSubscription,
   getAllAdminNotifications,
   getAllBannersFromDB,
+  getAllBookingsFromDB,
   getAllSubscriptionPlansTable,
   getBookingStatsByCategory,
   getContractorFeedback,
@@ -85,7 +86,7 @@ router.get('/get_daily_booking', getDailyBooking);
 
 router.post('/approved_contactor', approvedContactor);
 
-router.get('/bookings_contractor', getContractorFeedback);
+router.get('/bookings_contractor', getAllBookingsFromDB);
 router.patch('/contractor_home', addRemoveHome);
 router.get('/contractor_feedback', getContractorFeedback);
 

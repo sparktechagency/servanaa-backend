@@ -124,6 +124,8 @@ const updateLocation = async (
     }
   });
 
+  console.log('Filtered Payload:', customerId, locationId, filteredPayload);
+
   const updatedCustomer = await Customer.findOneAndUpdate(
     { _id: customerId, 'location._id': locationId },
     { $set: filteredPayload },
