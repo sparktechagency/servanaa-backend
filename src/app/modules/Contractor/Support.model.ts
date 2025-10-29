@@ -8,6 +8,7 @@ const supportSchema = new Schema<TSupportModel>(
             required: true
         },
         details: { type: String, required: true },
+        adminMessage: { type: String },
         status: { type: String }
     },
     { timestamps: true }

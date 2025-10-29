@@ -26,6 +26,7 @@ import { Review } from '../Review/Review.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Help } from '../Help/Help.model';
 import { SendEmail } from '../../utils/sendEmail';
+import { Support } from '../Contractor/Support.model';
 
 export const getDashboardData = catchAsync(async (req, res) => {
   const totalUser = await User.countDocuments({ isDeleted: false });
@@ -862,7 +863,7 @@ export const addRemoveHome = catchAsync(async (req, res) => {
 export const replayReportHelp = catchAsync(async (req, res) => {
   const { helpId, adminMessage } = req.body;
 
-  const existingHelp = await Help.isHelpExists(helpId);
+  const existingHelp = await Support.findById(helpId);
   if (!existingHelp) {
     throw new AppError(httpStatus.NOT_FOUND, 'Help report not found.');
   }

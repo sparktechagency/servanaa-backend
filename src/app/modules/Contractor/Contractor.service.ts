@@ -258,70 +258,6 @@ const getAllAvailableContractorsFromDB = async (
   // };
 };
 
-// const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
-
-
-//   if (query.coordinates) {
-//     const coordinates = query.coordinates as string;
-
-//   }
-
-//   console.log('Query received in service:', query);
-//   const ContractorQuery = new QueryBuilder(
-//     Contractor.find()
-//       .select("-certificates -createdAt -updatedAt -hasActiveSubscription -subscriptionId -isDeleted")
-//       .populate('userId')
-//       .populate('myScheduleId')
-//       .populate({
-//         path: "category",
-//         select: "name img"
-//       })
-//       .populate({
-//         path: "subCategory",
-//         select: "name img categoryId"
-//       }),
-//     query
-//   )
-//     .search(CONTRACTOR_SEARCHABLE_FIELDS)
-//     .filter()
-//     .sort()
-//     .paginate()
-//     .fields();
-
-//   const contractors = await ContractorQuery.modelQuery;
-
-//   const result = await Promise.all(
-//     contractors.map(async contractorDoc => {
-//       const contractor = contractorDoc.toObject();
-
-//       const userId = contractor.userId?._id || contractor.userId;
-
-//       // Ensure it's an ObjectId
-//       const contractorUserId = new mongoose.Types.ObjectId(userId);
-
-//       const reviews = await Review.find({ contractorId: contractorUserId });
-
-//       // console.log(`Found ${reviews.length} reviews for contractor userId ${contractorUserId}`);
-
-//       const totalRatings = reviews.length;
-//       const totalStars = reviews.reduce((sum, r) => sum + r.stars, 0);
-//       const averageRating = totalRatings > 0 ? totalStars / totalRatings : 0;
-
-//       contractor.ratings = Number(averageRating.toFixed(1));
-
-//       return contractor;
-//     })
-//   );
-
-//   const meta = await ContractorQuery.countTotal();
-
-//   return {
-//     result,
-//     meta
-//   };
-// };
-
-
 const getAllContractorsFromDB = async (query: Record<string, any>) => {
   const aggregatePipeline: any[] = [];
 
@@ -408,6 +344,13 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
       $match: { subCategory: new mongoose.Types.ObjectId(query.subCategory as string) },
     });
   }
+
+  if (query?.isHomeSelect) {
+    aggregatePipeline.push({
+      $match: { isHomeSelect: true },
+    });
+  }
+
 
 
 
@@ -640,8 +583,6 @@ const getAllSupport = async (query: any) => {
   const limit = Number(query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  console.log("query", query)
-
   const filter: any = {};
   if (query.searchTerm) {
     filter.$or = [
@@ -651,6 +592,7 @@ const getAllSupport = async (query: any) => {
   }
 
   const supports = await Support.find(filter)
+    .populate('userId', 'fullName email role')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);

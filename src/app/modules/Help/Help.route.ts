@@ -4,12 +4,13 @@ import validateRequest from '../../middlewares/validateRequest';
 import { createHelpValidationSchema, updateHelpValidationSchema } from './Help.validation';
 import auth from '../../middlewares/auth';
 import { USER_ROLE } from '../User/user.constant';
+import { ContractorControllers } from '../Contractor/Contractor.controller';
 
 const router = express.Router();
 
 router.post(
   '/create-help',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   validateRequest(createHelpValidationSchema),
   HelpControllers.createHelp,
 );
@@ -33,7 +34,7 @@ router.delete(
 
 router.get(
   '/',
-  HelpControllers.getAllHelps,
+  ContractorControllers.getAllSupport,
 );
 
 export const HelpRoutes = router;

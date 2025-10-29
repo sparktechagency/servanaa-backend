@@ -53,6 +53,7 @@ export type TSupportModel = {
   title: string;
   details: string;
   status: string;
+  adminMessage: string;
 }
 
 
