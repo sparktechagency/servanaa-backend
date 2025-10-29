@@ -72,7 +72,7 @@ const getAvailableTimesForDate = async (contractorId: string, date: string) => {
   console.log("Day slots from schedule:", user?._id);
 
   const existingBookings = await Booking.find({
-    contractorId: user?._id,
+    contractorId: user?._id.toString(),
     bookingDate: { $gte: dayStart, $lte: dayEnd }
   }).lean();
 
