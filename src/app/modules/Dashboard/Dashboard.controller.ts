@@ -877,7 +877,7 @@ export const replayReportHelp = catchAsync(async (req, res) => {
   console.log("User found for help report:", user);
   if (user && user.email) {
     console.log("Sending email to:", user.email);
-    await SendEmail.sendHelpReplyEmail("tayebrayhan101@gmail.com", user.fullName, adminMessage);
+    await SendEmail.sendHelpReplyEmail(user.email, user.fullName, adminMessage);
   }
 
   res.status(httpStatus.OK).json({
