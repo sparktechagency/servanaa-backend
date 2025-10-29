@@ -64,8 +64,8 @@ class QueryBuilder<T> {
   // public aggregate(pipeline: any[]) {
   //   return this.modelQuery.model.aggregate(pipeline);
   // }
-////
- filterSchedule(days: string[], startTime: string, duration: number) {
+  ////
+  filterSchedule(days: string[], startTime: string, duration: number) {
     if (!days || days.length === 0 || !startTime || !duration) {
       return this;
     }
@@ -99,7 +99,7 @@ class QueryBuilder<T> {
 
     return hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0');
   }
-////
+  ////
   async countTotal() {
     const totalQueries = this.modelQuery.getFilter();
     const total = await this.modelQuery.model.countDocuments(totalQueries);

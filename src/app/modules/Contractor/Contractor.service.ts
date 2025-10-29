@@ -11,6 +11,7 @@ import { Booking } from '../Booking/Booking.model';
 import { Review } from '../Review/Review.model';
 import { User } from '../User/user.model';
 import { Support } from './Support.model';
+import { Customer } from '../Customer/Customer.model';
 // import { ObjectId } from 'mongoose';
 
 // Helper function to generate time slots
@@ -257,61 +258,231 @@ const getAllAvailableContractorsFromDB = async (
   // };
 };
 
-const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
+// const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
 
-  console.log('Query received in service:', query);
-  const ContractorQuery = new QueryBuilder(
-    Contractor.find()
-      .select("-certificates -createdAt -updatedAt -hasActiveSubscription -subscriptionId -isDeleted")
-      .populate('userId')
-      .populate('myScheduleId')
-      .populate({
-        path: "category",
-        select: "name img"
-      })
-      .populate({
-        path: "subCategory",
-        select: "name img categoryId"
-      }),
-    query
-  )
-    .search(CONTRACTOR_SEARCHABLE_FIELDS)
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
 
-  const contractors = await ContractorQuery.modelQuery;
+//   if (query.coordinates) {
+//     const coordinates = query.coordinates as string;
 
+//   }
+
+//   console.log('Query received in service:', query);
+//   const ContractorQuery = new QueryBuilder(
+//     Contractor.find()
+//       .select("-certificates -createdAt -updatedAt -hasActiveSubscription -subscriptionId -isDeleted")
+//       .populate('userId')
+//       .populate('myScheduleId')
+//       .populate({
+//         path: "category",
+//         select: "name img"
+//       })
+//       .populate({
+//         path: "subCategory",
+//         select: "name img categoryId"
+//       }),
+//     query
+//   )
+//     .search(CONTRACTOR_SEARCHABLE_FIELDS)
+//     .filter()
+//     .sort()
+//     .paginate()
+//     .fields();
+
+//   const contractors = await ContractorQuery.modelQuery;
+
+//   const result = await Promise.all(
+//     contractors.map(async contractorDoc => {
+//       const contractor = contractorDoc.toObject();
+
+//       const userId = contractor.userId?._id || contractor.userId;
+
+//       // Ensure it's an ObjectId
+//       const contractorUserId = new mongoose.Types.ObjectId(userId);
+
+//       const reviews = await Review.find({ contractorId: contractorUserId });
+
+//       // console.log(`Found ${reviews.length} reviews for contractor userId ${contractorUserId}`);
+
+//       const totalRatings = reviews.length;
+//       const totalStars = reviews.reduce((sum, r) => sum + r.stars, 0);
+//       const averageRating = totalRatings > 0 ? totalStars / totalRatings : 0;
+
+//       contractor.ratings = Number(averageRating.toFixed(1));
+
+//       return contractor;
+//     })
+//   );
+
+//   const meta = await ContractorQuery.countTotal();
+
+//   return {
+//     result,
+//     meta
+//   };
+// };
+
+
+const getAllContractorsFromDB = async (query: Record<string, any>) => {
+  const aggregatePipeline: any[] = [];
+
+  // -----------------------------
+  // Step 1: Geo query using $geoNear
+  // -----------------------------
+  let lng: number | null = null;
+  let lat: number | null = null;
+
+  if (query.customerId) {
+    const customer = await Customer.findById(query.customerId);
+    if (!customer) throw new AppError(httpStatus.NOT_FOUND, 'Customer not found');
+
+    //@ts-ignore
+    const selectedLocation = customer.location.find(loc => loc.isSelect);
+    if (selectedLocation) {
+      [lng, lat] = selectedLocation.coordinates;
+
+      // @ts-ignore
+      if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Invalid coordinates for Geo query');
+      }
+
+      // Ensure 2dsphere index exists
+      await Contractor.collection.createIndex({ location: '2dsphere' });
+
+      const maxDistanceKm = query.maxDistance ? Number(query.maxDistance) : 100; // km
+      const maxDistanceMeters = maxDistanceKm * 1000;
+
+      aggregatePipeline.push({
+        $geoNear: {
+          near: { type: 'Point', coordinates: [lng, lat] },
+          distanceField: 'distance',
+          spherical: true,
+          maxDistance: maxDistanceMeters,
+        },
+      });
+    }
+  } else {
+    aggregatePipeline.push({ $match: { isDeleted: false } });
+  }
+
+  // -----------------------------
+  // Step 2: Exclude unwanted fields
+  // -----------------------------
+  aggregatePipeline.push({
+    $project: {
+      certificates: 0,
+      createdAt: 0,
+      updatedAt: 0,
+      hasActiveSubscription: 0,
+      subscriptionId: 0,
+      isDeleted: 0,
+    },
+  });
+
+  // -----------------------------
+  // Step 3: Search
+  // -----------------------------
+  if (query.search) {
+    const searchStr = query.search as string;
+    aggregatePipeline.push({
+      $match: {
+        $or: [
+          { city: { $regex: searchStr, $options: 'i' } },
+          { skillsCategory: { $regex: searchStr, $options: 'i' } },
+          { skills: { $regex: searchStr, $options: 'i' } },
+        ],
+      },
+    });
+  }
+
+  // -----------------------------
+  // Step 4: Filter by category / subCategory
+  // -----------------------------
+  if (query.category) {
+    aggregatePipeline.push({
+      $match: { category: new mongoose.Types.ObjectId(query.category as string) },
+    });
+  }
+
+  if (query.subCategory) {
+    aggregatePipeline.push({
+      $match: { subCategory: new mongoose.Types.ObjectId(query.subCategory as string) },
+    });
+  }
+
+
+
+  // -----------------------------
+  // Step 5: Pagination
+  // -----------------------------
+  const page = query.page ? Number(query.page) : 1;
+  const limit = query.limit ? Number(query.limit) : 10;
+  const skip = (page - 1) * limit;
+
+  aggregatePipeline.push({ $skip: skip }, { $limit: limit });
+
+  // -----------------------------
+  // Step 6: Lookup & populate references
+  // -----------------------------
+  aggregatePipeline.push(
+    // userId
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'userId',
+      },
+    },
+    { $addFields: { userId: { $arrayElemAt: ['$userId', 0] } } },
+    // category
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: 'category',
+      },
+    },
+    { $addFields: { category: { $arrayElemAt: ['$category', 0] } } },
+    // subCategory
+    {
+      $lookup: {
+        from: 'subcategories',
+        localField: 'subCategory',
+        foreignField: '_id',
+        as: 'subCategory',
+      },
+    }
+  );
+
+  // -----------------------------
+  // Step 7: Execute aggregation
+  // -----------------------------
+  const contractors = await Contractor.aggregate(aggregatePipeline);
+
+  // -----------------------------
+  // Step 8: Calculate ratings
+  // -----------------------------
   const result = await Promise.all(
-    contractors.map(async contractorDoc => {
-      const contractor = contractorDoc.toObject();
-
-      const userId = contractor.userId?._id || contractor.userId;
-
-      // Ensure it's an ObjectId
-      const contractorUserId = new mongoose.Types.ObjectId(userId);
-
+    contractors.map(async contractor => {
+      const contractorUserId = new mongoose.Types.ObjectId(contractor.userId?._id || contractor.userId);
       const reviews = await Review.find({ contractorId: contractorUserId });
-
-      // console.log(`Found ${reviews.length} reviews for contractor userId ${contractorUserId}`);
-
       const totalRatings = reviews.length;
       const totalStars = reviews.reduce((sum, r) => sum + r.stars, 0);
-      const averageRating = totalRatings > 0 ? totalStars / totalRatings : 0;
-
-      contractor.ratings = Number(averageRating.toFixed(1));
-
+      contractor.ratings = totalRatings > 0 ? Number((totalStars / totalRatings).toFixed(1)) : 0;
       return contractor;
     })
   );
 
-  const meta = await ContractorQuery.countTotal();
+  // -----------------------------
+  // Step 9: Get total count for meta
+  // -----------------------------
+  const countPipeline = aggregatePipeline.filter(stage => !('$skip' in stage || '$limit' in stage));
+  const metaCount = await Contractor.aggregate([...countPipeline, { $count: 'total' }]);
+  const total = metaCount[0]?.total || 0;
+  const totalPage = Math.ceil(total / limit);
 
-  return {
-    result,
-    meta
-  };
+  return { result, meta: { page, limit, total, totalPage } };
 };
 
 const getSingleContractorFromDB = async (id: string) => {

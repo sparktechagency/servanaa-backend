@@ -755,7 +755,6 @@ export const getContractorFeedback = catchAsync(async (req, res) => {
   });
 });
 
-
 // ================================
 export const getAllBookingsFromDB = catchAsync(async (req, res) => {
   try {

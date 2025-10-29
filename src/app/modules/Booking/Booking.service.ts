@@ -37,7 +37,6 @@ const toMinutes = (time: string) => {
   return h * 60 + m;
 };
 
-// Utility to convert minutes → "HH:mm"
 const toTime = (mins: number) => {
   const h = Math.floor(mins / 60)
     .toString()
@@ -47,33 +46,43 @@ const toTime = (mins: number) => {
 };
 
 const getAvailableTimesForDate = async (contractorId: string, date: string) => {
-  // Get contractor schedule
   const mySchedule = await MySchedule.findOne({ contractorId }).lean();
-  if (!mySchedule)
-    throw new AppError(httpStatus.NOT_FOUND, "Contractor schedule not found");
+  if (!mySchedule) throw new AppError(httpStatus.NOT_FOUND, "Contractor schedule not found");
 
-  const weekday = new Date(date).toLocaleDateString("en-US", { weekday: "long" });
+  const weekday = new Date(date)
+    .toLocaleDateString("en-US", { weekday: "long" })
+    .trim()
+    .toLowerCase();
 
-  const scheduleForDay = mySchedule.schedules.find((s: any) => s.days === weekday);
+  const scheduleForDay = mySchedule.schedules.find(
+    (s: any) => s.days.toLowerCase() === weekday
+  );
   if (!scheduleForDay)
     throw new AppError(httpStatus.BAD_REQUEST, `No schedule found for ${weekday}`);
 
-  const daySlots = scheduleForDay.timeSlots; // e.g., ["09:00-23:00"]
+  const daySlots = scheduleForDay.timeSlots;
 
-  // Get existing bookings for that date
+  const dayStart = new Date(date);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(date);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const user = await User.findOne({ contractor: contractorId });
+  if (!user) throw new AppError(httpStatus.NOT_FOUND, "Contractor user not found");
+  console.log("Day slots from schedule:", user?._id);
+
   const existingBookings = await Booking.find({
-    contractorId,
-    bookingDate: new Date(date),
-    isDeleted: false,
+    contractorId: user?._id,
+    bookingDate: { $gte: dayStart, $lte: dayEnd }
   }).lean();
 
-  // Convert schedule into ranges (in minutes)
+  console.log("Existing bookings for the day:", existingBookings);
+
   let freeRanges = daySlots.map((slot: string) => {
     const [start, end] = slot.split("-");
     return [toMinutes(start), toMinutes(end)];
   });
 
-  // Subtract booked times
   for (const booking of existingBookings) {
     const start = toMinutes(booking.startTime);
     const end = toMinutes(booking.endTime);
@@ -82,21 +91,17 @@ const getAvailableTimesForDate = async (contractorId: string, date: string) => {
 
     for (const [freeStart, freeEnd] of freeRanges) {
       if (end <= freeStart || start >= freeEnd) {
-        // No overlap
         updatedRanges.push([freeStart, freeEnd]);
       } else {
-        // Overlap — cut booked portion out
         if (start > freeStart) updatedRanges.push([freeStart, start]);
         if (end < freeEnd) updatedRanges.push([end, freeEnd]);
       }
     }
-
     freeRanges = updatedRanges;
   }
 
-  // Convert back to "HH:mm-HH:mm" format
   const availableSlots = freeRanges
-    .filter(([s, e]) => e - s >= 30) // Only slots >= 30 mins
+    .filter(([s, e]) => e - s >= 30)
     .map(([s, e]) => `${toTime(s)}-${toTime(e)}`);
 
   return {
@@ -108,6 +113,7 @@ const getAvailableTimesForDate = async (contractorId: string, date: string) => {
     availableSlots,
   };
 };
+
 
 const createBookingIntoDB = async (payload: TBooking, user: any) => {
   const { bookingType, contractorId, day, startTime, duration, bookingId } = payload;

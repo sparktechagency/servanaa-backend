@@ -13,7 +13,7 @@ const createHelpIntoDB = async (
   user: any
 ) => {
 
-  const usr =  await User.findOne({email:user.userEmail}).select(' fullName img _id role');
+  const usr = await User.findOne({ email: user.userEmail }).select(' fullName img _id role');
   console.log('usr', usr)
 
   if (!usr) {
@@ -22,7 +22,7 @@ const createHelpIntoDB = async (
 
   payload.userId = usr?._id;
   const result = await Help.create(payload);
-  
+
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Help');
   }
@@ -30,7 +30,7 @@ const createHelpIntoDB = async (
   usr.messageId = result._id;
   // const us = await usr.save();
 
-  
+
   const updatedUser = await User.findByIdAndUpdate(
     { _id: usr?._id },
     usr,
@@ -38,16 +38,16 @@ const createHelpIntoDB = async (
   );
 
 
- if(!updatedUser){
-  throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update user with help message');
- }
+  if (!updatedUser) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update user with help message');
+  }
 
   return result;
 };
 
 const getAllHelpsFromDB = async (query: Record<string, unknown>) => {
   const HelpQuery = new QueryBuilder(
-    Help.find(),
+    Help.find().populate('userId', 'fullName email img role'),
     query,
   )
     .search(HELP_SEARCHABLE_FIELDS)
