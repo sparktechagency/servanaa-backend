@@ -4,7 +4,16 @@ import { TContractor, ContractorModel } from './Contractor.interface';
 const locationSchema = new Schema({
   type: { type: String, enum: ["Point"], default: "Point" },
   coordinates: { type: [Number], required: true },
-  address: { type: String, required: true }
+  address: { type: String, required: true },
+  street: {
+    type: String,
+  },
+  direction: {
+    type: String,
+  },
+  unit: {
+    type: String,
+  },
 });
 
 const contractorSchema = new Schema<TContractor, ContractorModel>({

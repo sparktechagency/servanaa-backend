@@ -10,7 +10,31 @@ import { Booking } from '../Booking/Booking.model';
 import { Plans } from '../Subscription/Subscription.model';
 import { Withdraw } from './stripe.model';
 import { Contractor } from '../Contractor/Contractor.model';
+import cron from 'node-cron';
+
 const stripe = new Stripe(config.stripe_secret_key as string);
+
+// This cron runs every day at midnight (00:00)
+cron.schedule('0 0 * * *', async () => {
+  try {
+    const now = new Date();
+
+    const result = await Contractor.updateMany(
+      {
+        subscriptionEndDate: { $lte: now },
+        subscriptionStatus: { $ne: 'expired' }
+      },
+      {
+        $set: { subscriptionStatus: 'expired', hasActiveSubscription: false }
+      }
+    );
+
+    console.log(`${new Date().toISOString()}: Updated ${result.modifiedCount} contractor(s) to expired status.`);
+  } catch (error) {
+    console.error('Error updating expired subscriptions:', error);
+  }
+});
+
 
 const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any) => {
   const email = user?.userEmail;
