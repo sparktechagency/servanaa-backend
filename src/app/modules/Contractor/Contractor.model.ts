@@ -1,6 +1,23 @@
 import { Schema, model } from 'mongoose';
 import { TContractor, ContractorModel } from './Contractor.interface';
 
+
+const locationSchema = new Schema({
+  type: {
+    type: String,
+    enum: ["Point"],
+    default: "Point",
+  },
+  coordinates: {
+    type: [Number],
+    required: true,
+  },
+  address: {
+    type: String,
+    required: true,
+  }
+});
+
 const contractorSchema = new Schema<TContractor, ContractorModel>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -13,7 +30,7 @@ const contractorSchema = new Schema<TContractor, ContractorModel>(
     bio: { type: String, default: '' },
     city: { type: String, default: '' },
     language: { type: String, default: '' },
-    location: { type: String, default: '' },
+    location: { type: locationSchema },
     rateHourly: { type: Number, default: 0, required: true },
     balance: { type: Number, default: 0 },
     category: {

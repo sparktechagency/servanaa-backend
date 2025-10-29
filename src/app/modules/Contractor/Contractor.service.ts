@@ -258,6 +258,8 @@ const getAllAvailableContractorsFromDB = async (
 };
 
 const getAllContractorsFromDB = async (query: Record<string, unknown>) => {
+
+  console.log('Query received in service:', query);
   const ContractorQuery = new QueryBuilder(
     Contractor.find()
       .select("-certificates -createdAt -updatedAt -hasActiveSubscription -subscriptionId -isDeleted")

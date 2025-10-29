@@ -239,6 +239,9 @@ const checkAvailabilityIntoDB = async (
     addOneHour(startTime)
   );
 
+  const contractor = await Contractor.findById(contractorId);
+  if (!contractor) throw new Error('Contractor not found');
+
   const schedule = await MySchedule.findOne({ contractorId });
   if (!schedule) throw new Error('Contractor schedule not found');
 

@@ -10,8 +10,6 @@ import { SubCategory } from './SubCategory.model';
 const createSubCategoryIntoDB = async (payload: TSubCategory, file: any) => {
   if (file) {
     payload.img = file.location;
-    console.log(file.location, 'file.location');
-    console.log(payload.img, 'payload.img');
     // https://servana-bucket.s3.ap-southeast-2.amazonaws.com/1748498627351_download.jpg
     // https://servana-bucket.s3.ap-southeast-2.amazonaws.com/1748498627351_download.jpg
   }

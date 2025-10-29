@@ -20,7 +20,7 @@ export type TContractor = {
   minimumWithdrawal: number;
   city?: string;
   language?: string;
-  location: string;
+  location: any;
   ratings: number;
   skills: string[];
   subscriptionStatus:

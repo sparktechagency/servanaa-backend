@@ -29,7 +29,7 @@ const bookingSchema = new Schema<TBooking>(
     bookingType: {
       type: String,
       enum: {
-        values: ['oneTime', 'weekly'], // Changed from 'OneTime', 'Weekly'
+        values: ['oneTime', 'weekly'],
         message: '{VALUE} is not a valid booking type'
       },
       required: [true, 'Booking type is required']

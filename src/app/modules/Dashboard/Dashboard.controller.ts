@@ -24,6 +24,8 @@ import { Transaction } from '../Transaction/transaction.model';
 import AppError from '../../errors/AppError';
 import { Review } from '../Review/Review.model';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { Help } from '../Help/Help.model';
+import { SendEmail } from '../../utils/sendEmail';
 
 export const getDashboardData = catchAsync(async (req, res) => {
   const totalUser = await User.countDocuments({ isDeleted: false });
@@ -753,6 +755,8 @@ export const getContractorFeedback = catchAsync(async (req, res) => {
   });
 });
 
+
+// ================================
 export const getAllBookingsFromDB = catchAsync(async (req, res) => {
   try {
 
@@ -762,8 +766,6 @@ export const getAllBookingsFromDB = catchAsync(async (req, res) => {
     };
 
     const query = req.query;
-
-    // Check if contractorId is provided
 
     console.log('Contractor ID:', contractorId);
     if (!contractorId) {
@@ -851,5 +853,36 @@ export const addRemoveHome = catchAsync(async (req, res) => {
     message: `Contractor ${homeStatus ? 'added to' : 'removed from'
       } homepage successfully.`,
     data: updatedContractor,
+  });
+});
+
+
+// =============================
+// replayReportHelp Controller
+// =============================
+export const replayReportHelp = catchAsync(async (req, res) => {
+  const { helpId, adminMessage } = req.body;
+
+  const existingHelp = await Help.isHelpExists(helpId);
+  if (!existingHelp) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Help report not found.');
+  }
+
+  existingHelp.adminMessage = adminMessage;
+  // @ts-ignore
+  await existingHelp.save();
+
+
+  const user = await User.findById(existingHelp.userId);
+  console.log("User found for help report:", user);
+  if (user && user.email) {
+    console.log("Sending email to:", user.email);
+    await SendEmail.sendHelpReplyEmail("tayebrayhan101@gmail.com", user.fullName, adminMessage);
+  }
+
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: 'Admin reply sent successfully.',
+    data: existingHelp,
   });
 });

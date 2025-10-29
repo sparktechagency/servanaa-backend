@@ -17,6 +17,7 @@ import {
   getDailyBooking,
   getDashboardData,
   getTransactionHistoryTable,
+  replayReportHelp,
   totalCounts,
   updateBannerIntoDB,
   updateSubscription
@@ -89,6 +90,7 @@ router.post('/approved_contactor', approvedContactor);
 router.get('/bookings_contractor', getAllBookingsFromDB);
 router.patch('/contractor_home', addRemoveHome);
 router.get('/contractor_feedback', getContractorFeedback);
+router.patch('/replay_feedback', replayReportHelp);
 
 
 export const DashboardRoutes = router;
