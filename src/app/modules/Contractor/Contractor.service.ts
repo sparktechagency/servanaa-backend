@@ -432,8 +432,9 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
   const aggregatePipeline: any[] = [];
   let lng: number | null = null;
   let lat: number | null = null;
-
+  // ===========================================
   // Step 1: Get customer coordinates
+  // ===========================================
   if (query.customerId) {
     const user = await User.findById(query.customerId);
     if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
@@ -454,8 +455,9 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
     }
 
     await Contractor.collection.createIndex({ location: "2dsphere" });
-
+    // ===========================================
     // Step 2: $geoNear with dynamic radius
+    // ===========================================
     aggregatePipeline.push({
       $geoNear: {
         near: { type: "Point", coordinates: [lng, lat] },
@@ -486,8 +488,9 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
   } else {
     aggregatePipeline.push({ $match: { isDeleted: false } });
   }
-
+  // ===========================================
   // Step 3: Exclude unwanted fields
+  // ===========================================
   aggregatePipeline.push({
     $project: {
       certificates: 0,
@@ -498,8 +501,9 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
       isDeleted: 0,
     },
   });
-
+  // ===========================================
   // Step 4: Search
+  // ===========================================
   if (query.search) {
     const searchStr = query.search as string;
     aggregatePipeline.push({
@@ -512,8 +516,9 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
       },
     });
   }
-
+  // ===========================================
   // Step 5: Filter by category / subCategory
+  // ===========================================
   if (query.category) {
     aggregatePipeline.push({
       $match: { category: new mongoose.Types.ObjectId(query.category as string) },
@@ -527,14 +532,17 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
   if (query.isHomeSelect) {
     aggregatePipeline.push({ $match: { isHomeSelect: true } });
   }
-
+  // ===========================================
   // Step 6: Pagination
+  // ===========================================
   const page = query.page ? Number(query.page) : 1;
   const limit = query.limit ? Number(query.limit) : 10;
   const skip = (page - 1) * limit;
   aggregatePipeline.push({ $skip: skip }, { $limit: limit });
 
+  // ===========================================
   // Step 7: Populate references
+  // ===========================================
   aggregatePipeline.push(
     {
       $lookup: {
@@ -563,11 +571,13 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
       },
     }
   );
-
+  // ===========================================
   // Step 8: Execute aggregation
+  // ===========================================
   const contractorsWithDistance = await Contractor.aggregate(aggregatePipeline);
-
+  // ===========================================
   // Step 9: Calculate ratings
+  // ===========================================
   const result = await Promise.all(
     contractorsWithDistance.map(async (contractor) => {
       const contractorUserId = new mongoose.Types.ObjectId(contractor.userId?._id || contractor.userId);
@@ -578,8 +588,9 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
       return contractor;
     })
   );
-
+  // ===========================================
   // Step 10: Pagination meta
+  // ===========================================
   const countPipeline = aggregatePipeline.filter((stage) => !("$skip" in stage || "$limit" in stage));
   const metaCount = await Contractor.aggregate([...countPipeline, { $count: "total" }]);
   const total = metaCount[0]?.total || 0;
