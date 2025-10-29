@@ -584,31 +584,35 @@ const getAllSupport = async (query: any) => {
   const skip = (page - 1) * limit;
 
   const filter: any = {};
+
   if (query.searchTerm) {
-    filter.$or = [
-      { title: { $regex: query.searchTerm, $options: 'i' } },
-      { description: { $regex: query.searchTerm, $options: 'i' } },
-    ];
+    const searchRegex = { $regex: query.searchTerm, $options: 'i' };
+    filter.$or = [{ title: searchRegex }, { description: searchRegex }];
   }
 
-  const supports = await Support.find(filter)
-    .populate('userId', 'fullName email role')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+  const [supports, total] = await Promise.all([
+    Support.find(filter)
+      .populate('userId', 'fullName email role')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Support.countDocuments(filter),
+  ]);
 
-  const total = await Support.countDocuments(filter);
+  const totalPage = Math.ceil(total / limit);
 
   return {
     meta: {
-      total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      total,
+      totalPage,
     },
     data: supports,
   };
 };
+
+
 
 
 

@@ -126,7 +126,7 @@ const createSupport = catchAsync(async (req, res) => {
 
 
 const getAllSupport = catchAsync(async (req, res) => {
-  console.log('req', req)
+
   const query = req.query;
   const result = await ContractorServices.getAllSupport(query);
 
