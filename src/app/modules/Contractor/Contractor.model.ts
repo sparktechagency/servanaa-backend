@@ -7,12 +7,15 @@ const locationSchema = new Schema({
   address: { type: String, required: true },
   street: {
     type: String,
+    default: '',
   },
   direction: {
     type: String,
+    default: '',
   },
   unit: {
     type: String,
+    default: '',
   },
 });
 
