@@ -464,7 +464,7 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
         near: { type: "Point", coordinates: [lng, lat] },
         distanceField: "distance",
         spherical: true,
-        maxDistance: 100 * 1000, // max search 100 km
+        maxDistance: 50 * 1000, // max search 50 km
       },
     });
 
@@ -473,7 +473,7 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
         allowedDistance: {
           $cond: {
             if: { $eq: ["$subscriptionStatus", "active"] },
-            then: 100 * 1000, // 100 km
+            then: 50 * 1000, // 50 km
             else: 5 * 1000, // 5 km
           },
         },
@@ -599,7 +599,6 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
 
   return { result, meta: { page, limit, total, totalPage } };
 };
-
 
 const getSingleContractorFromDB = async (id: string) => {
   const result = await Contractor.findById(id).populate('myScheduleId');

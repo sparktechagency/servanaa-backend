@@ -24,7 +24,6 @@ import { Transaction } from '../Transaction/transaction.model';
 import AppError from '../../errors/AppError';
 import { Review } from '../Review/Review.model';
 import QueryBuilder from '../../builder/QueryBuilder';
-import { Help } from '../Help/Help.model';
 import { SendEmail } from '../../utils/sendEmail';
 import { Support } from '../Contractor/Support.model';
 

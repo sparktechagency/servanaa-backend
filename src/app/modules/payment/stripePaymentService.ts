@@ -35,7 +35,6 @@ cron.schedule('0 0 * * *', async () => {
   }
 });
 
-
 const createStripeSubscriptionSessionIntoDB = async (user: any, paymentData: any) => {
   const email = user?.userEmail;
   const { planId } = paymentData;
