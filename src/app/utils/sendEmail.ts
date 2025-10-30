@@ -92,4 +92,36 @@ export class SendEmail {
       throw new Error('Failed to send help reply email.');
     }
   }
+
+  static async sendSupportRequestToAdmin(userEmail: string, fullName: string, subject: string, message: string): Promise<void> {
+    const mailOptions = {
+      from: 'support@servana.com.au',
+      to: 'support@servana.com.au',
+      subject: `New Support Request from ${fullName}`,
+      html: `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h3 style="color: #007BFF;">New Help Request Received</h3>
+        <p><strong>From:</strong> ${fullName} (${userEmail})</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 15px 0;">
+        <p><strong>Message:</strong></p>
+        <blockquote style="border-left: 4px solid #007BFF; padding-left: 10px; color: #555;">
+          ${message}
+        </blockquote>
+        <br/>
+        <p>Please review and reply through the admin panel or by email.</p>
+        <br/>
+        <p>— <strong>Support Notification System</strong></p>
+      </div>
+    `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error sending support request email to admin:', error);
+      throw new Error('Failed to send support request email to admin.');
+    }
+  }
+
 }

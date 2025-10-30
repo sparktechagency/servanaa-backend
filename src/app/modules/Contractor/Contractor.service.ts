@@ -12,6 +12,7 @@ import { Review } from '../Review/Review.model';
 import { User } from '../User/user.model';
 import { Support } from './Support.model';
 import { Customer } from '../Customer/Customer.model';
+import { SendEmail } from '../../utils/sendEmail';
 // import { ObjectId } from 'mongoose';
 
 // Helper function to generate time slots
@@ -748,6 +749,13 @@ const createSupport = async (email: string, payload: any) => {
   if (!support) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Support not updated!');
   }
+
+  if (support) {
+    console.log("Sending email to:", user.email);
+    await SendEmail.sendSupportRequestToAdmin(email, user.fullName, payload.title, payload.details);
+  }
+
+
   return support;
 }
 
