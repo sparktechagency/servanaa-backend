@@ -143,6 +143,9 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   const price = Number(payload.totalAmount || 0);
   const adminChargeAmount = (price * adminCostPercent) / 100;
   const contractorNetIncome = price - adminChargeAmount;
+  console.log("charge.cost", adminCostPercent)
+  console.log("price", price)
+  console.log("contractorNetIncome", contractorNetIncome)
   payload.totalAmount = contractorNetIncome;
 
 
