@@ -138,13 +138,16 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
 
   payload.customerId = usr._id;
 
-  const charge = await CostAdmin.findOne({});
-  const adminCostPercent = charge?.cost || 1;
-  const price = Number(payload.totalAmount || 0);
-  const adminChargeAmount = (price * adminCostPercent) / 100;
-  const contractorNetIncome = price - adminChargeAmount;
-  payload.totalAmount = contractorNetIncome;
+  // const charge = await CostAdmin.findOne({});
+  // const adminCostPercent = charge?.cost || 1;
+  // const price = Number(payload.totalAmount || 0);
+  // const adminChargeAmount = (price * adminCostPercent) / 100;
+  // const contractorNetIncome = price - adminChargeAmount;
+  // console.log("charge.cost", adminCostPercent)
+  // console.log("price", price)
+  // console.log("contractorNetIncome", contractorNetIncome)
 
+  payload.totalAmount = Number(payload.totalAmount || 0);
 
   let selectedLocation = null;
   // @ts-ignore
@@ -287,7 +290,6 @@ const checkAvailabilityIntoDB = async (
 };
 
 const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
-  console.log('getAllBookingsFromDB query:', query);
 
   const BookingQuery = new QueryBuilder(
     Booking.find()
