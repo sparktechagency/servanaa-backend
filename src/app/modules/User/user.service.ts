@@ -325,9 +325,10 @@ const updateUserIntoDB = async (
 
   let roleDataToUpdate: any = {};
   let updatedRoleData: any = {};
-
   const add = payload?.add || {};
   const remove = payload?.remove || {};
+
+
 
   if (user?.role === 'contractor') {
     roleDataToUpdate = extractFields(payload || {}, contractorFields);
@@ -345,6 +346,7 @@ const updateUserIntoDB = async (
     if (payload.category) roleDataToUpdate.category = payload.category;
     if (payload.subCategory) roleDataToUpdate.subCategory = payload.subCategory;
 
+    console.log("===", payload)
     const existingContractor = await Contractor.findOne({
       _id: updatedUser.contractor
     });
@@ -412,6 +414,8 @@ const updateUserIntoDB = async (
     if (addedMaterials.length || removedMaterials.length) {
       roleDataToUpdate.materials = finalMaterials;
     }
+
+    console.log('roleDataToUpdate', roleDataToUpdate)
 
     updatedRoleData = await Contractor.findOneAndUpdate(
       { _id: updatedUser.contractor },

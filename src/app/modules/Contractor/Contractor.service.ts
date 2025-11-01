@@ -570,7 +570,15 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
         foreignField: "_id",
         as: "subCategory",
       },
-    }
+    },
+    {
+      $lookup: {
+        from: "myschedules", // <-- collection name in MongoDB (check actual collection name)
+        localField: "myScheduleId",
+        foreignField: "_id",
+        as: "myScheduleId",
+      },
+    },
   );
   // ===========================================
   // Step 8: Execute aggregation
