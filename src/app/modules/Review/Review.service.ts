@@ -5,10 +5,11 @@ import AppError from '../../errors/AppError';
 import { REVIEW_SEARCHABLE_FIELDS } from './Review.constant';
 import mongoose from 'mongoose';
 import { TReview } from './Review.interface';
-import { Review } from './Review.model';
+import { CustomerReview, Review } from './Review.model';
 import { User } from '../User/user.model';
 // import { Contractor } from '../Contractor/Contractor.model';
 import { Booking } from '../Booking/Booking.model';
+import { Customer } from '../Customer/Customer.model';
 
 const createReviewIntoDB = async (
   payload: TReview,
@@ -158,7 +159,79 @@ const deleteReviewFromDB = async (id: string) => {
   return deletedService;
 };
 
+const createReviewCustomer = async (payload: TReview, user: any) => {
+  const usr = await User.findOne({ email: user.userEmail }).select('fullName img _id role');
+
+  if (!usr) throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+
+  payload.contractorId = usr._id;
+
+  let customerUserId = payload.customerId;
+  const customerDoc = await Customer.findById(payload.customerId);
+  if (customerDoc) {
+    customerUserId = customerDoc.userId;
+    payload.customerId = customerDoc.userId;
+  }
+
+  const result = await CustomerReview.create(payload);
+  if (!result) throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Review');
+
+  const stats = await CustomerReview.find({ customerId: payload.customerId, isDeleted: false });
+
+  let averageRating = 0;
+  if (stats.length > 0) {
+    const totalStars = stats.reduce((sum, review) => sum + review.stars, 0);
+    averageRating = totalStars / stats.length;
+    averageRating = Math.round(averageRating * 10) / 10;
+  }
+
+  console.log('Customer User ID:', customerUserId.toString());
+  console.log('New Average Rating:', averageRating);
+
+  const updateResult = await Customer.updateOne(
+    { userId: customerUserId },
+    { $set: { ratings: averageRating } }
+  );
+
+  if (updateResult.modifiedCount === 0) {
+    console.warn('⚠️ No Customer document was updated for ID:', customerUserId);
+  }
+
+  return {
+    message: 'Review created successfully',
+    review: result,
+    averageRating,
+  };
+};
+
+
+const getAllReviewsCustomer = async (query: Record<string, unknown>) => {
+  const ReviewQuery = new QueryBuilder(
+    CustomerReview.find({
+      $or: [
+        { contractorId: query.contractorId }
+      ],
+      isDeleted: false
+    }),
+    query,
+  )
+    .search(REVIEW_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await ReviewQuery.modelQuery;
+  const meta = await ReviewQuery.countTotal();
+  return {
+    result,
+    meta,
+  };
+};
+
 export const ReviewServices = {
+  getAllReviewsCustomer,
+  createReviewCustomer,
   createReviewIntoDB,
   getAllReviewsFromDB,
   getSingleReviewFromDB,

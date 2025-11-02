@@ -42,8 +42,9 @@ const CustomerSchema = new Schema<TCustomer, CustomerModel>({
   city: { type: String, default: '' },
   language: { type: String, default: '' },
   balance: { type: Number, default: 0 },
+  ratings: { type: Number, default: 0 },
   location: { type: [locationSchema], required: true },
-  isDeleted: { type: Boolean, default: false }
+  isDeleted: { type: Boolean, default: false },
 });
 
 CustomerSchema.statics.isCustomerExists = async function (id: string) {

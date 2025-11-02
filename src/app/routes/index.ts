@@ -126,7 +126,7 @@ const moduleRoutes = [
     route: ContractorRoutes,
   },
   {
-    path: '/customers',
+    path: '/customer',
     route: CustomerRoutes,
   },
 

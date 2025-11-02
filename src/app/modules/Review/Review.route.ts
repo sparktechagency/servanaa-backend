@@ -38,5 +38,16 @@ router.get(
   '/',
   ReviewControllers.getAllReviews,
 );
+// ============
+router.post(
+  '/create-review-customer',
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor),
+  ReviewControllers.createReviewCustomer,
+);
 
+router.get(
+  '/customer',
+  auth(USER_ROLE.superAdmin, USER_ROLE.contractor),
+  ReviewControllers.getAllReviewsCustomer,
+);
 export const ReviewRoutes = router;

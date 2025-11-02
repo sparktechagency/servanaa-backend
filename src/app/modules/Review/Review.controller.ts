@@ -76,7 +76,34 @@ const deleteReview = catchAsync(async (req, res) => {
   });
 });
 
+const createReviewCustomer = catchAsync(async (req, res) => {
+  const ReviewData = req.body;
+  const result = await ReviewServices.createReviewCustomer(ReviewData, req.user);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Review is created successfully',
+    data: result,
+  });
+});
+
+
+const getAllReviewsCustomer = catchAsync(async (req, res) => {
+  const result = await ReviewServices.getAllReviewsFromDB(req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Review is created successfully',
+    data: result,
+  });
+});
+
+
 export const ReviewControllers = {
+  getAllReviewsCustomer,
+  createReviewCustomer,
   createReview,
   getSingleReview,
   getAllReviews,
