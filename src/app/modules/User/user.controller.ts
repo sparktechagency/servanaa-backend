@@ -42,6 +42,12 @@ const createCustomer = catchAsync(async (req, res) => {
 
 const createContractor = catchAsync(async (req, res) => {
   const userData = req.body;
+
+  if (req.file) {
+    // @ts-ignore
+    userData.img = req.file?.location || req.file?.path;
+  }
+
   const result = await UserServices.createContractorIntoDB(userData);
   const { refreshToken, accessToken, populatedContractor: user } = result;
 

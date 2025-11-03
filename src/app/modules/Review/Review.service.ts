@@ -185,8 +185,6 @@ const createReviewCustomer = async (payload: TReview, user: any) => {
     averageRating = Math.round(averageRating * 10) / 10;
   }
 
-  console.log('Customer User ID:', customerUserId.toString());
-  console.log('New Average Rating:', averageRating);
 
   const updateResult = await Customer.updateOne(
     { userId: customerUserId },

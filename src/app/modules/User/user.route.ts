@@ -11,7 +11,9 @@ import { CustomerControllers } from '../Customer/Customer.controller';
 const router = express.Router();
 router.post('/create-customer', UserControllers.createCustomer);
 
-router.post('/create-contractor', UserControllers.createContractor);
+router.post('/create-contractor',
+  uploadFileS3(true).single('file'),
+  UserControllers.createContractor);
 
 router.get(
   '/me',
