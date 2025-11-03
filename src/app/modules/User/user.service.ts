@@ -26,7 +26,7 @@ export const createCustomerIntoDB = async (payload: any) => {
     if (existingUser) {
       await OtpServices.generateAndSendOTP(payload.email);
       throw new Error(
-        'User already exists. OTP has been resent to your email for verification.'
+        'This email address is already taken.'
       );
     }
 
@@ -100,7 +100,7 @@ export const createContractorIntoDB = async (payload: any) => {
     if (existingUser) {
       await OtpServices.generateAndSendOTP(payload.email);
       throw new Error(
-        'User already exists. OTP has been resent to your email for verification.'
+        'This email address is already taken.'
       );
     }
 
