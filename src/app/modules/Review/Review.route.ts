@@ -15,6 +15,11 @@ router.post(
 );
 
 router.get(
+  '/customers/:customerId',
+  ReviewControllers.getAllReviewsCustomer,
+);
+
+router.get(
   '/get-average-review/:id',
   ReviewControllers.getAverageReview,
 );
@@ -45,9 +50,5 @@ router.post(
   ReviewControllers.createReviewCustomer,
 );
 
-router.get(
-  '/customer',
-  auth(USER_ROLE.superAdmin, USER_ROLE.contractor),
-  ReviewControllers.getAllReviewsCustomer,
-);
+
 export const ReviewRoutes = router;

@@ -48,7 +48,6 @@ export const createCustomerIntoDB = async (payload: any) => {
     // Populate user field in contractor document
     const userCustomer = await User.findById(newUser._id).populate({
       path: 'customer'
-      // select: '-password -__v', // exclude sensitive fields
     });
 
     if (newUser) {

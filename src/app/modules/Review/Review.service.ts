@@ -205,14 +205,9 @@ const createReviewCustomer = async (payload: TReview, user: any) => {
 };
 
 
-const getAllReviewsCustomer = async (query: Record<string, unknown>) => {
+const getAllReviewsCustomer = async (query: any, customerId: any) => {
   const ReviewQuery = new QueryBuilder(
-    CustomerReview.find({
-      $or: [
-        { contractorId: query.contractorId }
-      ],
-      isDeleted: false
-    }),
+    CustomerReview.find({ customerId }).populate('contractorId', 'img fullName contactNo email'),
     query,
   )
     .search(REVIEW_SEARCHABLE_FIELDS)

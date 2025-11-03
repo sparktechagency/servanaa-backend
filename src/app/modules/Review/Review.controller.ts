@@ -90,7 +90,8 @@ const createReviewCustomer = catchAsync(async (req, res) => {
 
 
 const getAllReviewsCustomer = catchAsync(async (req, res) => {
-  const result = await ReviewServices.getAllReviewsFromDB(req.query);
+  const customerId = req.params.customerId as any;
+  const result = await ReviewServices.getAllReviewsCustomer(req.query, customerId as any);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
