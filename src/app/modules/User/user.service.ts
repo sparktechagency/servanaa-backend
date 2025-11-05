@@ -296,6 +296,155 @@ function removeArrayItems<T>(
   }
 }
 
+// const updateUserIntoDB = async (
+//   id: string,
+//   payload?: any,
+//   file?: any,
+//   user?: any
+// ) => {
+//   if (payload?.subscriptionStatus) {
+//     throw new AppError(
+//       httpStatus.FORBIDDEN,
+//       'Subscription status cannot be updated directly. Please use subscription management endpoints.'
+//     );
+//   }
+
+//   const userDataToUpdate = extractFields(payload || {}, userFields);
+
+//   if (file && file.location) {
+//     userDataToUpdate.img = file.location;
+//   }
+
+//   const updatedUser = await User.findByIdAndUpdate(id, userDataToUpdate, {
+//     new: true,
+//     runValidators: true
+//   }).select('-password');
+
+//   if (!updatedUser) throw new Error('User not found');
+
+//   let roleDataToUpdate: any = {};
+//   let updatedRoleData: any = {};
+//   const add = payload?.add || {};
+//   const remove = payload?.remove || {};
+
+
+
+//   if (user?.role === 'contractor') {
+//     roleDataToUpdate = extractFields(payload || {}, contractorFields);
+//     if (payload.dob) roleDataToUpdate.dob = payload.dob;
+//     if (payload.gender) roleDataToUpdate.gender = payload.gender;
+//     if (payload.experience) roleDataToUpdate.experience = payload.experience;
+//     if (payload.bio) roleDataToUpdate.bio = payload.bio;
+//     if (payload.city) roleDataToUpdate.city = payload.city;
+//     if (payload.language) roleDataToUpdate.language = payload.language;
+//     if (payload.location) roleDataToUpdate.location = payload.location;
+//     if (payload.rateHourly) roleDataToUpdate.rateHourly = payload.rateHourly;
+//     if (payload.skillsCategory)
+//       roleDataToUpdate.skillsCategory = payload.skillsCategory;
+//     if (payload.ratings) roleDataToUpdate.ratings = payload.ratings;
+//     if (payload.category) roleDataToUpdate.category = payload.category;
+//     if (payload.subCategory) roleDataToUpdate.subCategory = payload.subCategory;
+//     if (payload.street) roleDataToUpdate.street = payload.street;
+
+//     console.log("===", payload)
+//     const existingContractor = await Contractor.findOne({
+//       _id: updatedUser.contractor
+//     });
+//     if (!existingContractor) throw new Error('Contractor not found');
+
+//     // Skills
+//     const existingSkills = Array.isArray(existingContractor.skills)
+//       ? existingContractor.skills
+//       : [];
+//     const addedSkills = add.skills || [];
+//     const removedSkills = remove.skills || [];
+//     const afterAddSkills = mergeArrayField(existingSkills, addedSkills);
+//     const finalSkills = removeArrayItems(afterAddSkills, removedSkills);
+
+//     if (addedSkills.length || removedSkills.length) {
+//       roleDataToUpdate.skills = finalSkills;
+//       //  console.log('roleDataToUpdate', roleDataToUpdate)
+//     }
+
+//     // Certificates
+//     const existingCertificates = existingContractor.certificates || [];
+//     const addedCerts = add.certificates || [];
+//     const removedCerts = remove.certificates || [];
+
+//     const afterAddCerts = mergeArrayField(existingCertificates, addedCerts);
+//     const finalCerts = removeArrayItems(afterAddCerts, removedCerts);
+
+//     if (addedCerts.length || removedCerts.length) {
+//       roleDataToUpdate.certificates = finalCerts;
+//     }
+
+//     // mySchedule
+//     // const existingSchedule = existingContractor?.myScheduleId || [];
+//     const existingSchedule = Array.isArray(existingContractor?.myScheduleId)
+//       ? existingContractor.myScheduleId
+//       : [existingContractor.myScheduleId];
+//     const addedSchedule = add.mySchedule || [];
+//     const removedSchedule = remove.mySchedule || [];
+
+//     const afterAddSchedule = [...existingSchedule, ...addedSchedule];
+//     const finalSchedule = removeArrayItems(
+//       afterAddSchedule,
+//       removedSchedule,
+//       'day'
+//     ); // assuming 'day' is unique
+
+//     if (addedSchedule.length || removedSchedule.length) {
+//       roleDataToUpdate.mySchedule = finalSchedule;
+//     }
+
+//     // Materials (add/remove)
+//     const existingMaterials = existingContractor.materials || [];
+//     const addedMaterials = add.materials || [];
+//     const removedMaterials = remove.materials || [];
+
+//     // const afterAddMaterials = mergeArrayField(existingMaterials, addedMaterials);
+//     const afterAddMaterials = [...existingMaterials, ...addedMaterials];
+//     // const finalMaterials = removeArrayItems(afterAddMaterials, removedMaterials);
+//     const finalMaterials = removeArrayItems(
+//       afterAddMaterials,
+//       removedMaterials,
+//       'name'
+//     );
+
+//     if (addedMaterials.length || removedMaterials.length) {
+//       roleDataToUpdate.materials = finalMaterials;
+//     }
+
+//     console.log('roleDataToUpdate', roleDataToUpdate)
+
+//     updatedRoleData = await Contractor.findOneAndUpdate(
+//       { _id: updatedUser.contractor },
+//       roleDataToUpdate,
+//       { new: true, runValidators: true }
+//     );
+//   }
+
+//   if (user?.role === 'customer') {
+//     console.log('Updating customer with payload:', payload.location);
+//     roleDataToUpdate = extractFields(payload || {}, customerFields);
+//     updatedRoleData = await Customer.findOneAndUpdate(
+//       { _id: updatedUser.customer },
+//       roleDataToUpdate,
+//       { new: true, runValidators: true }
+//     );
+//   }
+
+//   return {
+//     user: updatedUser,
+//     roleData: updatedRoleData
+//   };
+// };
+
+const mergeNested = (target: any, source: any) => ({
+  ...target,
+  ...Object.fromEntries(Object.entries(source).filter(([_, v]) => v !== undefined)),
+});
+
 const updateUserIntoDB = async (
   id: string,
   payload?: any,
@@ -317,7 +466,7 @@ const updateUserIntoDB = async (
 
   const updatedUser = await User.findByIdAndUpdate(id, userDataToUpdate, {
     new: true,
-    runValidators: true
+    runValidators: true,
   }).select('-password');
 
   if (!updatedUser) throw new Error('User not found');
@@ -327,95 +476,73 @@ const updateUserIntoDB = async (
   const add = payload?.add || {};
   const remove = payload?.remove || {};
 
-
-
+  // ========================= CONTRACTOR =========================
   if (user?.role === 'contractor') {
-    roleDataToUpdate = extractFields(payload || {}, contractorFields);
-    if (payload.dob) roleDataToUpdate.dob = payload.dob;
-    if (payload.gender) roleDataToUpdate.gender = payload.gender;
-    if (payload.experience) roleDataToUpdate.experience = payload.experience;
-    if (payload.bio) roleDataToUpdate.bio = payload.bio;
-    if (payload.city) roleDataToUpdate.city = payload.city;
-    if (payload.language) roleDataToUpdate.language = payload.language;
-    if (payload.location) roleDataToUpdate.location = payload.location;
-    if (payload.rateHourly) roleDataToUpdate.rateHourly = payload.rateHourly;
-    if (payload.skillsCategory)
-      roleDataToUpdate.skillsCategory = payload.skillsCategory;
-    if (payload.ratings) roleDataToUpdate.ratings = payload.ratings;
-    if (payload.category) roleDataToUpdate.category = payload.category;
-    if (payload.subCategory) roleDataToUpdate.subCategory = payload.subCategory;
-
-    console.log("===", payload)
-    const existingContractor = await Contractor.findOne({
-      _id: updatedUser.contractor
-    });
+    const existingContractor = await Contractor.findOne({ _id: updatedUser.contractor });
     if (!existingContractor) throw new Error('Contractor not found');
 
-    // Skills
-    const existingSkills = Array.isArray(existingContractor.skills)
-      ? existingContractor.skills
-      : [];
+    roleDataToUpdate = extractFields(payload || {}, contractorFields);
+
+    // Simple field updates
+    [
+      'dob', 'gender', 'experience', 'bio', 'city',
+      'language', 'rateHourly', 'skillsCategory',
+      'ratings', 'category', 'subCategory'
+    ].forEach((field) => {
+      if (payload[field] !== undefined) roleDataToUpdate[field] = payload[field];
+    });
+
+    // ✅ Properly update nested location
+    if (payload.location) {
+      roleDataToUpdate.location = mergeNested(
+        existingContractor.location?.toObject?.() || {},
+        payload.location
+      );
+    }
+
+    // ====== Skills Update ======
+    const existingSkills = existingContractor.skills || [];
     const addedSkills = add.skills || [];
     const removedSkills = remove.skills || [];
     const afterAddSkills = mergeArrayField(existingSkills, addedSkills);
     const finalSkills = removeArrayItems(afterAddSkills, removedSkills);
-
     if (addedSkills.length || removedSkills.length) {
       roleDataToUpdate.skills = finalSkills;
-      //  console.log('roleDataToUpdate', roleDataToUpdate)
     }
 
-    // Certificates
+    // ====== Certificates Update ======
     const existingCertificates = existingContractor.certificates || [];
     const addedCerts = add.certificates || [];
     const removedCerts = remove.certificates || [];
-
     const afterAddCerts = mergeArrayField(existingCertificates, addedCerts);
     const finalCerts = removeArrayItems(afterAddCerts, removedCerts);
-
     if (addedCerts.length || removedCerts.length) {
       roleDataToUpdate.certificates = finalCerts;
     }
 
-    // mySchedule
-    // const existingSchedule = existingContractor?.myScheduleId || [];
+    // ====== MySchedule Update ======
     const existingSchedule = Array.isArray(existingContractor?.myScheduleId)
       ? existingContractor.myScheduleId
       : [existingContractor.myScheduleId];
     const addedSchedule = add.mySchedule || [];
     const removedSchedule = remove.mySchedule || [];
-
     const afterAddSchedule = [...existingSchedule, ...addedSchedule];
-    const finalSchedule = removeArrayItems(
-      afterAddSchedule,
-      removedSchedule,
-      'day'
-    ); // assuming 'day' is unique
-
+    const finalSchedule = removeArrayItems(afterAddSchedule, removedSchedule, 'day');
     if (addedSchedule.length || removedSchedule.length) {
       roleDataToUpdate.mySchedule = finalSchedule;
     }
 
-    // Materials (add/remove)
+    // ====== Materials Update ======
     const existingMaterials = existingContractor.materials || [];
     const addedMaterials = add.materials || [];
     const removedMaterials = remove.materials || [];
-
-    // const afterAddMaterials = mergeArrayField(existingMaterials, addedMaterials);
     const afterAddMaterials = [...existingMaterials, ...addedMaterials];
-    // const finalMaterials = removeArrayItems(afterAddMaterials, removedMaterials);
-    const finalMaterials = removeArrayItems(
-      afterAddMaterials,
-      removedMaterials,
-      'name'
-    );
-
+    const finalMaterials = removeArrayItems(afterAddMaterials, removedMaterials, 'name');
     if (addedMaterials.length || removedMaterials.length) {
       roleDataToUpdate.materials = finalMaterials;
     }
 
-    console.log('roleDataToUpdate', roleDataToUpdate)
-
+    // ✅ Final contractor update
     updatedRoleData = await Contractor.findOneAndUpdate(
       { _id: updatedUser.contractor },
       roleDataToUpdate,
@@ -423,9 +550,31 @@ const updateUserIntoDB = async (
     );
   }
 
+  // ========================= CUSTOMER =========================
   if (user?.role === 'customer') {
-    console.log('Updating customer with payload:', payload.location);
+    const existingCustomer = await Customer.findOne({ _id: updatedUser.customer });
+    if (!existingCustomer) throw new Error('Customer not found');
+
     roleDataToUpdate = extractFields(payload || {}, customerFields);
+
+
+    if (payload.location && Array.isArray(payload.location)) {
+      // @ts-ignore
+      const updatedLocations = existingCustomer.location.map((loc) => {
+        // @ts-ignore
+        const update = payload.location.find((ploc) => ploc.name === loc.name);
+        return update ? mergeNested(loc.toObject(), update) : loc;
+      });
+
+      // Add new locations not previously stored
+      const newLocations = payload.location.filter(
+        // @ts-ignore
+        (ploc) => !existingCustomer.location.some((loc) => loc.name === ploc.name)
+      );
+
+      roleDataToUpdate.location = [...updatedLocations, ...newLocations];
+    }
+
     updatedRoleData = await Customer.findOneAndUpdate(
       { _id: updatedUser.customer },
       roleDataToUpdate,
@@ -433,11 +582,13 @@ const updateUserIntoDB = async (
     );
   }
 
+  // ========================= RETURN =========================
   return {
     user: updatedUser,
-    roleData: updatedRoleData
+    roleData: updatedRoleData,
   };
 };
+
 
 const deleteUserFromDB = async (userId: string) => {
   const session = await mongoose.startSession();

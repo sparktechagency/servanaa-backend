@@ -58,6 +58,7 @@ const bookingSchema = new Schema<TBooking>(
     ],
     material: [
       {
+        _id: { type: Schema.Types.ObjectId, auto: true },
         name: {
           type: String,
           required: [true, 'Material name is required']
@@ -74,6 +75,10 @@ const bookingSchema = new Schema<TBooking>(
           type: Number,
           required: [true, 'Material price is required'],
           min: [0, 'Material price cannot be negative']
+        },
+        isUse: {
+          type: Boolean,
+          default: false,
         }
       }
     ],
@@ -81,8 +86,28 @@ const bookingSchema = new Schema<TBooking>(
       type: Date,
       required: [true, 'Booking date is required']
     },
+    bookingDateAndStatus: {
+      type: [{
+        status: {
+          type: String,
+          default: "in_complete",
+          enum: ['in_complete', 'completed']
+        },
+        image: {
+          type: [String]
+        },
+        materials: {
+          type: Schema.Types.ObjectId,
+          refPath: 'Booking.material._id',
+        },
+        amount: {
+          type: Number,
+        }
+      }],
+      required: [true, 'Booking date is required']
+    },
     day: {
-      type: Schema.Types.Mixed, // Can be string or array
+      type: Schema.Types.Mixed,
       required: [true, 'Day is required']
     },
     startTime: {

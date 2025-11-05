@@ -9,6 +9,15 @@ const locationSchema = new Schema({
     type: String,
     default: '',
   },
+  suburb: {
+    type: String,
+  },
+  state: {
+    type: String,
+  },
+  postcode: {
+    type: String,
+  },
   direction: {
     type: String,
     default: '',

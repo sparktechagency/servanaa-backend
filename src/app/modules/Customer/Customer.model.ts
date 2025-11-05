@@ -18,6 +18,15 @@ const locationSchema = new Schema({
   street: {
     type: String,
   },
+  suburb: {
+    type: String,
+  },
+  state: {
+    type: String,
+  },
+  postcode: {
+    type: String,
+  },
   direction: {
     type: String,
   },

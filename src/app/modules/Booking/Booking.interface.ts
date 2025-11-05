@@ -13,6 +13,7 @@ export interface TBookingMaterial {
   name: string;
   unit: string;
   price: number;
+  isUse: boolean;
 }
 
 export interface DaySchedule {
@@ -22,6 +23,7 @@ export interface DaySchedule {
 
 export type TBooking = {
   bookingId: number,
+  bookingDateAndStatus: Object[];
   customerId: Types.ObjectId;
   contractorId: Types.ObjectId;
   subCategoryId: Types.ObjectId;

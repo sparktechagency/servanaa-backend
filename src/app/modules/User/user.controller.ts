@@ -17,6 +17,7 @@ import config from '../../config';
 //     data: result,
 //   });
 // });
+
 const createCustomer = catchAsync(async (req, res) => {
   const userData = req.body;
   const result = await UserServices.createCustomerIntoDB(userData);
@@ -96,6 +97,7 @@ const getSingleUser = catchAsync(async (req, res) => {
     data: result
   });
 });
+
 const changeStatus = catchAsync(async (req, res) => {
   const id = req.params.id;
 
@@ -108,6 +110,7 @@ const changeStatus = catchAsync(async (req, res) => {
     data: result
   });
 });
+
 const getAllUsers = catchAsync(async (req, res) => {
   const result = await UserServices.getAllUsersFromDB(req.query);
 
@@ -119,6 +122,7 @@ const getAllUsers = catchAsync(async (req, res) => {
     data: result.result
   });
 });
+
 // const getAllApprovalFalseUsers = catchAsync(async (req, res) => {
 //   const result = await UserServices.getAllApprovalFalseUsersFromDB(req.query);
 
@@ -162,6 +166,7 @@ const updateUser = catchAsync(async (req, res) => {
     data: result
   });
 });
+
 // const updateApproval = catchAsync(async (req, res) => {
 //   const { id } = req.params;
 //   const { User } = req.body;
@@ -174,6 +179,7 @@ const updateUser = catchAsync(async (req, res) => {
 //     data: result,
 //   });
 // });
+
 const deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await UserServices.deleteUserFromDB(id);
@@ -197,18 +203,7 @@ const getAllProviders = catchAsync(async (req, res) => {
     data: result.result
   });
 });
-// const getAllPreferedProviders = catchAsync(async (req, res) => {
-//   console.log(req.query, "test");
-//     const result = await UserServices.getAllPreferedProvidersFromDB(req.query);
 
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Providers are retrieved succesfully',
-//     meta: result.meta,
-//     data: result.result,
-//   });
-// });
 const getAllClients = catchAsync(async (req, res) => {
   const result = await UserServices.getAllClientsFromDB(req.query);
 
