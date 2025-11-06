@@ -166,5 +166,6 @@ bookingSchema.statics.isBookingExists = async function (id: string) {
   return await this.findOne({ _id: id, isDeleted: { $ne: true } });
 };
 
+
 // Create and export the model
 export const Booking = model<TBooking, BookingModel>('Booking', bookingSchema);
