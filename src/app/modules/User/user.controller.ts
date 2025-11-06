@@ -44,6 +44,8 @@ const createCustomer = catchAsync(async (req, res) => {
 const createContractor = catchAsync(async (req, res) => {
   const userData = req.body;
 
+  console.log("userData", userData)
+
   if (req.file) {
     // @ts-ignore
     userData.img = req.file?.location || req.file?.path;
