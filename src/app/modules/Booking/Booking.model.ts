@@ -156,7 +156,6 @@ const bookingSchema = new Schema<TBooking>(
   }
 );
 
-// Add indexes for better query performance
 bookingSchema.index({ contractorId: 1, bookingDate: 1 });
 bookingSchema.index({ customerId: 1, status: 1 });
 bookingSchema.index({ bookingType: 1, status: 1 });

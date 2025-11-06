@@ -129,7 +129,10 @@ const moduleRoutes = [
     path: '/customer',
     route: CustomerRoutes,
   },
-
+  {
+    path: '/customers',
+    route: CustomerRoutes,
+  },
   {
     path: '/availabilities',
     route: MyScheduleRoutes,
