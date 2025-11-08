@@ -79,28 +79,5 @@ router.get(
 
 //  =======================Added by Rakib==================
 
-// router.patch(
-//   '/accept/:id',
-//   auth(USER_ROLE.contractor),
-//   BookingControllers.acceptBooking
-// );
-
-// router.patch(
-//   '/reject/:id',
-//   auth(USER_ROLE.contractor),
-//   BookingControllers.rejectBooking
-// );
-
-// router.patch(
-//   '/complete/:id',
-//   auth(USER_ROLE.customer),
-//   BookingControllers.markWorkCompleted
-// );
-
-// router.patch(
-//   '/transfer-payment/:id',
-//   auth(USER_ROLE.superAdmin),
-//   BookingControllers.transferPayment
-// );
 
 export const BookingRoutes = router;
