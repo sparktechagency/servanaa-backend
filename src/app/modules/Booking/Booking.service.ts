@@ -325,6 +325,7 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
     .fields();
 
   const result = await BookingQuery.modelQuery;
+
   const meta = await BookingQuery.countTotal();
   return {
     result,
