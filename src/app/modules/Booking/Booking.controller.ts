@@ -51,24 +51,7 @@ const getAllBookings = catchAsync(async (req, res) => {
     data: result
   });
 });
-// const getAllBookings = catchAsync(async (req, res) => {
-//   console.log('=== DEBUGGING BOOKING CREATION ===');
-//   console.log('Raw req.body:', JSON.stringify(req.body, null, 2));
-//   console.log('bookingDate field:', req.body.bookingDate);
-//   console.log('bookingDate type:', typeof req.body.bookingDate);
-//   console.log('All keys in req.body:', Object.keys(req.body));
-//   console.log('=====================================');
 
-//   const booking = req.body;
-//   const result = await BookingServices.createBookingIntoDB(booking, req.user);
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Bookings are retrieved successfully',
-//     data: result
-//   });
-// });
 
 const getAllBookingsByUser = catchAsync(async (req, res) => {
 
@@ -104,6 +87,22 @@ const updateBooking = catchAsync(async (req, res) => {
     data: result
   });
 });
+
+const updateWeeklyBookingIntoDB = catchAsync(async (req, res) => {
+  const files = (req.files as Express.MulterS3.File[]) || [];
+  const { id } = req.params;
+  const booking = req.body;
+
+  const result = await BookingServices.updateWeeklyBookingIntoDB(id, booking, files);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Booking updated successfully',
+    data: result
+  });
+});
+
 
 const updatePaymentStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -188,6 +187,7 @@ const deleteBooking = catchAsync(async (req, res) => {
 // });
 
 export const BookingControllers = {
+  updateWeeklyBookingIntoDB,
   checkBookingAvailability,
   createBooking,
   getSingleBooking,

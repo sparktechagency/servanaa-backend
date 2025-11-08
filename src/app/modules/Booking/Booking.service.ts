@@ -175,6 +175,20 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
 
   const requestedDays = Array.isArray(day) ? day : [day];
 
+  if (bookingType === 'weekly') {
+    const bookingDateAndStatus: any[] = requestedDays.map(d => ({
+      status: 'in_complete',
+      image: [],
+      materials: [],
+      amount: 0,
+    }));
+
+    payload.bookingDateAndStatus = bookingDateAndStatus;
+  } else {
+    payload.bookingDateAndStatus = [];
+  }
+
+
   const createdBookings = [
     await Booking.create({
       ...payload,
@@ -502,6 +516,52 @@ const updateBookingIntoDB = async (id: string, payload: any, files?: any) => {
   return updatedBooking;
 };
 
+const updateWeeklyBookingIntoDB = async (bookingId: string, payload: any, files?: any) => {
+  const booking = await Booking.findById(bookingId) as any;
+  if (!booking) throw new AppError(httpStatus.NOT_FOUND, "Booking not found");
+
+  const { entryId, status, materials, amount } = payload;
+  console.log('entryId, status, materials, amount', entryId, status, materials, amount)
+
+  if (!entryId) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Entry ID is required for update");
+  }
+
+  if (files && Array.isArray(files) && files.length > 0) {
+    const uploadedFiles = files.map((file: any) => ({
+      name: file.originalname || file.filename,
+      url: file.location || file.path,
+      mimetype: file.mimetype,
+      size: file.size
+    }));
+    payload.files = [...(booking.files || []), ...uploadedFiles];
+  }
+
+  // Find the specific entry in bookingDateAndStatus
+  const entryIndex = booking.bookingDateAndStatus.findIndex(
+    (entry: any) => entry._id.toString() === entryId
+  )
+
+  if (entryIndex === -1) {
+    throw new AppError(httpStatus.NOT_FOUND, "Booking date entry not found");
+  }
+
+  // Update fields
+  if (status) booking.bookingDateAndStatus[entryIndex].status = status;
+  if (materials) booking.bookingDateAndStatus[entryIndex].materials = materials;
+  if (amount !== undefined) booking.bookingDateAndStatus[entryIndex].amount = amount;
+  if (files) booking.bookingDateAndStatus[entryIndex].image = payload.files;
+  if (files) booking.files = payload.files;
+
+  await booking.save();
+
+  return {
+    success: true,
+    message: "Weekly booking updated successfully",
+    data: booking,
+  };
+};
+
 const updatePaymentStatusIntoDB = async (id: string, payload: any) => {
   const booking = await Booking.findOne({
     customerId: id,
@@ -797,6 +857,7 @@ const createDynamicNotification = async ({
 
 // =============================added by rakib==========================
 export const BookingServices = {
+  updateWeeklyBookingIntoDB,
   getAvailableTimesForDate,
   handlePaymentSuccessUpdateBooking,
   createBookingIntoDB,

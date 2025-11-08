@@ -53,6 +53,22 @@ router.patch(
   BookingControllers.updateBooking
 );
 
+router.patch(
+  '/weekly/:id',
+  uploadFileS3(true).array('file', 5),
+  (req: Request, res: Response, next: NextFunction) => {
+    if (req.body.data) {
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (error) {
+        next(error);
+      }
+    }
+    next();
+  },
+  BookingControllers.updateWeeklyBookingIntoDB
+);
+
 router.delete('/:id', BookingControllers.deleteBooking);
 
 router.get(
