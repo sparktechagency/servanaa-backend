@@ -163,10 +163,6 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
     payload.location = "No location selected";
   }
 
-  // const mySchedule = await MySchedule.findOne({ contractorId: contractorId?.toString() }).lean();
-  // if (!mySchedule)
-  //   throw new AppError(httpStatus.NOT_FOUND, "Contractor schedule not found");
-
   const [startHour, startMinute] = startTime.split(":").map(Number);
   const endTime = new Date(0, 0, 0, startHour + duration, startMinute)
     .toTimeString()
