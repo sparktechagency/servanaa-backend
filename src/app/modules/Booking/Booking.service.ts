@@ -487,7 +487,7 @@ const getAllBookingsByUserFromDB = async (
     .lean();
 
   bookings.forEach((booking: any) => {
-    if (booking?.bookingDateAndStatus.length) {
+    if (booking?.bookingDateAndStatus?.length) {
       booking.bookingDateAndStatus = booking?.bookingDateAndStatus?.map((bds: any) => ({
         ...bds,
         materials: bds.materials?.map((matId: any) =>
