@@ -487,12 +487,15 @@ const getAllBookingsByUserFromDB = async (
     .lean();
 
   bookings.forEach((booking: any) => {
-    booking.bookingDateAndStatus = booking.bookingDateAndStatus.map((bds: any) => ({
-      ...bds,
-      materials: bds.materials?.map((matId: any) =>
-        booking.material.find((m: any) => m._id.toString() === matId.toString())
-      ).filter(Boolean),
-    }));
+    if (booking?.bookingDateAndStatus.length) {
+      booking.bookingDateAndStatus = booking?.bookingDateAndStatus?.map((bds: any) => ({
+        ...bds,
+        materials: bds.materials?.map((matId: any) =>
+          booking.material.find((m: any) => m._id.toString() === matId.toString())
+        ).filter(Boolean),
+      }));
+    }
+
   });
 
   return {
