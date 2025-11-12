@@ -474,7 +474,7 @@ const getAllBookingsByUserFromDB = async (
     })
     .populate({
       path: 'contractorId',
-      select: 'fullName img contractor',
+      select: 'fullName img contractor email',
       populate: {
         path: 'contractor',
         select: 'ratings',
