@@ -19,12 +19,12 @@ import { User } from '../User/user.model';
 import { NotificationServices } from '../Notification/Notification.service';
 import { NOTIFICATION_TYPES } from '../Notification/Notification.constant';
 import { Contractor } from '../Contractor/Contractor.model';
-import { Customer } from '../Customer/Customer.model';
 import { Transaction } from '../Transaction/transaction.model';
 import { Notification } from '../Notification/Notification.model';
 import { CostAdmin } from '../Dashboard/Dashboard.model';
 import config from '../../config';
 import Stripe from 'stripe';
+
 const generateBookingId = () => {
   return Math.floor(10000000 + Math.random() * 90000000).toString();
 };
@@ -113,7 +113,6 @@ const getAvailableTimesForDate = async (contractorId: string, date: string) => {
     availableSlots,
   };
 };
-
 
 const createBookingIntoDB = async (payload: TBooking, user: any) => {
   const { bookingType, contractorId, day, startTime, duration, bookingId } = payload;
@@ -518,32 +517,27 @@ const updateWeeklyBookingIntoDB = async (bookingId: string, payload: any, files?
   if (!booking) throw new AppError(httpStatus.NOT_FOUND, "Booking not found");
 
   const { entryId, status, materials, amount } = payload;
-  console.log('entryId, status, materials, amount', entryId, status, materials, amount)
 
   if (!entryId) {
     throw new AppError(httpStatus.BAD_REQUEST, "Entry ID is required for update");
   }
 
+  // Upload files → store URLs only
   if (files && Array.isArray(files) && files.length > 0) {
-    const uploadedFiles = files.map((file: any) => ({
-      name: file.originalname || file.filename,
-      url: file.location || file.path,
-      mimetype: file.mimetype,
-      size: file.size
-    }));
-    payload.files = [...(booking.files || []), ...uploadedFiles];
+    const uploadedUrls = files.map((file: any) => file.location || file.path);
+    payload.files = [...(booking.files || []), ...uploadedUrls];
   }
 
-  // Find the specific entry in bookingDateAndStatus
+  // Find entry
   const entryIndex = booking.bookingDateAndStatus.findIndex(
     (entry: any) => entry._id.toString() === entryId
-  )
+  );
 
   if (entryIndex === -1) {
     throw new AppError(httpStatus.NOT_FOUND, "Booking date entry not found");
   }
 
-  // Update fields
+  // Update entry fields
   if (status) booking.bookingDateAndStatus[entryIndex].status = status;
   if (materials) booking.bookingDateAndStatus[entryIndex].materials = materials;
   if (amount !== undefined) booking.bookingDateAndStatus[entryIndex].amount = amount;
@@ -850,7 +844,6 @@ const createDynamicNotification = async ({
   console.log('===', not)
   return { success: issue === 'booking_successful', issue, message };
 };
-
 
 // =============================added by rakib==========================
 export const BookingServices = {

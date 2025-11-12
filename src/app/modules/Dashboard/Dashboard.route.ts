@@ -9,12 +9,14 @@ import {
   deleteSubscription,
   getAllAdminNotifications,
   getAllBannersFromDB,
+  getAllBookingAdmin,
   getAllBookingsFromDB,
   getAllSubscriptionPlansTable,
   getBookingStatsByCategory,
   getContractorFeedback,
   getDailyBooking,
   getDashboardData,
+  getSingleBookingFromDB,
   getTransactionHistoryTable,
   replayReportHelp,
   totalCounts,
@@ -90,6 +92,11 @@ router.get('/bookings_contractor', getAllBookingsFromDB);
 router.patch('/contractor_home', addRemoveHome);
 router.get('/contractor_feedback', getContractorFeedback);
 router.patch('/replay_feedback', replayReportHelp);
+
+// ==================================================
+router.get('/get_all_booking', getAllBookingAdmin);
+router.get('/get_booking_details/:id', getSingleBookingFromDB);
+
 
 
 export const DashboardRoutes = router;

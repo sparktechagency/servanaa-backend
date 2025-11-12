@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
 // src/app/modules/Dashboard/Dashboard.controller.ts
-
 import { User } from '../User/user.model';
 import {
   Subscription,
@@ -26,6 +25,7 @@ import { Review } from '../Review/Review.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { SendEmail } from '../../utils/sendEmail';
 import { Support } from '../Contractor/Support.model';
+import { BOOKING_SEARCHABLE_FIELDS } from '../Booking/Booking.constant';
 
 export const getDashboardData = catchAsync(async (req, res) => {
   const totalUser = await User.countDocuments({ isDeleted: false });
@@ -855,7 +855,6 @@ export const addRemoveHome = catchAsync(async (req, res) => {
   });
 });
 
-
 // =============================
 // replayReportHelp Controller
 // =============================
@@ -884,4 +883,64 @@ export const replayReportHelp = catchAsync(async (req, res) => {
     message: 'Admin reply sent successfully.',
     data: existingHelp,
   });
+});
+
+export const getAllBookingAdmin = catchAsync(async (req, res) => {
+
+  const query = req.query;
+
+  const BookingQuery = new QueryBuilder(
+    Booking.find()
+      .populate({
+        path: 'contractorId',
+        populate: {
+          path: 'contractor',
+          select: 'ratings rateHourly location'
+        }
+      })
+      .populate('subCategoryId', 'name')
+      .populate('customerId', 'fullName img'),
+    query
+  )
+    .search(BOOKING_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await BookingQuery.modelQuery;
+
+  const meta = await BookingQuery.countTotal();
+
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: 'Data get successfully.',
+    data: {
+      result,
+      meta
+    }
+  });
+
+});
+
+export const getSingleBookingFromDB = catchAsync(async (req, res) => {
+  const id = req.params.id
+  const result = await Booking.findById(id)
+    .populate({
+      path: 'contractorId',
+      populate: {
+        path: 'contractor',
+        select: 'ratings rateHourly location'
+      }
+    })
+    .populate('subCategoryId', 'name')
+    .populate('customerId', 'fullName img')
+
+
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: 'Data get successfully.',
+    data: result
+  });
+
 });
