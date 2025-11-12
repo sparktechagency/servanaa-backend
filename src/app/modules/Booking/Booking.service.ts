@@ -392,6 +392,10 @@ const getAllBookingsByUserFromDB = async (
         select: 'ratings',
       },
     })
+    .populate({
+      path: 'bookingDateAndStatus.materials',
+      model: 'Material',
+    })
     .populate('subCategoryId')
     .sort({ createdAt: -1 })
     .skip(skip)
