@@ -100,6 +100,10 @@ const bookingSchema = new Schema<TBooking>(
           type: [Schema.Types.ObjectId],
           refPath: 'Booking.material._id',
         },
+        date: {
+          type: Date,
+          required: [true, 'Day is required']
+        },
         amount: {
           type: Number,
         }

@@ -173,6 +173,7 @@ const createBookingIntoDB = async (payload: TBooking, user: any) => {
   if (bookingType === 'weekly') {
     const bookingDateAndStatus: any[] = requestedDays.map(d => ({
       status: 'in_complete',
+      date: new Date(d),
       image: [],
       materials: [],
       amount: 0,
