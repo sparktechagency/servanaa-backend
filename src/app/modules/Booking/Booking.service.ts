@@ -329,6 +329,93 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
   };
 };
 
+// const getAllBookingsByUserFromDB = async (
+//   query: Record<string, any>,
+//   user: any,
+// ) => {
+//   const { status: stat, page = 1, limit = 10 } = query;
+
+//   let status: string[] = [];
+
+//   if (stat === 'history') {
+//     status = ['completed', 'rejected', 'cancelled'];
+//   } else if (stat) {
+//     status = [stat];
+//   }
+
+//   const usr = await User.findOne({ email: user.userEmail });
+//   if (!usr) throw new Error('User not found');
+
+//   let filter: Record<string, any> = {};
+//   let roleField = '';
+
+//   if (user.role === 'customer') {
+//     roleField = 'customerId';
+//     filter.customerId = usr._id;
+
+//   } else if (user.role === 'contractor') {
+//     if (stat === 'pending') {
+//       status = ['pending'];
+//     }
+//     if (stat === 'home') {
+//       status = ['pending', 'accepted', 'ongoing'];
+//     }
+//     roleField = 'contractorId';
+//     filter.contractorId = usr._id;
+//   } else {
+//     throw new Error('Invalid user role');
+//   }
+
+//   if (status.length) {
+//     filter.status = { $in: status };
+//   }
+
+//   const total = await Booking.countDocuments(filter);
+
+//   const skip = (Number(page) - 1) * Number(limit);
+//   const totalPage = Math.ceil(total / Number(limit));
+
+//   const bookings = await Booking.find(filter)
+//     .populate({
+//       path: 'customerId',
+//       select: 'fullName email img customerId',
+//       populate: {
+//         path: 'customerId',
+//         select: 'city',
+//       },
+//     })
+//     .populate({
+//       path: 'contractorId',
+//       select: 'fullName img contractor',
+//       populate: {
+//         path: 'contractor',
+//         select: 'ratings',
+//       },
+//     })
+//     .populate({
+//       path: 'bookingDateAndStatus.materials',
+//       model: 'Material',
+//     })
+//     .populate('subCategoryId')
+//     .sort({ createdAt: -1 })
+//     .skip(skip)
+//     .limit(Number(limit));
+
+//   console.log(bookings)
+
+//   return {
+//     success: true,
+//     data: bookings,
+//     meta: {
+//       page: Number(page),
+//       limit: Number(limit),
+//       total,
+//       totalPage,
+//     },
+//   };
+// };
+
+
 const getAllBookingsByUserFromDB = async (
   query: Record<string, any>,
   user: any,
@@ -375,6 +462,7 @@ const getAllBookingsByUserFromDB = async (
   const skip = (Number(page) - 1) * Number(limit);
   const totalPage = Math.ceil(total / Number(limit));
 
+  // Fetch bookings
   const bookings = await Booking.find(filter)
     .populate({
       path: 'customerId',
@@ -392,16 +480,20 @@ const getAllBookingsByUserFromDB = async (
         select: 'ratings',
       },
     })
-    .populate({
-      path: 'bookingDateAndStatus.materials',
-      model: 'Material',
-    })
     .populate('subCategoryId')
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(Number(limit));
+    .limit(Number(limit))
+    .lean();
 
-  console.log(bookings)
+  bookings.forEach((booking: any) => {
+    booking.bookingDateAndStatus = booking.bookingDateAndStatus.map((bds: any) => ({
+      ...bds,
+      materials: bds.materials?.map((matId: any) =>
+        booking.material.find((m: any) => m._id.toString() === matId.toString())
+      ).filter(Boolean),
+    }));
+  });
 
   return {
     success: true,
