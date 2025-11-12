@@ -96,10 +96,20 @@ const bookingSchema = new Schema<TBooking>(
         image: {
           type: [String]
         },
-        materials: {
-          type: [Schema.Types.ObjectId],
-          refPath: 'Booking.material._id',
-        },
+        materials: [
+          {
+            materialId: {
+              type: Schema.Types.ObjectId,
+              refPath: 'Booking.material._id',
+              required: true
+            },
+            count: {
+              type: Number,
+              required: true,
+              min: [1, 'Count must be at least 1']
+            }
+          }
+        ],
         date: {
           type: Date,
           required: [true, 'Day is required']
@@ -147,6 +157,10 @@ const bookingSchema = new Schema<TBooking>(
       type: Number,
       required: [true, 'Total amount is required'],
       min: [0, 'Total amount cannot be negative']
+    },
+    completeAmount: {
+      type: Number,
+      default: 0
     },
     files: [Schema.Types.Mixed],
     isDeleted: {

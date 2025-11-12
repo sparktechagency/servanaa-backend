@@ -46,6 +46,7 @@ export type TBooking = {
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   totalAmount: number;
   isDeleted: boolean;
+  completeAmount: 0;
 };
 
 export interface BookingModel extends Model<TBooking> {

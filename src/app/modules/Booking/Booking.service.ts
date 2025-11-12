@@ -329,93 +329,6 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
   };
 };
 
-// const getAllBookingsByUserFromDB = async (
-//   query: Record<string, any>,
-//   user: any,
-// ) => {
-//   const { status: stat, page = 1, limit = 10 } = query;
-
-//   let status: string[] = [];
-
-//   if (stat === 'history') {
-//     status = ['completed', 'rejected', 'cancelled'];
-//   } else if (stat) {
-//     status = [stat];
-//   }
-
-//   const usr = await User.findOne({ email: user.userEmail });
-//   if (!usr) throw new Error('User not found');
-
-//   let filter: Record<string, any> = {};
-//   let roleField = '';
-
-//   if (user.role === 'customer') {
-//     roleField = 'customerId';
-//     filter.customerId = usr._id;
-
-//   } else if (user.role === 'contractor') {
-//     if (stat === 'pending') {
-//       status = ['pending'];
-//     }
-//     if (stat === 'home') {
-//       status = ['pending', 'accepted', 'ongoing'];
-//     }
-//     roleField = 'contractorId';
-//     filter.contractorId = usr._id;
-//   } else {
-//     throw new Error('Invalid user role');
-//   }
-
-//   if (status.length) {
-//     filter.status = { $in: status };
-//   }
-
-//   const total = await Booking.countDocuments(filter);
-
-//   const skip = (Number(page) - 1) * Number(limit);
-//   const totalPage = Math.ceil(total / Number(limit));
-
-//   const bookings = await Booking.find(filter)
-//     .populate({
-//       path: 'customerId',
-//       select: 'fullName email img customerId',
-//       populate: {
-//         path: 'customerId',
-//         select: 'city',
-//       },
-//     })
-//     .populate({
-//       path: 'contractorId',
-//       select: 'fullName img contractor',
-//       populate: {
-//         path: 'contractor',
-//         select: 'ratings',
-//       },
-//     })
-//     .populate({
-//       path: 'bookingDateAndStatus.materials',
-//       model: 'Material',
-//     })
-//     .populate('subCategoryId')
-//     .sort({ createdAt: -1 })
-//     .skip(skip)
-//     .limit(Number(limit));
-
-//   console.log(bookings)
-
-//   return {
-//     success: true,
-//     data: bookings,
-//     meta: {
-//       page: Number(page),
-//       limit: Number(limit),
-//       total,
-//       totalPage,
-//     },
-//   };
-// };
-
-
 const getAllBookingsByUserFromDB = async (
   query: Record<string, any>,
   user: any,
@@ -616,16 +529,16 @@ const updateWeeklyBookingIntoDB = async (bookingId: string, payload: any, files?
   const booking = await Booking.findById(bookingId) as any;
   if (!booking) throw new AppError(httpStatus.NOT_FOUND, "Booking not found");
 
-  const { entryId, status, materials, amount } = payload;
+  const { entryId, status, materials } = payload;
 
   if (!entryId) {
     throw new AppError(httpStatus.BAD_REQUEST, "Entry ID is required for update");
   }
 
   // Upload files → store URLs only
+  let uploadedUrls: string[] = [];
   if (files && Array.isArray(files) && files.length > 0) {
-    const uploadedUrls = files.map((file: any) => file.location || file.path);
-    payload.files = [...(booking.files || []), ...uploadedUrls];
+    uploadedUrls = files.map((file: any) => file.location || file.path);
   }
 
   // Find entry
@@ -637,14 +550,99 @@ const updateWeeklyBookingIntoDB = async (bookingId: string, payload: any, files?
     throw new AppError(httpStatus.NOT_FOUND, "Booking date entry not found");
   }
 
+  //  =================================
+  let materialsAll = [];
+  if (materials) {
+    try {
+      materialsAll = typeof materials === "string" ? JSON.parse(materials) : materials;
+    } catch (err) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Invalid materials format — must be JSON");
+    }
+  }
+
+  //  ====================================
+  if (materialsAll?.length && booking?.material?.length) {
+    for (const used of materialsAll) {
+      const foundMaterial = booking?.material.find(
+        (m: any) => m._id.toString() === used.materialId
+      );
+      if (foundMaterial) {
+        if (foundMaterial.count < used.count) {
+          throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `Not enough material '${foundMaterial.name}' available. Requested ${used.count}, available ${foundMaterial.count}`
+          );
+        }
+
+        // Deduct count
+        foundMaterial.count -= used.count;
+
+        // If all used → optional: mark as used up
+        if (foundMaterial.count === 0) {
+          foundMaterial.isUse = true;
+        }
+      } else {
+        throw new AppError(httpStatus.BAD_REQUEST, `${used.materialId} This material is not part of this booking order`);
+      }
+    }
+  }
+
+  // ===========================================
+  const rateHourly = booking.rateHourly || 0;
+  const duration = booking.duration || 0;
+  const baseAmount = rateHourly * duration;
+
+  let materialAmount = 0;
+  if (materialsAll?.length) {
+    for (const used of materialsAll) {
+      const foundMaterial = booking.material.find(
+        (m: any) => m._id.toString() === used.materialId
+      );
+      if (foundMaterial) {
+        materialAmount += used.count * foundMaterial.price;
+      }
+    }
+  }
+
+  const amount = baseAmount + materialAmount;
+
+  // ===========================================
+
   // Update entry fields
   if (status) booking.bookingDateAndStatus[entryIndex].status = status;
-  if (materials) booking.bookingDateAndStatus[entryIndex].materials = materials;
+  if (materialsAll?.length) booking.bookingDateAndStatus[entryIndex].materials = materialsAll;
   if (amount !== undefined) booking.bookingDateAndStatus[entryIndex].amount = amount;
-  if (files) booking.bookingDateAndStatus[entryIndex].image = payload.files;
-  if (files) booking.files = payload.files;
+  if (uploadedUrls.length > 0) {
+    booking.bookingDateAndStatus[entryIndex].image = uploadedUrls;
+  }
+
+  if (uploadedUrls.length > 0) {
+    booking.bookingDateAndStatus[entryIndex].image = uploadedUrls;
+  }
+
+  if (uploadedUrls.length > 0) {
+    booking.files = [...(booking.files || []), ...uploadedUrls];
+  }
 
   await booking.save();
+
+  if (status === 'completed') {
+    const contractorData = await Contractor.findOne({ userId: booking.contractorId.toString() });
+    if (!contractorData) throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
+
+    contractorData.balance = (contractorData.balance ?? 0) + Number(amount);
+
+    await Promise.all([contractorData.save()]);
+
+    await NotificationServices.createNotificationIntoDB({
+      userId: booking.customerId,
+      type: NOTIFICATION_TYPES.WORK_COMPLETED,
+      title: 'Work Completed',
+      message: 'Your work has been marked as completed',
+      bookingId: booking._id,
+      isRead: []
+    });
+  }
 
   return {
     success: true,
