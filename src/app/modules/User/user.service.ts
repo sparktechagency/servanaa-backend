@@ -452,6 +452,7 @@ const updateUserIntoDB = async (
   file?: any,
   user?: any
 ) => {
+
   if (payload?.subscriptionStatus) {
     throw new AppError(
       httpStatus.FORBIDDEN,
@@ -476,6 +477,8 @@ const updateUserIntoDB = async (
   let updatedRoleData: any = {};
   const add = payload?.add || {};
   const remove = payload?.remove || {};
+
+  console.log("add.materials ", payload)
 
   // ========================= CONTRACTOR =========================
   if (user?.role === 'contractor') {

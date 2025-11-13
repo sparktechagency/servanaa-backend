@@ -665,6 +665,8 @@ const deleteContractorFromDB = async (id: string) => {
 // ==================================================
 
 const createMaterials = async (email: string, payload: any) => {
+
+  console.log("===", email, payload)
   // Find contractor using user's email
   const user = await User.findOne({ email });
   if (!user) {
@@ -676,17 +678,21 @@ const createMaterials = async (email: string, payload: any) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
   }
 
-  if (Array.isArray(payload)) {
-    contractor?.materials.push(...payload);
-  } else {
-    contractor?.materials.push(payload);
+  // Initialize materials if not already
+  if (!Array.isArray(contractor.materials)) {
+    contractor.materials = [];
   }
 
-  console.log(contractor)
+  if (Array.isArray(payload)) {
+    contractor.materials.push(...payload);
+  } else {
+    contractor.materials.push(payload);
+  }
 
   await contractor.save();
   return contractor.materials;
 };
+
 
 const updateMaterials = async (email: string, payload: any) => {
   console.log("==", payload)
@@ -728,12 +734,12 @@ const deleteMaterials = async (_id: string) => {
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid material ID format');
   }
 
-  const contractor = await Contractor.findOne({ 'materials._id': _id });
-
+  const contractor = await Contractor.findOne({ 'materials._id': new mongoose.Types.ObjectId(_id) });
   if (!contractor) {
     throw new AppError(httpStatus.NOT_FOUND, 'Material not found');
   }
 
+  // Remove the material
   // @ts-ignore
   contractor.materials = contractor.materials.filter(
     (mat: any) => mat._id.toString() !== _id
@@ -743,6 +749,7 @@ const deleteMaterials = async (_id: string) => {
 
   return contractor.materials;
 };
+
 
 const createSupport = async (email: string, payload: any) => {
   const user = await User.findOne({ email });

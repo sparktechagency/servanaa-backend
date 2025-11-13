@@ -86,6 +86,8 @@ const createMaterials = catchAsync(async (req, res) => {
     data: result
   });
 });
+
+
 const updateMaterials = catchAsync(async (req, res) => {
   const { userEmail } = req.user;
   const material = req.body;

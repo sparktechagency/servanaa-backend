@@ -28,6 +28,12 @@ const locationSchema = new Schema({
   },
 });
 
+const materialSchema = new Schema({
+  name: { type: String, required: true },
+  unit: { type: String, default: '' },
+  price: { type: Number, default: 0 }
+});
+
 const contractorSchema = new Schema<TContractor, ContractorModel>({
   userId: { type: Schema.Types.ObjectId, ref: 'User' },
   dob: { type: String, default: '' },
@@ -45,6 +51,7 @@ const contractorSchema = new Schema<TContractor, ContractorModel>({
   skillsCategory: { type: String, default: '' },
   ratings: { type: Number, required: true, default: 0 },
   skills: { type: [String], required: true, default: [] },
+  materials: { type: [materialSchema], default: [] },
   subscriptionStatus: { type: String, enum: ['active', 'inactive', 'cancelled', 'expired', 'failed'], default: 'inactive' },
   certificates: { type: [String], default: [] },
   myScheduleId: { type: Schema.Types.ObjectId, ref: 'MySchedule', default: null },
@@ -56,7 +63,6 @@ const contractorSchema = new Schema<TContractor, ContractorModel>({
 }, { timestamps: true });
 
 // Add indexes
-
 contractorSchema.index({ location: '2dsphere' });
 contractorSchema.index({ userId: 1 });
 contractorSchema.index({ 'withdrawalHistory.status': 1 });
