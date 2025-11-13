@@ -311,7 +311,7 @@ const getAllBookingsFromDB = async (query: Record<string, unknown>) => {
         }
       })
       .populate('subCategoryId', 'name')
-      .populate('customerId', 'fullName img'),
+      .populate('customerId', 'fullName email img'),
     query
   )
     .search(BOOKING_SEARCHABLE_FIELDS)
