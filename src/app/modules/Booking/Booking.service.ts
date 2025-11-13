@@ -401,14 +401,20 @@ const getAllBookingsByUserFromDB = async (
 
   bookings.forEach((booking: any) => {
     if (booking?.bookingDateAndStatus?.length) {
-      booking.bookingDateAndStatus = booking?.bookingDateAndStatus?.map((bds: any) => ({
+      booking.bookingDateAndStatus = booking.bookingDateAndStatus.map((bds: any) => ({
         ...bds,
-        materials: bds.materials?.map((matId: any) =>
-          booking.material.find((m: any) => m._id.toString() === matId.toString())
-        ).filter(Boolean),
+        materials: bds?.materials?.map((mat: any) => {
+          const matchedMaterial = booking?.material.find(
+            (m: any) => m?._id.toString() === mat?.materialId.toString()
+          );
+          if (!matchedMaterial) return null;
+          return {
+            ...matchedMaterial,
+            count: mat?.count
+          };
+        }).filter(Boolean),
       }));
     }
-
   });
 
   return {

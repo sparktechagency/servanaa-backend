@@ -664,32 +664,68 @@ const deleteContractorFromDB = async (id: string) => {
 
 // ==================================================
 
-const createMaterials = async (email: string, payload: any) => {
+// const createMaterials = async (email: string, payload: any) => {
 
-  console.log("===", email, payload)
-  // Find contractor using user's email
+//   console.log("===", email, payload)
+//   // Find contractor using user's email
+//   const user = await User.findOne({ email });
+//   if (!user) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+//   }
+
+//   const contractor = await Contractor.findOne({ userId: user._id }) as any;
+//   if (!contractor) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
+//   }
+
+//   // Initialize materials if not already
+//   if (!Array.isArray(contractor.materials)) {
+//     contractor.materials = [];
+//   }
+
+//   if (Array.isArray(payload)) {
+//     contractor.materials.push(...payload);
+//   } else {
+//     contractor.materials.push(payload);
+//   }
+
+//   await contractor.save();
+//   return contractor.materials;
+// };
+
+const createMaterials = async (email: string, payload: any) => {
+  console.log('Adding material(s) for email:', email, payload);
+
+
   const user = await User.findOne({ email });
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
+
 
   const contractor = await Contractor.findOne({ userId: user._id }) as any;
   if (!contractor) {
     throw new AppError(httpStatus.NOT_FOUND, 'Contractor not found');
   }
 
-  // Initialize materials if not already
   if (!Array.isArray(contractor.materials)) {
     contractor.materials = [];
   }
 
-  if (Array.isArray(payload)) {
-    contractor.materials.push(...payload);
-  } else {
-    contractor.materials.push(payload);
-  }
+
+  const materialsToAdd = Array.isArray(payload) ? payload : [payload];
+
+
+  materialsToAdd.forEach((mat) => {
+    const exists = contractor.materials.some((m: any) => m.name === mat.name);
+    if (!exists) {
+      contractor.materials.push(mat);
+    }
+  });
 
   await contractor.save();
+
+  console.log('Updated contractor materials:', contractor.materials);
   return contractor.materials;
 };
 
