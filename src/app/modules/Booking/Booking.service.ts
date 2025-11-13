@@ -630,6 +630,13 @@ const updateWeeklyBookingIntoDB = async (bookingId: string, payload: any, files?
     booking.files = [...(booking.files || []), ...uploadedUrls];
   }
 
+  const allCompleted = booking.bookingDateAndStatus.every(
+    (entry: any) => entry?.status === 'completed'
+  );
+  if (allCompleted) {
+    booking.status = 'completed';
+  }
+
   await booking.save();
 
   if (status === 'completed') {
