@@ -934,13 +934,26 @@ export const getSingleBookingFromDB = catchAsync(async (req, res) => {
       }
     })
     .populate('subCategoryId', 'name')
-    .populate('customerId', 'fullName img')
+    .populate('customerId', 'fullName email img')
+    .lean();
 
+
+  if (result?.bookingDateAndStatus) {
+    result.bookingDateAndStatus = result.bookingDateAndStatus.map(item => {
+      // @ts-ignore
+      const populatedMaterials = item.materials.map(mat => {
+        // @ts-ignore
+        const match = result.material.find(m => m._id.toString() === mat.materialId.toString());
+        //@ts-ignore
+        return match ? { ...mat, materialId: { _id: match?._id, name: match?.name, unit: match?.unit, price: match?.price } } : mat;
+      });
+      return { ...item, materials: populatedMaterials };
+    });
+  }
 
   res.status(httpStatus.OK).json({
     success: true,
     message: 'Data get successfully.',
     data: result
   });
-
 });

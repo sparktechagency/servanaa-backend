@@ -176,6 +176,7 @@ const getMe = async (userEmail: string) => {
   }
 
   if (user.role === 'contractor') {
+
     await user.populate({
       path: 'contractor',
       populate: {
