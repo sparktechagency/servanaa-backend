@@ -231,10 +231,9 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const studentQuery = new QueryBuilder(
     User.find({ role: { $ne: 'superAdmin' } })
       .select('fullName email contactNo role status adminAccept img otpVerified createdAt')
+      .populate('customer')
       .populate({
         path: 'contractor',
-        select:
-          'dob gender experience bio city language location rateHourly balance category subCategory subscriptionStatus hasActiveSubscription certificates materials myScheduleId subscriptionStartDate subscriptionEndDate isHomeSelect',
         populate: {
           path: 'myScheduleId',
           select: 'schedules',
@@ -253,9 +252,10 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
 
   return {
     meta,
-    result
+    result,
   };
 };
+
 
 const changeStatus = async (id: string, payload: { status: string }) => {
   const result = await User.findByIdAndUpdate(id, payload, {
