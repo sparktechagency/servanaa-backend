@@ -899,7 +899,7 @@ export const getAllBookingAdmin = catchAsync(async (req, res) => {
         }
       })
       .populate('subCategoryId', 'name')
-      .populate('customerId', 'fullName img'),
+      .populate('customerId', 'fullName email img'),
     query
   )
     .search(BOOKING_SEARCHABLE_FIELDS)
