@@ -4,6 +4,7 @@ import { TReview, ReviewModel } from './Review.interface';
 const ReviewSchema = new Schema<TReview, ReviewModel>({
   customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  subCategoryId: { type: Schema.Types.ObjectId, ref: 'SubCategory' },
   stars: { type: Number, required: true },
   description: { type: String },
   isDeleted: { type: Boolean, default: false },
@@ -16,6 +17,7 @@ ReviewSchema.statics.isReviewExists = async function (id: string) {
 const ReviewCustomerSchema = new Schema<TReview, ReviewModel>({
   customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  subCategoryId: { type: Schema.Types.ObjectId, ref: 'SubCategory' },
   stars: { type: Number, required: true },
   description: { type: String },
   isDeleted: { type: Boolean, default: false },

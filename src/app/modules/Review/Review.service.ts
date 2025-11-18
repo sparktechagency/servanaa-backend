@@ -38,11 +38,10 @@ const getAllReviewsFromDB = async (query: Record<string, unknown>) => {
   const ReviewQuery = new QueryBuilder(
     Review.find({
       $or: [
-        { customerId: query.customerId },
-        { providerId: query.providerId }
+        { customerId: query.customerId }
       ],
       isDeleted: false
-    }),
+    }).populate('customerId', 'img fullName contactNo email').populate('contractorId', 'img fullName contactNo email').populate('subCategoryId', 'name'),
     query,
   )
     .search(REVIEW_SEARCHABLE_FIELDS)
@@ -82,7 +81,10 @@ const getSingleReviewFromDB = async (id: string) => {
 
 
 
-  const result = await Review.findById(id);
+  const result = await Review.findById(id)
+    .populate('customerId', 'img fullName contactNo email')
+    .populate('contractorId', 'img fullName contactNo email')
+    .populate('subCategoryId', 'name')
 
   return result;
 };
@@ -97,10 +99,9 @@ const getAverageReviewFromDB = async (id: string) => {
 
   // Fetch only latest 3 reviews
   const threeReviews = await Review.find({ contractorId })
-    .populate({
-      path: 'customerId',
-      select: "img fullName"
-    })
+    .populate('customerId', 'img fullName contactNo email')
+    .populate('contractorId', 'img fullName contactNo email')
+    .populate('subCategoryId', 'name')
     .sort({ createdAt: -1 })
     .limit(3);
 
@@ -205,7 +206,10 @@ const createReviewCustomer = async (payload: TReview, user: any) => {
 
 const getAllReviewsCustomer = async (query: any, customerId: any) => {
   const ReviewQuery = new QueryBuilder(
-    CustomerReview.find({ customerId }).populate('contractorId', 'img fullName contactNo email'),
+    CustomerReview.find({ customerId })
+      .populate('customerId', 'img fullName contactNo email')
+      .populate('contractorId', 'img fullName contactNo email')
+      .populate('subCategoryId', 'name'),
     query,
   )
     .search(REVIEW_SEARCHABLE_FIELDS)

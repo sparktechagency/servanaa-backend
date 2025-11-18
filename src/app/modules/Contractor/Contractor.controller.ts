@@ -27,6 +27,7 @@ const getAllContractors = catchAsync(async (req, res) => {
     data: result.result
   });
 });
+
 const getAllAvailableContractors = catchAsync(async (req, res) => {
   // const subCategory = req.body;
   const result = await ContractorServices.getAllAvailableContractorsFromDB(
