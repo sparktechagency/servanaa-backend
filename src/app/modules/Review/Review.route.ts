@@ -21,7 +21,7 @@ router.get(
 
 router.get(
   '/contractor/:contractorId',
-  ReviewControllers.getAllReviewsCustomer,
+  ReviewControllers.getAllReviewsContractor,
 );
 
 router.get(
