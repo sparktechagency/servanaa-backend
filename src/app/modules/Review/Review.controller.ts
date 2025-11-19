@@ -96,13 +96,29 @@ const getAllReviewsCustomer = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Review is created successfully',
+    message: 'Review get successfully',
     data: result,
   });
 });
 
 
+const getAllReviewsContractor = catchAsync(async (req, res) => {
+  const contractorId = req.params.contractorId as any;
+  const result = await ReviewServices.getAllReviewsContractor(req.query, contractorId as any);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Review get successfully',
+    data: result,
+  });
+});
+
+
+
+
 export const ReviewControllers = {
+  getAllReviewsContractor,
   getAllReviewsCustomer,
   createReviewCustomer,
   createReview,

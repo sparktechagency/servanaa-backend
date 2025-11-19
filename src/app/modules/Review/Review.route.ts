@@ -20,6 +20,11 @@ router.get(
 );
 
 router.get(
+  '/contractor/:contractorId',
+  ReviewControllers.getAllReviewsCustomer,
+);
+
+router.get(
   '/get-average-review/:id',
   ReviewControllers.getAverageReview,
 );

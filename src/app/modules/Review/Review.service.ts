@@ -78,9 +78,6 @@ const getAllReviewsFromDB = async (query: Record<string, unknown>) => {
 // };
 
 const getSingleReviewFromDB = async (id: string) => {
-
-
-
   const result = await Review.findById(id)
     .populate('customerId', 'img fullName contactNo email')
     .populate('contractorId', 'img fullName contactNo email')
@@ -88,6 +85,8 @@ const getSingleReviewFromDB = async (id: string) => {
 
   return result;
 };
+
+
 const getAverageReviewFromDB = async (id: string) => {
   const contractorId = id;
   const user = await User.findById(contractorId).populate({
@@ -226,7 +225,32 @@ const getAllReviewsCustomer = async (query: any, customerId: any) => {
   };
 };
 
+
+const getAllReviewsContractor = async (query: any, contractorId: any) => {
+  const ReviewQuery = new QueryBuilder(
+    Review.find({ contractorId })
+      .populate('customerId', 'img fullName contactNo email')
+      .populate('contractorId', 'img fullName contactNo email')
+      .populate('subCategoryId', 'name'),
+    query,
+  )
+    .search(REVIEW_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await ReviewQuery.modelQuery;
+  const meta = await ReviewQuery.countTotal();
+  return {
+    result,
+    meta,
+  };
+};
+
+
 export const ReviewServices = {
+  getAllReviewsContractor,
   getAllReviewsCustomer,
   createReviewCustomer,
   createReviewIntoDB,
