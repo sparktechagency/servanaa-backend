@@ -15,6 +15,7 @@ import { Contractor } from '../Contractor/Contractor.model';
 import { Customer } from '../Customer/Customer.model';
 import mongoose from 'mongoose';
 import { TContractor } from '../Contractor/Contractor.interface';
+import { Review } from '../Review/Review.model';
 
 // create customer
 export const createCustomerIntoDB = async (payload: any) => {
@@ -184,9 +185,14 @@ const getMe = async (userEmail: string) => {
       }
     });
 
-    const contractor = user.contractor as any;
+    let contractor = user.contractor as any;
     const totalFields = 6;
     let filledFields = 0;
+
+    const reviews = await Review.find({ contractorId: user?._id.toString() });
+    const totalRatings = reviews.length;
+    const totalStars = reviews.reduce((sum, r) => sum + r.stars, 0);
+    contractor.ratings = totalRatings > 0 ? Number((totalStars / totalRatings).toFixed(1)) : 0;
 
     if (contractor.subCategory) filledFields++;
     if (contractor.category) filledFields++;
