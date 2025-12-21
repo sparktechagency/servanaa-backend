@@ -64,7 +64,20 @@ const deleteReport = catchAsync(async (req, res) => {
   });
 });
 
+const accountDelete = catchAsync(async (req, res) => {
+  const { name, accountId } = req.body;
+  // const result = await ReportServices.deleteReportFromDB(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Your request has been received successfully.',
+    data: true,
+  });
+});
+
 export const ReportControllers = {
+  accountDelete,
   createReport,
   getSingleReport,
   getAllReports,

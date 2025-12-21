@@ -9,9 +9,15 @@ const router = express.Router();
 
 router.post(
   '/create-report',
-  auth(USER_ROLE.superAdmin,  USER_ROLE.customer,  USER_ROLE.contractor),
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   validateRequest(createReportValidationSchema),
   ReportControllers.createReport,
+);
+
+// Demo for app store 
+router.post(
+  '/delete-account',
+  ReportControllers.accountDelete,
 );
 
 router.get(
