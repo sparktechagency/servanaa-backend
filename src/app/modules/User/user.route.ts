@@ -47,6 +47,7 @@ router.patch(
 );
 
 router.delete('/:id', auth(USER_ROLE.superAdmin), UserControllers.deleteUser);
+router.delete('/delete/:id', UserControllers.deleteUser);
 
 router.get(
   '/',

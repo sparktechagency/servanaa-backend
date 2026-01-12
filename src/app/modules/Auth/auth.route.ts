@@ -41,6 +41,8 @@ router.post(
 );
 
 router.post('/create_update_cost', createUpdateCost);
+
+
 router.get('/getPercent', getPercent);
 
 export const AuthRoutes = router;
