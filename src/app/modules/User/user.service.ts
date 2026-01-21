@@ -234,9 +234,6 @@ const getSingleUserIntoDB = async (id: string) => {
   const isActive = process.env.PAYMENT_MOOD !== 'TESTING';
   const user = { isActive, ...user_data.toObject() };
 
-  //@ts-ignore
-
-
   return user;
 };
 
@@ -597,10 +594,11 @@ const updateUserIntoDB = async (
       { new: true, runValidators: true }
     );
   }
-
+  const isActive = process.env.PAYMENT_MOOD !== 'TESTING';
+  const userData = { isActive, ...updatedUser.toObject() };
   // ========================= RETURN =========================
   return {
-    user: updatedUser,
+    user: userData,
     roleData: updatedRoleData,
   };
 };
