@@ -232,13 +232,8 @@ const getSingleUserIntoDB = async (id: string) => {
     await user.populate('customer');
   }
 
-  if (process.env.PAYMENT_MOOD === 'TESTING') {
-    //@ts-ignore
-    user.isActive = false
-  } else {
-    //@ts-ignore
-    user.isActive = true
-  }
+  //@ts-ignore
+  user.isActive = process.env.PAYMENT_MOOD !== 'TESTING';
 
   return user;
 };
