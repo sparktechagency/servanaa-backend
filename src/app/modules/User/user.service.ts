@@ -219,21 +219,23 @@ const getMe = async (userEmail: string) => {
 // get single user into db
 const getSingleUserIntoDB = async (id: string) => {
   // Fetch the user from the database first
-  const user = await User.findById(id);
+  const user_data = await User.findById(id);
   // Check the role and populate the respective field
-  if (!user) {
+  if (!user_data) {
     throw new Error('User not found');
   }
 
   // Populate the correct field based on user role
-  if (user.role === 'contractor') {
-    await user.populate('contractor'); // Populating contractor data
-  } else if (user.role === 'customer') {
-    await user.populate('customer');
+  if (user_data.role === 'contractor') {
+    await user_data.populate('contractor'); // Populating contractor data
+  } else if (user_data.role === 'customer') {
+    await user_data.populate('customer');
   }
+  const isActive = process.env.PAYMENT_MOOD !== 'TESTING';
+  const user = { isActive, ...user_data.toObject() };
 
   //@ts-ignore
-  user.isActive = process.env.PAYMENT_MOOD !== 'TESTING';
+
 
   return user;
 };
