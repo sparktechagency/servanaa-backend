@@ -68,12 +68,9 @@ export const initializeCronJobs = () => {
       timezone: 'UTC'
     }
   );
-
-  console.log('🚀 Cron jobs initialized successfully');
 };
 
-// FIXED: Process expired subscriptions with proper transaction management and batching
-async function processExpiredSubscriptions () {
+async function processExpiredSubscriptions() {
   const batchSize = 100; // Process in batches to avoid memory issues
   let processed = 0;
   let failed = 0;
@@ -157,7 +154,7 @@ async function processExpiredSubscriptions () {
   return { processed, failed };
 }
 
-async function sendSubscriptionReminders () {
+async function sendSubscriptionReminders() {
   let sent = 0;
   let failed = 0;
 
@@ -194,9 +191,7 @@ async function sendSubscriptionReminders () {
       .select('endDate planType contractorId')
       .limit(500);
 
-    console.log(
-      `📧 Found ${expiringSubscriptions.length} subscriptions requiring reminders`
-    );
+    console.log(`📧 Found ${expiringSubscriptions.length} subscriptions requiring reminders`);
 
     for (const subscription of expiringSubscriptions) {
       try {
@@ -212,7 +207,7 @@ async function sendSubscriptionReminders () {
 
         const daysUntilExpiry = Math.ceil(
           (subscription.endDate.getTime() - new Date().getTime()) /
-            (1000 * 60 * 60 * 24)
+          (1000 * 60 * 60 * 24)
         );
 
         console.log(

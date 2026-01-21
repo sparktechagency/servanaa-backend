@@ -16,6 +16,7 @@ import { Customer } from '../Customer/Customer.model';
 import mongoose from 'mongoose';
 import { TContractor } from '../Contractor/Contractor.interface';
 import { Review } from '../Review/Review.model';
+import e from 'express';
 
 // create customer
 export const createCustomerIntoDB = async (payload: any) => {
@@ -228,7 +229,15 @@ const getSingleUserIntoDB = async (id: string) => {
   if (user.role === 'contractor') {
     await user.populate('contractor'); // Populating contractor data
   } else if (user.role === 'customer') {
-    await user.populate('customer'); // Populating customer data
+    await user.populate('customer');
+  }
+
+  if (process.env.PAYMENT_MOOD === 'TESTING') {
+    //@ts-ignore
+    user.isActive = false
+  } else {
+    //@ts-ignore
+    user.isActive = true
   }
 
   return user;

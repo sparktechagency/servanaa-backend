@@ -190,10 +190,6 @@ const forgetPassword = async (userEmail: string) => {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked ! !');
   }
 
-  // const otp = await OtpServices.generateAndSendOTP(user.email);
-  // If OTP is not verified, send OTP and return a specific message
-  // if (!user.otpVerified) {
-
   await OtpServices.generateAndSendOTP(user.email);
 
   // Return a specific message for the controller
@@ -203,33 +199,6 @@ const forgetPassword = async (userEmail: string) => {
     // refreshToken: null,
   };
 
-  // }
-
-  // const jwtPayload = {
-  //   userEmail: user.email,
-  //   role: user.role,
-  // };
-
-  // const resetToken = createToken(
-  //   jwtPayload,
-  //   config.jwt_access_secret as string,
-  //   '10m',
-  // );
-
-  // // const resetUILink = `${config.reset_pass_ui_link}?email=${user.email}&token=${resetToken} `;
-  // // // console.log(resetUILink, 'resetUILink');
-
-  // // SendEmail.sendResetLinkToEmail(user.email, resetUILink);
-  //         // console.log(newCustomer, 'newCustomer');
-  //         // if(user.role === 'admin' || user.role === 'superAdmin'){
-
-  //           // if (!otp) {
-  //           //   throw new AppError(httpStatus.FORBIDDEN, 'Otp not created ! !');
-  //           // }
-
-  //           // return {otp, resetToken};
-  //         // }
-  // return {resetToken};
 };
 
 const resetPassword = async (
