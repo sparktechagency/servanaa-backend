@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 export type TContractor = {
   subCategory: [Types.ObjectId];
   isHomeSelect: Boolean;
+  marital_status: string;
   subscriptionEndDate: Date;
   subscriptionStartDate: Date;
   category: Types.ObjectId;

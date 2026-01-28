@@ -39,6 +39,7 @@ const contractorSchema = new Schema<TContractor, ContractorModel>({
   dob: { type: String, default: '' },
   isHomeSelect: { type: Boolean },
   gender: { type: String, default: '' },
+  marital_status: { type: String, default: '' },
   experience: { type: String, default: '' },
   bio: { type: String, default: '' },
   city: { type: String, default: '' },
