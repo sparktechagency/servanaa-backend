@@ -20,6 +20,7 @@ app.use(
     origin: [
       'http://192.168.12.63:5173',
       'http://192.168.12.63:3001',
+      'http://3.27.248.133:4173',
       'https://dashboard.servana.com.au',
       'https://www.dashboard.servana.com.au',
       'http://34.233.41.57:3000',
