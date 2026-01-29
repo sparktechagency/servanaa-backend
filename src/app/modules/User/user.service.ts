@@ -500,7 +500,7 @@ const updateUserIntoDB = async (
     [
       'dob', 'gender', 'experience', 'bio', 'city',
       'language', 'rateHourly', 'skillsCategory',
-      'ratings', 'category', 'subCategory'
+      'ratings', 'category', 'subCategory', 'marital_status'
     ].forEach((field) => {
       if (payload[field] !== undefined) roleDataToUpdate[field] = payload[field];
     });
@@ -532,6 +532,8 @@ const updateUserIntoDB = async (
     if (addedCerts.length || removedCerts.length) {
       roleDataToUpdate.certificates = finalCerts;
     }
+
+
 
     // ====== MySchedule Update ======
     const existingSchedule = Array.isArray(existingContractor?.myScheduleId)

@@ -12,7 +12,7 @@ const userSchema = new Schema<TUser, UserModel>({
   password: { type: String, required: true, select: false },
   stripeAccountId: { type: String },
   customerId: { type: String, ref: "Customer" },
-  contactNo: { type: String, required: true },
+  contactNo: { type: String },
   otpVerified: { type: Boolean, default: false },
   img: { type: String, default: '' },
   role: {
