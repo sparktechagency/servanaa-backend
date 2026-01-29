@@ -25,7 +25,8 @@ export const customerFields = [
   'gender',
   'city',
   'language',
-  'location'
+  'location',
+  'marital_status'
   // add other customer-specific fields here
 ];
 
@@ -42,6 +43,7 @@ export const contractorFields = [
   'skills',
   'certificates',
   'materials',
-  'mySchedule'
+  'mySchedule',
+  'marital_status'
   // add other contractor-specific fields here
 ];
