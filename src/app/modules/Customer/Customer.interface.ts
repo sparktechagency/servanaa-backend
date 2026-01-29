@@ -9,6 +9,7 @@ export type TCustomer = {
   language?: string;
   balance?: number;
   location?: string;
+  marital_status: string;
   ratings: number;
 
   // Add Stripe integration field

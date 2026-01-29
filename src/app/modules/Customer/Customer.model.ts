@@ -47,6 +47,7 @@ const locationSchema = new Schema({
 const CustomerSchema = new Schema<TCustomer, CustomerModel>({
   userId: { type: Schema.Types.ObjectId, ref: 'User' },
   dob: { type: String, default: '' },
+  marital_status: { type: String, default: '' },
   gender: { type: String, default: '' },
   city: { type: String, default: '' },
   language: { type: String, default: '' },
