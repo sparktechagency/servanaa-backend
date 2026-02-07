@@ -24,6 +24,7 @@ export class SendEmail {
       subject: 'Your OTP for Verification',
       text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
     };
+
     try {
       await this.transporter.sendMail(mailOptions);
       console.log(`OTP sent to ${email}`);
@@ -48,6 +49,27 @@ export class SendEmail {
       throw new Error('Failed to send quote email.');
     }
   }
+
+  static async sendChangeEmailNotify(
+    oldEmail: string,
+    newEmail: string
+  ): Promise<void> {
+    const mailOptions = {
+      from: config.admin_email_user,
+      to: oldEmail,
+      subject: 'Your Email Address Has Been Changed',
+      text: `Your account email has been changed from ${oldEmail} to ${newEmail}. If you did not make this change, please contact our support team immediately.`,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log(`Change email notification sent to ${oldEmail}`);
+    } catch (error) {
+      console.error('Error sending change email notification:', error);
+      throw new Error('Failed to send change email notification.');
+    }
+  }
+
 
   static async sendResetLinkToEmail(email: string, resetLink: string): Promise<void> {
     const mailOptions = {

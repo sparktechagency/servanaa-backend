@@ -82,7 +82,25 @@ const resetPassword = catchAsync(async (req, res) => {
   });
 });
 
+
+const changeEmail = catchAsync(async (req, res) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Something went wrong !');
+  }
+  const result = await AuthServices.changeEmail(req.body?.oldEmail, req.body?.newEmail, req.body?.otp);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Email changed successfully!',
+    data: result
+  });
+});
+
+
+
 export const AuthControllers = {
+  changeEmail,
   loginUser,
   changePassword,
   refreshToken,

@@ -32,6 +32,11 @@ router.post(
   validateRequest(AuthValidation.forgetPasswordValidationSchema),
   AuthControllers.forgetPassword
 );
+router.patch(
+  '/change-email',
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  AuthControllers.changeEmail
+);
 
 router.post(
   '/reset-password',

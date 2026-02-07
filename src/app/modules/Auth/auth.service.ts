@@ -8,6 +8,8 @@ import AppError from '../../errors/AppError';
 import { OtpServices } from '../Otp/otp.service';
 import { createToken, verifyToken } from './auth.utils';
 import config from '../../config/index';
+import { Otp } from '../Otp/otp.model';
+import { SendEmail } from '../../utils/sendEmail';
 
 const loginUser = async (payload: TLoginUser) => {
   console.log(payload, 'req.body');
@@ -254,8 +256,58 @@ const resetPassword = async (
     }
   );
 };
+
+const changeEmail = async (oldEmail: string, newEmail: string, otp: number) => {
+
+  const user = await User.isUserExistsByCustomEmail(oldEmail);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
+
+  const newEmailOTP = await Otp.findOne({ email: newEmail })
+    .sort({ createdAt: -1 });
+
+  if (!newEmailOTP) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'OTP not found. Please verify your new email first.');
+  }
+
+  if (newEmailOTP.otp !== Number(otp)) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Invalid OTP. Please try again.');
+  }
+
+  const updatedUser = await User.findOneAndUpdate(
+    { email: oldEmail },
+    { email: newEmail },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update email. Please try again later.');
+  }
+
+  await Otp.deleteMany({ email: newEmail });
+
+  await SendEmail.sendChangeEmailNotify(oldEmail, newEmail);
+
+  const jwtPayload = {
+    userEmail: updatedUser.email,
+    role: updatedUser.role
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string
+  );
+
+  return {
+    accessToken
+  };
+};
+changeEmail
 export const AuthServices = {
   loginUser,
+  changeEmail,
   changePassword,
   refreshToken,
   forgetPassword,
