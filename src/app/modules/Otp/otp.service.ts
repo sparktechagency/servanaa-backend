@@ -13,7 +13,7 @@ import config from "../../config";
 
 
 export const generateAndSendOTP = async (email: any) => {
-  const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
   await Otp.create({ email, otp });
   // Simulate sending OTP (e.g., SMS or email)

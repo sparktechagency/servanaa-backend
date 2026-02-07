@@ -39,6 +39,13 @@ router.patch(
 );
 
 router.post(
+  '/change-email-otp',
+  auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
+  AuthControllers.changeEmailOTP
+);
+
+
+router.post(
   '/reset-password',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   // validateRequest(AuthValidation.resetPasswordValidationSchema),

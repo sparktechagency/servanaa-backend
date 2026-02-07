@@ -304,11 +304,24 @@ const changeEmail = async (oldEmail: string, newEmail: string, otp: number) => {
     accessToken
   };
 };
-changeEmail
+const changeEmailOTP = async (userEmail: string) => {
+
+  await OtpServices.generateAndSendOTP(userEmail);
+
+  // Return a specific message for the controller
+  return {
+    message: 'OTP sent successfully!',
+    accessToken: null
+    // refreshToken: null,
+  };
+
+};
+
 export const AuthServices = {
   loginUser,
   changeEmail,
   changePassword,
+  changeEmailOTP,
   refreshToken,
   forgetPassword,
   resetPassword

@@ -97,10 +97,23 @@ const changeEmail = catchAsync(async (req, res) => {
   });
 });
 
+const changeEmailOTP = catchAsync(async (req, res) => {
+  const userEmail = req.body.email;
+  const result = await AuthServices.changeEmailOTP(userEmail);
+
+  // const { message } = result;
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: result.message,
+    data: result
+  });
+});
 
 
 export const AuthControllers = {
   changeEmail,
+  changeEmailOTP,
   loginUser,
   changePassword,
   refreshToken,
