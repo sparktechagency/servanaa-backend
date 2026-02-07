@@ -305,6 +305,11 @@ const changeEmail = async (oldEmail: string, newEmail: string, otp: number) => {
   };
 };
 const changeEmailOTP = async (userEmail: string) => {
+  const user = await User.isUserExistsByCustomEmail(userEmail);
+
+  if (user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This email is already created with an account, please try with a different email!');
+  }
 
   await OtpServices.generateAndSendOTP(userEmail);
 
