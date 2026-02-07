@@ -39,6 +39,7 @@ const generateAndSendOTPToMobile = async (phone: any, email: any) => {
   const client = new Twilio(config.account_sid, config.auth_token);
 
   // Use the client to send an SMS message
+  console.log('phone', otp);
   try {
     await client.messages.create({
       body: `Your OTP is ${otp}. It is valid for 5 minutes.`,
@@ -51,6 +52,7 @@ const generateAndSendOTPToMobile = async (phone: any, email: any) => {
     return `Failed to send OTP: ${error.message}`;
   }
 };
+
 const verifyOTP = async (user: any, payload: any) => {
   const { email, otp } = payload;
 
@@ -164,6 +166,7 @@ const otpVeryfyForgetPasswordIntoDB = async (payload: any) => {
 
   return { resetToken };
 };
+
 // const otpVerifyForMobileNumberIntoDB = async ( payload : any, user: any) => {
 //     const { phone, otp } = payload;
 //     console.log('user otp', user);
