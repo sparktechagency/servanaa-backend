@@ -33,7 +33,6 @@ export const generateAndSendOTP = async (email: any) => {
 const generateAndSendOTPToMobile = async (phone: any, email: any) => {
   const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
   // Save OTP to database
-
   await Otp.create({ phone, otp, email });
   // Create a Twilio client
   const client = new Twilio(config.account_sid, config.auth_token);

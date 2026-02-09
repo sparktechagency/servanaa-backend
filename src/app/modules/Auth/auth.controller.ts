@@ -6,11 +6,9 @@ import sendResponse from '../../utils/sendResponse';
 import AppError from '../../errors/AppError';
 
 const loginUser = catchAsync(async (req, res) => {
-  console.log('teeeeeeeee');
   const result = await AuthServices.loginUser(req.body);
 
   const { refreshToken, accessToken } = result;
-  // const { refreshToken, accessToken, needsPasswordChange } = result;
 
   res.cookie('refreshToken', refreshToken, {
     secure: config.NODE_ENV === 'production',
@@ -23,7 +21,7 @@ const loginUser = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User is logged in succesfully!',
+    message: 'User is logged in successfully!',
     data: {
       accessToken
       // needsPasswordChange,

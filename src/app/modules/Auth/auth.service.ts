@@ -20,6 +20,11 @@ const loginUser = async (payload: TLoginUser) => {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
   }
 
+  if (payload?.requestRole === "superAdmin" && user?.role !== "superAdmin") {
+    throw new AppError(httpStatus.FORBIDDEN, 'You are not allowed to login with this role !');
+  }
+
+
   const otpVerified = user.otpVerified;
 
   if (!otpVerified) {
