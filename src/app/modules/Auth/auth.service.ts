@@ -57,6 +57,7 @@ const loginUser = async (payload: TLoginUser) => {
 
   // checking if the user is blocked
   const userStatus = user?.status;
+  console.log(userStatus, 'userStatus--------login service');
 
   if (userStatus === 'blocked') {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked !');

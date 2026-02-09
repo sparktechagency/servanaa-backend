@@ -54,6 +54,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     const userStatus = user?.status;
+    console.log(userStatus, 'userStatus--------auth middleware');
 
     if (userStatus === 'blocked') {
       throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked !');
