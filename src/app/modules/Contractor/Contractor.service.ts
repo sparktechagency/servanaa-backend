@@ -180,8 +180,12 @@ const getAllAvailableContractorsFromDB = async (
 
   const contractors = await Contractor.find({
     skills: { $in: [skills] },
-    skillsCategory: skillsCategory
-  }).populate('myScheduleId');
+    skillsCategory: skillsCategory,
+  }).populate('myScheduleId')
+    .populate({
+      path: 'userId',
+      match: { status: 'active' }
+    });
 
   if (contractors.length <= 0) {
     throw new AppError(
@@ -384,6 +388,7 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
       },
     },
     { $addFields: { userId: { $arrayElemAt: ["$userId", 0] } } },
+    { $match: { "userId.status": "active" } },
     {
       $lookup: {
         from: "categories",
