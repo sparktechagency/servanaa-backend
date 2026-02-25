@@ -17,8 +17,10 @@ const createNotificationIntoDB = async (payload: any) => {
 
   // Socket emit for real-time notification
   if (io && result.userId) {
+    console.log('Emitting notification to user:', result.userId);
     const receiverSocketId = onlineUsers.get(result.userId.toString());
     if (receiverSocketId) {
+      console.log('Emitting notification to receiverSocketId:', receiverSocketId);
       io.to(receiverSocketId).emit('notification', result);
     }
   }
