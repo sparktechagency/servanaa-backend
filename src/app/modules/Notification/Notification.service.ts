@@ -6,12 +6,21 @@ import mongoose from 'mongoose';
 
 import { Notification } from './Notification.model';
 import { User } from '../User/user.model';
+import { io, onlineUsers } from '../Chat/chat.socket';
 
 const createNotificationIntoDB = async (payload: any) => {
   const result = await Notification.create(payload);
 
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Notification');
+  }
+
+  // Socket emit for real-time notification
+  if (io && result.userId) {
+    const receiverSocketId = onlineUsers.get(result.userId.toString());
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('notification', result);
+    }
   }
 
   return result;

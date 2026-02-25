@@ -6,12 +6,6 @@ import catchAsync from '../utils/catchAsync';
 import AppError from '../errors/AppError';
 import config from '../config/index';
 import { User } from '../modules/User/user.model';
-// import { UserStatus } from '../modules/User/user.constant';
-// import config from '..\config';
-// import AppError from \index.ts'../errors/AppError';
-// import { TUserRole } from '..\modules\User\user.interface';
-// import { User } from \index.ts'../modules/User/user.model';
-// import catchAsync from '..\utils\catchAsync\index.ts';
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {

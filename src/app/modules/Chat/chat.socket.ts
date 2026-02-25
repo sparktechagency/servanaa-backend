@@ -4,11 +4,15 @@
 import { ChatServices } from "./Chat.service";
 import { Server, Socket } from "socket.io";
 // Map for tracking socket connections
-const onlineUsers = new Map();
+export const onlineUsers = new Map();
 
-export const initializeChatSocket = (io: Server) => {
+export let io: Server;
+
+export const initializeChatSocket = (socketIo: Server) => {
+  io = socketIo;
   io.on("connection", (socket: Socket) => {
     const userId = socket.handshake.query.userId;
+   
     if (userId) {
       onlineUsers.set(userId, socket.id);
       console.log(`${userId} connected`);
