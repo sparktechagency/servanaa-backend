@@ -64,7 +64,7 @@ const subscriptionSchema = new Schema<TSubscription>(
       required: true
     },
     stripeCustomerId: { type: String, required: true },
-    stripeSubscriptionId: { type: String, required: true, unique: true },
+    stripeSubscriptionId: { type: String, required: true, },
     status: {
       type: String,
       enum: [
