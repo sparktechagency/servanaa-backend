@@ -36,7 +36,10 @@ const userSchema = new Schema<TUser, UserModel>({
   contractor: { type: Schema.Types.ObjectId, ref: 'Contractor' },
   messageId: { type: Schema.Types.ObjectId, ref: 'Help' },
   customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
-  isDeleted: { type: Boolean, default: false }
+  isDeleted: { type: Boolean, default: false },
+  cardData:{
+    type: Object
+  }
 },
   {
     timestamps: true

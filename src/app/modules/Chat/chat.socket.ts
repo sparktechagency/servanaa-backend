@@ -34,7 +34,7 @@ export const initializeChatSocket = (socketIo: Server) => {
       }
 
     });
-
+    
     socket.on('disconnect', () => {
       onlineUsers.delete(userId);
       console.log(`${userId} disconnected`);

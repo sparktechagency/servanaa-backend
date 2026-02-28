@@ -218,6 +218,20 @@ const getAllClients = catchAsync(async (req, res) => {
   });
 });
 
+const AddOrUpdateCard = catchAsync(async (req, res) => {
+  const { userEmail } = req.user;
+  const result = await UserServices.AddOrUpdateCard(req.body, userEmail);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Card is added or updated successfully',
+    data: result
+  });
+});
+
+ 
+
 export const UserControllers = {
   createCustomer,
   createContractor,
@@ -229,7 +243,8 @@ export const UserControllers = {
   changeStatus,
   getAllUsers,
   getAllClients,
-  getAllProviders
+  getAllProviders,
+  AddOrUpdateCard
   // updateApproval,
   // getAllApprovalFalseUsers,
   // addMobileNumber,

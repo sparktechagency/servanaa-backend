@@ -31,11 +31,9 @@ const auth = (...requiredRoles: TUserRole[]) => {
     console.log(iat, 'iat');
 
     // console.log(decoded, 'decoded');
-
-    //  console.log('userEmail', userEmail)
+    // console.log('userEmail', userEmail)
     // checking if the user is exist
     const user = await User.isUserExistsByCustomEmail(userEmail);
-
     //  console.log('user', user)
 
     if (!user) {

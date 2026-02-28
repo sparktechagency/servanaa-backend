@@ -19,6 +19,13 @@ export type TUser = {
   status: 'active' | 'blocked';
   passwordChangedAt: Date;
   isDeleted: boolean;
+  cardData?: {
+    cardNumber?: string;
+    expMonth?: number;
+    expYear?: number;
+    cardHolderName?: string;
+    cvc?: string;
+  };
 };
 
 export interface UserModel extends Model<TUser> {

@@ -5,7 +5,7 @@ import { USER_ROLE } from './user.constant';
 import auth from '../../middlewares/auth';
 import { uploadFileS3 } from '../../utils/UploaderS3';
 import validateRequest from '../../middlewares/validateRequest';
-import { statusSchema } from './user.validation';
+import { addOrUpdateCardSchema, statusSchema } from './user.validation';
 import { CustomerControllers } from '../Customer/Customer.controller';
 
 const router = express.Router();
@@ -19,6 +19,12 @@ router.get(
   '/me',
   auth(USER_ROLE.superAdmin, USER_ROLE.customer, USER_ROLE.contractor),
   UserControllers.getMe
+);
+router.patch(
+  '/add-update-card',
+  auth(USER_ROLE.customer, USER_ROLE.contractor),
+  validateRequest(addOrUpdateCardSchema),
+  UserControllers.AddOrUpdateCard
 );
 
 router.post(
