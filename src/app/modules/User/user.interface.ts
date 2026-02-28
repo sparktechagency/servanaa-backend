@@ -20,8 +20,7 @@ export type TUser = {
   isDeleted: boolean;
   cardData?: {
     cardNumber?: string;
-    expMonth?: string;
-    expYear?: string;
+    expiryDate: string; 
     cardHolderName?: string;
     cvc?: string;
   };
