@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { Model, Types } from 'mongoose';
 import { USER_ROLE } from './user.constant';
 
@@ -21,24 +20,18 @@ export type TUser = {
   isDeleted: boolean;
   cardData?: {
     cardNumber?: string;
-    expMonth?: number;
-    expYear?: number;
+    expMonth?: string;
+    expYear?: string;
     cardHolderName?: string;
     cvc?: string;
   };
 };
-
-export interface UserModel extends Model<TUser> {
-  // Static methods for checking if the user exists
-  isUserExistsByCustomEmail(email: string): Promise<TUser | null>;
-
-  // Static method for password comparison
+export interface UserModel extends Model<TUser> { 
+  isUserExistsByCustomEmail(email: string): Promise<TUser | null>; 
   isPasswordMatched(
     plainTextPassword: string,
     hashedPassword: string
-  ): Promise<boolean>;
-
-  // Static method to check JWT issuance timing
+  ): Promise<boolean>; 
   isJWTIssuedBeforePasswordChanged(
     passwordChangedTimestamp: Date,
     jwtIssuedTimestamp: number

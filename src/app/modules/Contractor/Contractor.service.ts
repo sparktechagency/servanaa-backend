@@ -298,7 +298,7 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
         near: { type: "Point", coordinates: [lng, lat] },
         distanceField: "distance",
         spherical: true,
-        maxDistance: 50 * 1000, // max search 50 km
+        maxDistance: 50 * 1000, 
       },
     });
 
@@ -388,7 +388,7 @@ const getAllContractorsFromDB = async (query: Record<string, any>) => {
       },
     },
     { $addFields: { userId: { $arrayElemAt: ["$userId", 0] } } },
-    { $match: { "userId.status": "active" } },
+    { $match: { "userId.status": { $ne: "blocked" } } },
     {
       $lookup: {
         from: "categories",

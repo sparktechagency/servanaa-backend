@@ -310,6 +310,7 @@ const changeEmail = async (oldEmail: string, newEmail: string, otp: number) => {
     accessToken
   };
 };
+
 const changeEmailOTP = async (userEmail: string) => {
   const user = await User.isUserExistsByCustomEmail(userEmail);
 
