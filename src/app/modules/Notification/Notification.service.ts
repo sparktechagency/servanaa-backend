@@ -32,10 +32,13 @@ const getAllNotificationsFromDB = async (
   user: any
 ) => {
   const { userId } = query;
+  if(!userId) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required');
+  }
   const usr = await User.findById(userId);
   if (!usr) throw new Error('User not found');
 
-  const filter: any = { isDeleted: false };
+  const filter: any = { userId: userId,isDeleted: false };
 
   // Role-based filtering
   if (usr?.role === 'contractor') {
