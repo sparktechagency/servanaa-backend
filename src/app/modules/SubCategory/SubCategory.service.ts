@@ -14,13 +14,14 @@ const createSubCategoryIntoDB = async (payload: TSubCategory, file: any) => {
     // https://servana-bucket.s3.ap-southeast-2.amazonaws.com/1748498627351_download.jpg
   }
 
-  // ensure uniqueness by name within the same category
-  // normalize name (trim) and check case-insensitively to avoid duplicates like "trading" vs "Trading"
-  if (payload.name && typeof payload.name === 'string') {
-    payload.name = payload.name.trim();
-  }
+ 
 
-  const existing = await SubCategory.findOne({ name: payload.name, categoryId: payload.categoryId, isDeleted: false }).collation({ locale: 'en', strength: 2 });
+  // escape regex special chars
+  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+  const nameRegex = new RegExp(`^${escapeRegex(payload.name as string)}$`, 'i');
+
+  // search DB case-insensitively for the exact name within the same category
+  const existing = await SubCategory.findOne({ name: { $regex: nameRegex }, categoryId: payload.categoryId, isDeleted: false });
   if (existing) {
     throw new AppError(httpStatus.CONFLICT, 'SubCategory with this name already exists for the category');
   }
@@ -78,6 +79,25 @@ const updateSubCategoryIntoDB = async (
 
   if (isDeletedService.isDeleted) {
     throw new Error('Cannot update a deleted SubCategory');
+  }
+
+  if (payload.name && typeof payload.name === 'string') {
+
+    const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+    const nameRegex = new RegExp(`^${escapeRegex(payload.name)}$`, 'i');
+ 
+    const categoryToCheck = payload.categoryId || isDeletedService.categoryId;
+
+    const existing = await SubCategory.findOne({
+      _id: { $ne: new mongoose.Types.ObjectId(id) },
+      name: { $regex: nameRegex },
+      categoryId: categoryToCheck,
+      isDeleted: false,
+    });
+
+    if (existing) {
+      throw new AppError(httpStatus.CONFLICT, 'SubCategory with this name already exists for the category');
+    }
   }
 
   const updatedData = await SubCategory.findByIdAndUpdate(

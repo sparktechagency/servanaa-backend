@@ -17,8 +17,16 @@ const createCategoryIntoDB = async (
   }
   
 
+  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+  const nameRegex = new RegExp(`^${escapeRegex(payload.name as string)}$`, 'i');
+
+  const existing = await Category.findOne({ name: { $regex: nameRegex }, isDeleted: false });
+  if (existing) {
+    throw new AppError(httpStatus.CONFLICT, 'Category with this name already exists');
+  }
+
   const result = await Category.create(payload);
-  
+
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Category');
   }
@@ -70,6 +78,23 @@ const updateCategoryIntoDB = async (id: string, payload: any, file?: any) => {
 
   if (isDeletedService.isDeleted) {
     throw new Error('Cannot update a deleted Category');
+  }
+
+  // If renaming, ensure new name doesn't conflict (case-insensitive)
+  if (payload.name && typeof payload.name === 'string') {
+
+    const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+    const nameRegex = new RegExp(`^${escapeRegex(payload.name)}$`, 'i');
+
+    const existing = await Category.findOne({
+      _id: { $ne: new mongoose.Types.ObjectId(id) },
+      name: { $regex: nameRegex },
+      isDeleted: false,
+    });
+
+    if (existing) {
+      throw new AppError(httpStatus.CONFLICT, 'Category with this name already exists');
+    }
   }
 
   const updatedData = await Category.findByIdAndUpdate(
