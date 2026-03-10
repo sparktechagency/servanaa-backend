@@ -274,7 +274,6 @@ const changeStatus = async (id: string, payload: { status: string }) => {
   const result = await User.findByIdAndUpdate(id, payload, {
     new: true
   });
-
   return result;
 };
 

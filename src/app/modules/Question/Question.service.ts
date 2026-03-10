@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
-import QueryBuilder from '../../builder/QueryBuilder';
+// Not using QueryBuilder here; implement query handling inline
 import AppError from '../../errors/AppError';
 import { FAQ_SEARCHABLE_FIELDS } from './Question.constant';
 import mongoose from 'mongoose';
@@ -26,23 +26,20 @@ const createFaqIntoDB = async (payload: TFaq) => {
 };
 
 const getAllFaqsFromDB = async (query: Record<string, unknown>) => {
+  const page = Number((query as any)?.page) || 1;
+  const limit = Number((query as any)?.limit) || 10;
+  const skip = (page - 1) * limit;
 
-  const FaqQuery = new QueryBuilder(
-    Faq.find().populate('subCategoryId', 'name img'),
-    query,
-  )
-    .search(FAQ_SEARCHABLE_FIELDS)
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
+  const mongooseQuery = Faq.find().populate('subCategoryId', 'name img').skip(skip).limit(limit);
 
-  const result = await FaqQuery.modelQuery;
-  const meta = await FaqQuery.countTotal();
-  return {
-    result,
-    meta,
-  };
+  const result = await mongooseQuery;
+
+  const total = await Faq.countDocuments();
+  const totalPage = Math.ceil(total / limit);
+
+  const meta = { page, limit, total, totalPage };
+
+  return { result, meta };
 };
 
 const getSingleFaqFromDB = async (id: string) => {
