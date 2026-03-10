@@ -14,6 +14,17 @@ const createSubCategoryIntoDB = async (payload: TSubCategory, file: any) => {
     // https://servana-bucket.s3.ap-southeast-2.amazonaws.com/1748498627351_download.jpg
   }
 
+  // ensure uniqueness by name within the same category
+  // normalize name (trim) and check case-insensitively to avoid duplicates like "trading" vs "Trading"
+  if (payload.name && typeof payload.name === 'string') {
+    payload.name = payload.name.trim();
+  }
+
+  const existing = await SubCategory.findOne({ name: payload.name, categoryId: payload.categoryId, isDeleted: false }).collation({ locale: 'en', strength: 2 });
+  if (existing) {
+    throw new AppError(httpStatus.CONFLICT, 'SubCategory with this name already exists for the category');
+  }
+
   const result = await SubCategory.create(payload);
 
   if (!result) {
